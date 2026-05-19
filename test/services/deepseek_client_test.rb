@@ -43,14 +43,14 @@ class DeepseekClientTest < ActiveSupport::TestCase
     assert_includes result.first["insight"], DeepseekClient::DISCLAIMER
   end
 
-  test "normalize limits legal_insights to MAX_ITEMS_PER_SECTION" do
-    items = 10.times.map { |i| { "topic" => "T#{i}", "insight" => "I#{i}", "risk_level" => "low", "paragraph_id" => i } }
+  test "normalize retorna todos os insights sem limite" do
+    items = 20.times.map { |i| { "topic" => "T#{i}", "insight" => "I#{i}", "risk_level" => "low", "paragraph_id" => i } }
     result = @client.send(:normalize, {
       "orthography" => [],
       "writing_suggestions" => [],
       "legal_insights" => items
     })
-    assert result["legal_insights"].length <= DeepseekClient::MAX_ITEMS_PER_SECTION
+    assert_equal 20, result["legal_insights"].length
   end
 
   test "normalize_insights caps field length" do

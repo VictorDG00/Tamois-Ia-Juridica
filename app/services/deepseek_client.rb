@@ -4,8 +4,7 @@ require "json"
 class DeepseekClient
   BASE_URL = "https://api.deepseek.com".freeze
   MAX_TEXT_LENGTH = 20_000
-  MAX_ITEMS_PER_SECTION = 8
-  MAX_FIELD_LENGTH = 400
+  MAX_FIELD_LENGTH = 600
   DISCLAIMER = "Análise informativa que não substitui consultoria jurídica profissional.".freeze
 
   VALID_RISK_LEVELS = %w[low medium high].freeze
@@ -54,30 +53,40 @@ class DeepseekClient
         { role: "system", content: "Responda somente em JSON válido." },
         { role: "user", content: build_prompt(text) }
       ],
-      temperature: 0.2
+      temperature: 0.1
     }
   end
 
   def build_prompt(text)
     <<~PROMPT
-      Você é um revisor jurídico especializado em direito brasileiro.
+      Você é um revisor jurídico especializado em direito brasileiro. Sua função é identificar problemas REAIS e CONFIRMADOS — nunca inferir, nunca inventar.
+
+      REGRA FUNDAMENTAL ANTI-ALUCINAÇÃO:
+      - Só reporte um item se tiver CERTEZA ABSOLUTA. Em caso de dúvida, NÃO reporte.
+      - Prefira uma lista pequena e precisa a uma lista grande com itens duvidosos.
+      - Nunca corrija o que pode estar correto em determinado contexto jurídico.
 
       CONTEXTO JURÍDICO:
       - Aplique normas do português jurídico brasileiro (ABNT, terminologia forense).
-      - Reconheça e preserve jargão latino válido: in dubio pro reo, pacta sunt servanda, ad referendum, ex officio, habeas corpus, sub judice, entre outros.
-      - Conheça categorias de cláusula: rescisão, vigência, penalidade, confidencialidade, responsabilidade civil, foro, objeto, preço, garantia, cessão de direitos.
-      - Classifique risco jurídico como:
-          high: nulidade, inconstitucionalidade, crime, dano irreparável, violação de direito fundamental.
-          medium: cláusula abusiva, ambiguidade crítica, prazo irregular, falta de elemento essencial.
-          low: imprecisão terminológica, redundância, sugestão de clareza.
+      - Preserve jargão latino válido: in dubio pro reo, pacta sunt servanda, ad referendum, ex officio, habeas corpus, sub judice, entre outros.
+      - Preserve termos técnicos jurídicos mesmo que incomuns.
+      - Classifique risco jurídico apenas como:
+          high: nulidade, inconstitucionalidade, violação de direito fundamental — somente quando explicitamente configurado no texto.
+          medium: cláusula abusiva confirmada, ambiguidade que gera conflito real, falta de elemento essencial.
+          low: imprecisão terminológica clara, redundância evidente.
 
-      INSTRUÇÕES:
-      1. orthography: corrija apenas erros ortográficos e gramaticais reais. Não altere jargão jurídico correto.
-      2. writing_suggestions: proponha reescrita de trechos ambíguos, redundantes ou de redação jurídica fraca.
-         Use 'excerpt' com o trecho exato do texto e 'suggestion' com a versão melhorada.
-      3. legal_insights: identifique riscos jurídicos por cláusula. Use 'topic' como nome da cláusula ou tema,
-         'insight' com a análise objetiva, 'risk_level' conforme classificação acima,
-         e 'paragraph_id' com o número inteiro do parágrafo de origem.
+      INSTRUÇÕES POR SEÇÃO:
+      1. orthography: reporte APENAS erros ortográficos inequívocos (grafia errada, concordância errada, crase errada).
+         NÃO reporte: palavras corretas em contexto jurídico, variações aceitas, termos técnicos, latinismos.
+         Reporte TODOS os erros encontrados, sem limite de quantidade.
+
+      2. writing_suggestions: reporte APENAS trechos onde a ambiguidade ou fraqueza de redação é objetiva e clara.
+         NÃO reporte: estilo pessoal do redator, preferências subjetivas, trechos que já estão corretos.
+         Use 'excerpt' com o trecho EXATO do texto (copie literalmente).
+
+      3. legal_insights: reporte APENAS riscos baseados em norma jurídica específica e identificável.
+         NÃO reporte: especulações, riscos hipotéticos, interpretações forçadas.
+         Reporte TODOS os riscos reais encontrados, sem limite de quantidade.
 
       IMPORTANTE: O texto contém parágrafos indexados (ex: [Paragrafo 0] ...). Use o índice para paragraph_id.
 
@@ -87,7 +96,7 @@ class DeepseekClient
         "writing_suggestions": [{"excerpt":"...","suggestion":"...","reason":"..."}],
         "legal_insights": [{"topic":"...","insight":"...","risk_level":"low|medium|high","paragraph_id":INT}]
       }
-      Se não houver itens em alguma seção, retorne lista vazia. Seja objetivo e conciso.
+      Se não houver itens em alguma seção, retorne lista vazia.
 
       Texto:
       #{text}
@@ -135,9 +144,9 @@ class DeepseekClient
 
   def normalize(payload)
     {
-      "orthography" => normalize_orthography(payload["orthography"]).first(MAX_ITEMS_PER_SECTION),
-      "writing_suggestions" => normalize_writing(payload["writing_suggestions"]).first(MAX_ITEMS_PER_SECTION),
-      "legal_insights" => normalize_insights(payload["legal_insights"]).first(MAX_ITEMS_PER_SECTION)
+      "orthography" => normalize_orthography(payload["orthography"]),
+      "writing_suggestions" => normalize_writing(payload["writing_suggestions"]),
+      "legal_insights" => normalize_insights(payload["legal_insights"])
     }
   end
 
