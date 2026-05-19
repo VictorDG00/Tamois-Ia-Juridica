@@ -1,0 +1,24 @@
+services:
+  tamois:
+    build: .
+    container_name: tamois
+    restart: always
+    expose:
+      - "80"
+    volumes:
+      - tamois_storage:/rails/storage
+    env_file:
+      - .env
+    environment:
+      - RAILS_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - SOLID_QUEUE_IN_PUMA=true
+    networks:
+      - vps-proxy
+
+volumes:
+  tamois_storage:
+
+networks:
+  vps-proxy:
+    external: true
