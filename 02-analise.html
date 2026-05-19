@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tamois — Análise de Documentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tamois.css">
+<style>
+/* ── LAYOUT ────────────────────────────────────── */
+.analyze {
+  display: grid; grid-template-columns: 340px 1fr; gap: var(--s8);
+  align-items: start;
+}
+
+/* LEFT RAIL: stepper + minimum info */
+.rail {
+  position: sticky; top: calc(var(--nav-h) + var(--s8));
+  display: flex; flex-direction: column; gap: var(--s5);
+}
+
+.stepper {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); padding: var(--s6);
+}
+.stepper-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: var(--s5); }
+.step { display: flex; align-items: flex-start; gap: var(--s3); padding: var(--s3) 0; position: relative; }
+.step + .step { border-top: 1px solid var(--border-subtle); }
+.step-num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-size: 10px; flex-shrink: 0; transition: all var(--dur-base); }
+.step.done .step-num { background: var(--c-ok-bg); color: var(--c-ok-text); border: 1px solid var(--c-ok-border); }
+.step.done .step-num::after { content: '✓'; font-size: 12px; }
+.step.done .step-num > span { display: none; }
+.step.active .step-num { background: var(--crimson); color: var(--parchment); box-shadow: 0 0 16px var(--glow-crimson); }
+.step.pending .step-num { background: var(--bg-elevated); color: var(--text-tertiary); border: 1px solid var(--border-subtle); }
+.step-body { flex: 1; }
+.step-label { font-size: 13px; color: var(--text-primary); font-weight: 500; margin-bottom: 2px; }
+.step.pending .step-label { color: var(--text-tertiary); font-weight: 400; }
+.step-meta { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; color: var(--text-tertiary); text-transform: uppercase; }
+
+/* context summary (compact) */
+.ctx {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); padding: var(--s6);
+}
+.ctx-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s4); }
+.ctx-head-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-tertiary); }
+.ctx-row { display: flex; justify-content: space-between; gap: var(--s4); padding: var(--s2) 0; font-size: 12px; }
+.ctx-row + .ctx-row { border-top: 1px solid var(--border-subtle); }
+.ctx-key { color: var(--text-tertiary); font-family: var(--font-mono); letter-spacing: 0.1em; font-size: 10px; text-transform: uppercase; }
+.ctx-val { color: var(--text-primary); text-align: right; font-weight: 500; }
+
+/* ── MAIN COLUMN ───────────────────────────────── */
+.main { display: flex; flex-direction: column; gap: var(--s5); min-width: 0; }
+
+/* doc tabs */
+.doc-tabs {
+  display: flex; gap: 2px; padding: 4px; background: var(--bg-surface);
+  border: 1px solid var(--border-subtle); border-radius: var(--r3);
+  overflow-x: auto;
+}
+.doc-tab {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s2) var(--s4); border-radius: var(--r2);
+  cursor: pointer; transition: all var(--dur-fast);
+  font-size: 12px; color: var(--text-secondary); white-space: nowrap;
+  flex-shrink: 0;
+}
+.doc-tab:hover { background: var(--sidebar-hover-bg); color: var(--text-primary); }
+.doc-tab.is-active { background: var(--bg-elevated); color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--border-medium); }
+.doc-tab-name { font-weight: 500; }
+.doc-tab-meta { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--text-tertiary); }
+.doc-tab-status { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.doc-tab-add {
+  margin-left: auto; padding: var(--s2) var(--s3); border: 1px dashed var(--border-medium);
+  border-radius: var(--r2); color: var(--text-tertiary); cursor: pointer; font-size: 11px;
+  background: none; font-family: var(--font-body); display: flex; gap: var(--s2); align-items: center;
+}
+.doc-tab-add:hover { color: var(--text-primary); border-color: var(--border-accent); }
+
+/* result tabs */
+.result-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.result-tab {
+  background: none; border: none; padding: var(--s3) var(--s5);
+  cursor: pointer; font-family: var(--font-body); font-size: 13px;
+  color: var(--text-secondary); position: relative; transition: color var(--dur-fast);
+  display: inline-flex; align-items: center; gap: var(--s3);
+}
+.result-tab:hover { color: var(--text-primary); }
+.result-tab.is-active { color: var(--text-primary); }
+.result-tab.is-active::after {
+  content: ''; position: absolute; left: var(--s4); right: var(--s4); bottom: -1px;
+  height: 2px; background: var(--crimson);
+}
+.result-tab .count {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  background: var(--bg-elevated); color: var(--text-tertiary);
+  padding: 2px 6px; border-radius: var(--r-full);
+}
+.result-tab.is-active .count { color: var(--text-primary); background: var(--c-info-bg); }
+
+/* document head */
+.doc-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s6); background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); gap: var(--s4); flex-wrap: wrap;
+}
+.doc-info { display: flex; align-items: center; gap: var(--s4); }
+.doc-icon-big {
+  width: 48px; height: 60px; flex-shrink: 0;
+  border-radius: var(--r2); position: relative;
+  background: linear-gradient(135deg, var(--bg-elevated), var(--bg-surface));
+  border: 1px solid var(--border-medium);
+}
+.doc-icon-big::before {
+  content: ''; position: absolute; top: 12px; left: 10px; right: 10px; height: 1px;
+  background: var(--text-tertiary);
+  box-shadow: 0 5px 0 var(--text-tertiary), 0 10px 0 var(--text-tertiary), 0 15px 0 rgba(102,155,188,0.3);
+}
+.doc-icon-big::after {
+  content: 'DOC'; position: absolute; bottom: 4px; left: 0; right: 0;
+  text-align: center; font-family: var(--font-mono); font-size: 7px;
+  letter-spacing: 0.15em; color: var(--text-accent);
+}
+.doc-name { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text-primary); margin-bottom: 2px; }
+.doc-meta { display: flex; gap: var(--s4); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--text-tertiary); text-transform: uppercase; }
+
+.doc-actions { display: flex; gap: var(--s2); align-items: center; }
+
+/* result panels */
+.panel {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); padding: var(--s8);
+}
+
+.executive {
+  border-left: 2px solid var(--steel);
+}
+.executive-title { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text-primary); margin-bottom: var(--s4); }
+.executive-text { font-family: var(--font-display); font-size: 17px; font-weight: 300; line-height: 1.75; color: var(--text-primary); }
+.executive-text strong { font-weight: 500; }
+
+/* KPIs */
+.kpis {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s4);
+  margin-top: var(--s6);
+}
+.kpi {
+  padding: var(--s4) var(--s5);
+  background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+  border-radius: var(--r3);
+}
+.kpi-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: var(--s2); }
+.kpi-value { font-family: var(--font-display); font-size: 32px; font-weight: 400; line-height: 1; color: var(--text-primary); margin-bottom: var(--s1); }
+.kpi-value.risk { color: var(--c-risk-text); }
+.kpi-value.warn { color: var(--c-warn-text); }
+.kpi-value.ok { color: var(--c-ok-text); }
+.kpi-sub { font-size: 11px; color: var(--text-secondary); }
+
+/* risks list */
+.risks { display: flex; flex-direction: column; gap: var(--s3); }
+.risk-item {
+  display: grid; grid-template-columns: auto 1fr auto; gap: var(--s4); align-items: flex-start;
+  padding: var(--s5); background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+  border-radius: var(--r3);
+  transition: all var(--dur-base);
+}
+.risk-item:hover { border-color: var(--border-medium); }
+.risk-num { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.15em; }
+.risk-body { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+.risk-head { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; }
+.risk-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.risk-where { font-family: var(--font-mono); font-size: 10px; color: var(--text-accent); letter-spacing: 0.08em; }
+.risk-text { font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+.risk-refs { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s2); }
+.risk-actions { display: flex; gap: var(--s2); flex-direction: column; align-items: flex-end; }
+
+/* next steps */
+.steps-list { display: flex; flex-direction: column; gap: var(--s3); }
+.step-card {
+  display: flex; gap: var(--s4); padding: var(--s5);
+  background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+  border-radius: var(--r3); transition: all var(--dur-base);
+}
+.step-card:hover { border-color: var(--border-medium); transform: translateX(2px); }
+.step-mark {
+  width: 32px; height: 32px; border-radius: var(--r2); flex-shrink: 0;
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-size: 16px;
+  background: rgba(193,18,31,0.08); border: 1px solid rgba(193,18,31,0.2);
+  color: var(--crimson);
+}
+.step-card .step-body { display: flex; flex-direction: column; gap: var(--s2); flex: 1; }
+.step-card-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.step-card-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.step-card-foot { display: flex; gap: var(--s4); align-items: center; flex-wrap: wrap; }
+.step-deadline { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.1em; }
+
+/* INLINE COMMENT preview (for .docx flow) */
+.doc-preview {
+  display: grid; grid-template-columns: 1fr 320px; gap: 0;
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); overflow: hidden;
+}
+.doc-page {
+  padding: var(--s10) var(--s10);
+  background: var(--parchment); color: #1a1a1a;
+  font-family: 'Times New Roman', Times, serif; font-size: 14px; line-height: 1.85;
+  position: relative;
+  min-height: 600px;
+}
+[data-theme="light"] .doc-page { background: #FFFFFF; border-right: 1px solid var(--border-subtle); }
+.doc-page h3 { font-family: 'Times New Roman', Times, serif; font-size: 18px; font-weight: 700; margin-bottom: var(--s5); text-align: center; letter-spacing: 0.04em; text-transform: uppercase; }
+.doc-page p { margin-bottom: var(--s4); text-align: justify; }
+.doc-page .highlight {
+  background: rgba(232,199,106,0.4); padding: 1px 2px; border-radius: 2px; cursor: pointer;
+  position: relative;
+}
+.doc-page .highlight.risk { background: rgba(240,112,112,0.35); }
+.doc-page .highlight::after {
+  content: attr(data-num); position: absolute; top: -8px; right: -16px;
+  background: var(--crimson); color: var(--parchment);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  padding: 1px 5px; border-radius: var(--r-full);
+}
+.doc-page .clause-h { font-weight: 700; }
+
+.comments-rail {
+  background: var(--bg-elevated); padding: var(--s5); display: flex; flex-direction: column; gap: var(--s3);
+  max-height: 600px; overflow-y: auto;
+}
+.comments-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-tertiary); padding-bottom: var(--s3); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+.comment {
+  display: flex; flex-direction: column; gap: var(--s2);
+  padding: var(--s4); background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r3); position: relative;
+}
+.comment::before {
+  content: ''; position: absolute; left: -1px; top: var(--s4); bottom: var(--s4);
+  width: 2px; background: var(--c-warn-text); border-radius: 2px;
+}
+.comment.risk::before { background: var(--c-risk-text); }
+.comment-head { display: flex; justify-content: space-between; align-items: center; }
+.comment-num { font-family: var(--font-mono); font-size: 10px; color: var(--text-accent); letter-spacing: 0.1em; }
+.comment-time { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); letter-spacing: 0.1em; }
+.comment-body { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.comment-body strong { color: var(--text-primary); font-weight: 500; }
+.comment-quote {
+  font-family: var(--font-display); font-style: italic; font-size: 12px;
+  color: var(--text-tertiary); padding-left: var(--s3); border-left: 1px solid var(--border-medium);
+}
+.comment-foot { display: flex; gap: var(--s3); }
+.comment-action { background: none; border: none; cursor: pointer; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); padding: 0; }
+.comment-action:hover { color: var(--text-primary); }
+.comment-action.primary { color: var(--c-info-text); }
+
+/* citations */
+.citations {
+  margin-top: var(--s6); padding-top: var(--s5);
+  border-top: 1px solid var(--border-subtle);
+}
+.citations-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: var(--s3); }
+.citations-row { display: flex; gap: var(--s2); flex-wrap: wrap; }
+
+/* tab content */
+.tab-content { display: none; flex-direction: column; gap: var(--s4); }
+.tab-content.is-active { display: flex; }
+
+/* footer actions */
+.result-foot {
+  display: flex; gap: var(--s3); justify-content: flex-end; align-items: center;
+  padding-top: var(--s4); flex-wrap: wrap;
+}
+.result-foot .meta { margin-right: auto; font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.1em; }
+
+/* form modal — initial state alt (not active here) */
+.contextual-form {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); padding: var(--s8);
+}
+
+@media (max-width: 1100px) {
+  .analyze { grid-template-columns: 1fr; }
+  .rail { position: static; }
+  .doc-preview { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+
+<body data-page="analise">
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<nav class="nav">
+  <a class="brand" href="01-landing.html">
+    <div class="brand-mark">T</div>
+    <div class="brand-name">Tamois</div>
+    <span class="brand-tag">IA Jurídica</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="01-landing.html" data-page="landing"><span class="nav-num">01</span>Início</a></li>
+    <li><a href="02-analise.html" data-page="analise"><span class="nav-num">02</span>Análise</a></li>
+    <li><a href="03-chat.html" data-page="chat"><span class="nav-num">03</span>Chat</a></li>
+    <li><a href="05-painel.html" data-page="painel"><span class="nav-num">05</span>Painel</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a class="version-pill" href="02-analise-v2.html" title="Ver versão refinada do light mode"><span class="version-pill-dot"></span>Light v2 →</a>
+    <div class="theme-toggle" id="themeToggle">
+      <button class="theme-opt active" data-t="dark">Dark</button>
+      <button class="theme-opt" data-t="light">Light</button>
+    </div>
+    <a href="04-cadastro.html" class="btn btn-secondary btn-sm">Sair</a>
+  </div>
+</nav>
+
+<main class="page">
+<div class="container container-wide">
+
+  <header class="page-header fade-up fade-up-1">
+    <div>
+      <div class="crumb">
+        <a href="05-painel.html">Painel</a>
+        <span class="crumb-sep">/</span>
+        <a href="#">Análises</a>
+        <span class="crumb-sep">/</span>
+        <span>Contrato — Aliança S.A.</span>
+      </div>
+      <h1 class="page-title">Análise de documentos</h1>
+      <p class="page-subtitle">Contextualize a análise, envie o material e receba parecer com fundamento normativo e próximos passos.</p>
+    </div>
+    <div style="display:flex;gap:var(--s2)">
+      <button class="btn btn-secondary btn-sm">⬇ Exportar parecer</button>
+      <button class="btn btn-primary btn-sm">＋ Nova análise</button>
+    </div>
+  </header>
+
+  <div class="analyze">
+
+    <!-- ═══ LEFT RAIL: stepper + minimum context ═══ -->
+    <aside class="rail fade-up fade-up-2">
+      <div class="stepper">
+        <div class="stepper-title">— Progresso da análise</div>
+        <div class="step done"><div class="step-num"><span>1</span></div><div class="step-body"><div class="step-label">Contexto preenchido</div><div class="step-meta">2 min atrás</div></div></div>
+        <div class="step done"><div class="step-num"><span>2</span></div><div class="step-body"><div class="step-label">Documentos enviados</div><div class="step-meta">3 arquivos · 47 págs.</div></div></div>
+        <div class="step done"><div class="step-num"><span>3</span></div><div class="step-body"><div class="step-label">Análise concluída</div><div class="step-meta">há 47 s · 12,4s de processamento</div></div></div>
+        <div class="step active"><div class="step-num">4</div><div class="step-body"><div class="step-label">Revisão do operador</div><div class="step-meta">em andamento</div></div></div>
+        <div class="step pending"><div class="step-num">5</div><div class="step-body"><div class="step-label">Exportar parecer</div><div class="step-meta">aguardando</div></div></div>
+      </div>
+
+      <div class="ctx">
+        <div class="ctx-head">
+          <div class="ctx-head-title">— Informações mínimas</div>
+          <button class="btn btn-ghost btn-sm" style="padding: 4px 8px; font-size: 11px">editar</button>
+        </div>
+        <div class="ctx-row"><div class="ctx-key">Área</div><div class="ctx-val">Civil · Contratual</div></div>
+        <div class="ctx-row"><div class="ctx-key">Tipo</div><div class="ctx-val">Prest. de serviços</div></div>
+        <div class="ctx-row"><div class="ctx-key">Objetivo</div><div class="ctx-val">Revisar riscos</div></div>
+        <div class="ctx-row"><div class="ctx-key">Parte</div><div class="ctx-val">Contratante</div></div>
+        <div class="ctx-row"><div class="ctx-key">Prazo</div><div class="ctx-val">Urgente — 48h</div></div>
+        <div class="ctx-row"><div class="ctx-key">Contexto</div><div class="ctx-val" style="font-family: var(--font-display); font-style: italic; font-weight: 400">"Contraparte é fornecedor recorrente, foco em SLA e LGPD."</div></div>
+      </div>
+
+      <div class="ctx" style="background: linear-gradient(155deg, var(--bg-elevated), var(--bg-surface));">
+        <div class="ctx-head"><div class="ctx-head-title">— Confidencialidade</div></div>
+        <div style="display:flex;gap:var(--s3);align-items:flex-start">
+          <div style="width: 32px;height: 32px; flex-shrink:0; border-radius: var(--r2); display: grid; place-items: center; background: var(--c-ok-bg); border: 1px solid var(--c-ok-border); color: var(--c-ok-text); font-size: 14px">🔒</div>
+          <div>
+            <div style="font-size: 13px; color: var(--text-primary); font-weight: 500; margin-bottom: 4px">Modo sigiloso ativo</div>
+            <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.6">Documentos cifrados em trânsito e em repouso. Não são utilizados para treinamento.</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ MAIN: documents + result tabs ═══ -->
+    <section class="main fade-up fade-up-3">
+
+      <!-- DOCUMENT TABS -->
+      <div class="doc-tabs">
+        <div class="doc-tab is-active">
+          <div class="doc-tab-status" style="background: var(--c-ok-text)"></div>
+          <div>
+            <div class="doc-tab-name">Contrato-Alianca-v3.docx</div>
+            <div class="doc-tab-meta">12 PÁGS · ANALISADO</div>
+          </div>
+        </div>
+        <div class="doc-tab">
+          <div class="doc-tab-status" style="background: var(--c-ok-text)"></div>
+          <div>
+            <div class="doc-tab-name">Aditivo-SLA.pdf</div>
+            <div class="doc-tab-meta">5 PÁGS · ANALISADO</div>
+          </div>
+        </div>
+        <div class="doc-tab">
+          <div class="doc-tab-status" style="background: var(--c-warn-text)"></div>
+          <div>
+            <div class="doc-tab-name">Anexo-LGPD.pdf</div>
+            <div class="doc-tab-meta">30 PÁGS · 2 ALERTAS</div>
+          </div>
+        </div>
+        <button class="doc-tab-add">＋ Adicionar arquivo</button>
+      </div>
+
+      <!-- DOC HEAD -->
+      <div class="doc-head">
+        <div class="doc-info">
+          <div class="doc-icon-big"></div>
+          <div>
+            <div class="doc-name">Contrato-Alianca-v3.docx</div>
+            <div class="doc-meta">
+              <span>12 PÁGINAS</span>
+              <span>· 4.328 PALAVRAS</span>
+              <span>· DOCX EDITÁVEL</span>
+              <span>· ENVIADO 14:32</span>
+            </div>
+          </div>
+        </div>
+        <div class="doc-actions">
+          <span class="stag stag-warn">2 riscos</span>
+          <span class="stag stag-info">5 sugestões</span>
+        </div>
+      </div>
+
+      <!-- RESULT TABS -->
+      <div class="result-tabs" id="resultTabs">
+        <button class="result-tab is-active" data-tab="summary">Resumo executivo</button>
+        <button class="result-tab" data-tab="risks">Riscos <span class="count">2</span></button>
+        <button class="result-tab" data-tab="next">Próximos passos <span class="count">5</span></button>
+        <button class="result-tab" data-tab="inline">Comentários inline <span class="count">7</span></button>
+      </div>
+
+      <!-- TAB: SUMMARY -->
+      <div class="tab-content is-active" data-tab="summary">
+        <div class="panel executive">
+          <div class="ai-badge"><div class="ai-dot"></div>Tamois · Resumo executivo</div>
+          <p class="executive-text">
+            Contrato de <strong>prestação de serviços continuados</strong> entre Aliança Tecnologia S.A. (contratada)
+            e o cliente representado, com vigência de <strong>24 meses</strong> e renovação tácita. A estrutura geral
+            é coerente com a prática contratual brasileira e atende ao art. 421 do Código Civil. No entanto, foram
+            identificadas duas cláusulas com <strong>desvio em relação à jurisprudência consolidada</strong> — em
+            especial sobre limite de multa rescisória e foro de eleição — que justificam contraproposta antes
+            da assinatura. As obrigações de tratamento de dados pessoais carecem de detalhamento conforme exige
+            o art. 7º da LGPD.
+          </p>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">— Risco geral</div>
+              <div class="kpi-value warn">Moderado</div>
+              <div class="kpi-sub">2 cláusulas críticas</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">— Conformidade</div>
+              <div class="kpi-value ok">78%</div>
+              <div class="kpi-sub">com normativos vigentes</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">— Cláusulas</div>
+              <div class="kpi-value">42</div>
+              <div class="kpi-sub">7 com comentário</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">— Tempo IA</div>
+              <div class="kpi-value">12.4s</div>
+              <div class="kpi-sub">parecer gerado</div>
+            </div>
+          </div>
+
+          <div class="citations">
+            <div class="citations-title">— Base normativa consultada</div>
+            <div class="citations-row">
+              <span class="norm-tag"><span class="norm-prefix">LEI</span> 10.406/02 — CC</span>
+              <span class="norm-tag"><span class="norm-prefix">LEI</span> 13.105/15 — CPC</span>
+              <span class="norm-tag"><span class="norm-prefix">LEI</span> 13.709/18 — LGPD</span>
+              <span class="norm-tag"><span class="norm-prefix">STJ</span> Tema 1.027</span>
+              <span class="norm-tag"><span class="norm-prefix">STJ</span> Súm. 543</span>
+              <span class="norm-tag"><span class="norm-prefix">CDC</span> art. 51</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-foot">
+          <div class="meta">PARECER GERADO POR TAMOIS · NÃO SUBSTITUI ANÁLISE DE OPERADOR DO DIREITO</div>
+          <button class="btn btn-ghost btn-sm">Copiar resumo</button>
+          <button class="btn btn-secondary btn-sm">Exportar PDF</button>
+        </div>
+      </div>
+
+      <!-- TAB: RISKS -->
+      <div class="tab-content" data-tab="risks">
+        <div class="panel">
+          <div class="risks">
+            <div class="risk-item">
+              <div class="risk-num">— 01 —</div>
+              <div class="risk-body">
+                <div class="risk-head">
+                  <div class="risk-title">Multa rescisória superior ao limite jurisprudencial</div>
+                  <span class="risk-where">CLÁUSULA 7.2 · pág. 5</span>
+                </div>
+                <div class="risk-text">
+                  A cláusula prevê multa de <strong>50% do valor remanescente</strong> em caso de rescisão antecipada
+                  pelo contratante. A jurisprudência pacificada (STJ Tema 1.027) considera abusiva multa superior a
+                  10% do valor remanescente em contratos de execução continuada por prazo determinado. Há risco
+                  concreto de declaração de nulidade parcial e revisão judicial.
+                </div>
+                <div class="risk-refs">
+                  <span class="norm-tag"><span class="norm-prefix">STJ</span> Tema 1.027</span>
+                  <span class="norm-tag"><span class="norm-prefix">CC</span> art. 413</span>
+                  <span class="norm-tag"><span class="norm-prefix">CDC</span> art. 51, IV</span>
+                </div>
+              </div>
+              <div class="risk-actions">
+                <div class="severity severity-high"><div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div><span>Alto</span></div>
+                <button class="btn btn-ghost btn-sm">Ver no doc</button>
+              </div>
+            </div>
+
+            <div class="risk-item">
+              <div class="risk-num">— 02 —</div>
+              <div class="risk-body">
+                <div class="risk-head">
+                  <div class="risk-title">Foro de eleição sem ressalva de hipossuficiência</div>
+                  <span class="risk-where">CLÁUSULA 14.1 · pág. 11</span>
+                </div>
+                <div class="risk-text">
+                  Eleição exclusiva do foro de São Paulo/SP sem ressalva à hipótese de hipossuficiência ou
+                  dificuldade de acesso à justiça pela parte aderente. Conforme art. 63, §3º do CPC, o juiz
+                  pode declarar de ofício a abusividade quando o foro dificultar o exercício do direito de defesa.
+                </div>
+                <div class="risk-refs">
+                  <span class="norm-tag"><span class="norm-prefix">CPC</span> art. 63, §3º</span>
+                  <span class="norm-tag"><span class="norm-prefix">CDC</span> art. 51</span>
+                </div>
+              </div>
+              <div class="risk-actions">
+                <div class="severity severity-med"><div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div><span>Médio</span></div>
+                <button class="btn btn-ghost btn-sm">Ver no doc</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: NEXT STEPS -->
+      <div class="tab-content" data-tab="next">
+        <div class="panel">
+          <div class="steps-list">
+            <div class="step-card">
+              <div class="step-mark">①</div>
+              <div class="step-body">
+                <div class="step-card-title">Contraproposta sobre cláusula 7.2 (multa rescisória)</div>
+                <div class="step-card-text">
+                  Sugerir redução para 10% do valor remanescente ou cláusula proporcional ao período cumprido,
+                  alinhada ao entendimento do STJ Tema 1.027. Preparar minuta com 3 alternativas de redação.
+                </div>
+                <div class="step-card-foot">
+                  <span class="step-deadline">— PRAZO: ANTES DA ASSINATURA</span>
+                  <span class="stag stag-risk">crítico</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-mark">②</div>
+              <div class="step-body">
+                <div class="step-card-title">Ajustar cláusula 14.1 (foro de eleição)</div>
+                <div class="step-card-text">
+                  Incluir ressalva expressa sobre hipossuficiência conforme art. 63, §3º do CPC, ou adotar foro
+                  da parte aderente como subsidiário.
+                </div>
+                <div class="step-card-foot">
+                  <span class="step-deadline">— PRAZO: ANTES DA ASSINATURA</span>
+                  <span class="stag stag-warn">atenção</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-mark">③</div>
+              <div class="step-body">
+                <div class="step-card-title">Detalhar obrigações LGPD no anexo de tratamento</div>
+                <div class="step-card-text">
+                  Definir base legal (art. 7º), prazo de retenção, sub-operadores autorizados, plano de resposta a
+                  incidentes e canal de exercício de direitos do titular. Há modelo disponível em "Modelos do Escritório".
+                </div>
+                <div class="step-card-foot">
+                  <span class="step-deadline">— PRAZO: 5 DIAS ÚTEIS</span>
+                  <span class="stag stag-warn">recomendado</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-mark">④</div>
+              <div class="step-body">
+                <div class="step-card-title">Solicitar certidão de regularidade fiscal e trabalhista</div>
+                <div class="step-card-text">
+                  Padrão de due diligence para fornecedor recorrente — CND federal, CRF FGTS e CNDT.
+                  Anexar comprovantes ao processo antes da assinatura.
+                </div>
+                <div class="step-card-foot">
+                  <span class="step-deadline">— PRAZO: 3 DIAS ÚTEIS</span>
+                  <span class="stag stag-info">due diligence</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-mark">⑤</div>
+              <div class="step-body">
+                <div class="step-card-title">Validar índice de reajuste com financeiro</div>
+                <div class="step-card-text">
+                  Cláusula 9 prevê IPCA com periodicidade anual. Confirmar com o financeiro se índice está
+                  alinhado ao orçamento e se há limite de teto.
+                </div>
+                <div class="step-card-foot">
+                  <span class="step-deadline">— PRAZO: 7 DIAS ÚTEIS</span>
+                  <span class="stag stag-neutral">interno</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: INLINE COMMENTS -->
+      <div class="tab-content" data-tab="inline">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-medium); border-left: 2px solid var(--steel); border-radius: var(--r3); padding: var(--s5); margin-bottom: 4px">
+          <div class="ai-badge"><div class="ai-dot"></div>Documento editável detectado</div>
+          <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.7">
+            Tamois detectou que <strong style="color:var(--text-primary)">Contrato-Alianca-v3.docx</strong> é editável.
+            Os 7 comentários abaixo foram inseridos como <strong style="color:var(--text-primary)">anotações nativas do Word</strong>,
+            preservando autoria ("Tamois IA") e timestamp. Baixe a versão comentada ou abra direto no editor.
+          </div>
+          <div style="display:flex; gap: var(--s2); margin-top: var(--s4)">
+            <button class="btn btn-primary btn-sm">⬇ Baixar .docx comentado</button>
+            <button class="btn btn-secondary btn-sm">Abrir no editor online</button>
+          </div>
+        </div>
+
+        <div class="doc-preview">
+          <div class="doc-page">
+            <h3>Contrato de Prestação de Serviços</h3>
+            <p style="text-align: center; font-style: italic; margin-bottom: var(--s8)">— v3 · revisão pré-assinatura —</p>
+
+            <p><span class="clause-h">Cláusula 1ª — Objeto.</span> Constitui objeto do presente instrumento a prestação continuada
+            dos serviços de tecnologia descritos no Anexo I, pela CONTRATADA ao CONTRATANTE, mediante remuneração mensal
+            e nas condições estipuladas a seguir.</p>
+
+            <p><span class="clause-h">Cláusula 7ª — Rescisão.</span> Em caso de rescisão antecipada por iniciativa do CONTRATANTE,
+            será devida à CONTRATADA <span class="highlight risk" data-num="3">multa correspondente a 50% (cinquenta por cento)
+            do valor remanescente do contrato</span>, a título de compensação financeira pelo investimento despendido na
+            estruturação dos serviços.</p>
+
+            <p><span class="clause-h">Cláusula 9ª — Reajuste.</span> Os valores serão reajustados <span class="highlight" data-num="4">anualmente pelo IPCA acumulado</span>, contado a partir da data de assinatura, sem prejuízo de
+            revisão extraordinária em caso de comprovado desequilíbrio econômico-financeiro.</p>
+
+            <p><span class="clause-h">Cláusula 14ª — Foro.</span> Fica eleito o <span class="highlight" data-num="5">foro da Comarca de
+            São Paulo/SP</span>, com renúncia expressa a qualquer outro, por mais privilegiado que seja, para dirimir
+            quaisquer controvérsias oriundas deste contrato.</p>
+
+            <p style="margin-top: var(--s10); font-style: italic; text-align: center; color: #888">— continua na página 6 —</p>
+          </div>
+
+          <aside class="comments-rail">
+            <div class="comments-title">
+              <span>— 4 de 7 comentários</span>
+              <button class="btn btn-ghost btn-sm" style="padding: 4px; font-size: 10px">filtrar</button>
+            </div>
+
+            <div class="comment risk">
+              <div class="comment-head">
+                <span class="comment-num">— #03 · pág. 5</span>
+                <span class="comment-time">14:33</span>
+              </div>
+              <div class="comment-quote">"...multa correspondente a 50% do valor..."</div>
+              <div class="comment-body">
+                <strong>Risco alto.</strong> Multa supera limite jurisprudencial (STJ Tema 1.027 — 10%). Sugiro redução
+                ou proporcionalidade ao período cumprido.
+              </div>
+              <div class="comment-foot">
+                <button class="comment-action primary">Aceitar sugestão</button>
+                <button class="comment-action">Marcar resolvido</button>
+              </div>
+            </div>
+
+            <div class="comment">
+              <div class="comment-head">
+                <span class="comment-num">— #04 · pág. 7</span>
+                <span class="comment-time">14:33</span>
+              </div>
+              <div class="comment-quote">"...reajustados anualmente pelo IPCA..."</div>
+              <div class="comment-body">
+                Índice e periodicidade adequados. Considere incluir <strong>teto anual de 12%</strong> como proteção
+                contra picos inflacionários.
+              </div>
+              <div class="comment-foot">
+                <button class="comment-action primary">Inserir sugestão</button>
+                <button class="comment-action">Descartar</button>
+              </div>
+            </div>
+
+            <div class="comment">
+              <div class="comment-head">
+                <span class="comment-num">— #05 · pág. 11</span>
+                <span class="comment-time">14:33</span>
+              </div>
+              <div class="comment-quote">"...foro da Comarca de São Paulo/SP..."</div>
+              <div class="comment-body">
+                Incluir ressalva de hipossuficiência conforme <strong>art. 63, §3º CPC</strong>. Redação sugerida
+                disponível ao lado.
+              </div>
+              <div class="comment-foot">
+                <button class="comment-action primary">Ver redação</button>
+                <button class="comment-action">Marcar resolvido</button>
+              </div>
+            </div>
+
+            <div class="comment">
+              <div class="comment-head">
+                <span class="comment-num">— #06 · pág. 12</span>
+                <span class="comment-time">14:33</span>
+              </div>
+              <div class="comment-body">
+                <strong>Cláusula de confidencialidade</strong> ausente. Padrão de mercado para contratos com acesso a
+                dados estratégicos.
+              </div>
+              <div class="comment-foot">
+                <button class="comment-action primary">Inserir cláusula</button>
+                <button class="comment-action">Não aplicável</button>
+              </div>
+            </div>
+
+            <div style="text-align: center; padding: var(--s3); font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.12em">— mostrar mais 3 —</div>
+          </aside>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-brand">
+    <div class="brand-mark" style="width:22px;height:22px;font-size:13px">T</div>
+    Tamois
+  </div>
+  <div class="footer-meta">
+    Análise gerada por IA · Não substitui parecer humano<br>
+    LGPD ANPD 2024 · Sigilo profissional preservado<br>
+    © 2026 Tamois
+  </div>
+</footer>
+
+</main>
+
+<aside class="tweaks" id="tweaks">
+  <div class="tweaks-title">Tweaks · Variações</div>
+  <div class="tweaks-row">
+    <div class="tweaks-label">Cor de acento</div>
+    <div class="tweaks-seg" data-key="accent" data-default="crimson">
+      <button data-v="crimson">Crimson</button>
+      <button data-v="abyss">Abyss</button>
+      <button data-v="molten">Molten</button>
+    </div>
+  </div>
+  <div class="tweaks-row">
+    <div class="tweaks-label">Densidade</div>
+    <div class="tweaks-seg" data-key="density" data-default="default">
+      <button data-v="compact">Compacto</button>
+      <button data-v="default">Padrão</button>
+      <button data-v="comfortable">Amplo</button>
+    </div>
+  </div>
+</aside>
+
+<script src="tamois.js"></script>
+<script>
+  // result tabs
+  const tabs = document.querySelectorAll('.result-tab');
+  const panels = document.querySelectorAll('.tab-content');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    const k = t.dataset.tab;
+    tabs.forEach(x => x.classList.toggle('is-active', x === t));
+    panels.forEach(p => p.classList.toggle('is-active', p.dataset.tab === k));
+  }));
+
+  // doc tabs (cosmetic)
+  document.querySelectorAll('.doc-tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.doc-tab').forEach(x => x.classList.toggle('is-active', x === t));
+  }));
+</script>
+</body>
+</html>

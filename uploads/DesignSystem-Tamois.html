@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEX — Design System v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   LEX DESIGN SYSTEM v2.0
+   Arquétipo: Sábio × Governante × Mago
+   Paleta: Fiery Ocean
+   Temas: Dark (padrão) · Light
+═══════════════════════════════════════════════════════ */
+
+/* ── PRIMITIVES ─────────────────────────────────────── */
+:root {
+  --molten:    #780000;
+  --crimson:   #C1121F;
+  --parchment: #FDF0D5;
+  --abyss:     #003049;
+  --steel:     #669BBC;
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Instrument Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px;
+  --s6:24px; --s8:32px; --s10:40px; --s12:48px; --s16:64px; --s20:80px;
+
+  --r1:2px; --r2:4px; --r3:8px; --r4:12px; --r5:16px; --r-full:9999px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-expo:  cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-inout:    cubic-bezier(0.45, 0, 0.55, 1);
+  --dur-fast: 150ms; --dur-base: 280ms;
+  --dur-slow: 500ms; --dur-enter: 650ms;
+}
+
+/* ── DARK THEME ─────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-primary:   #000F18;
+  --bg-surface:   #001928;
+  --bg-elevated:  #002036;
+  --bg-glass:     rgba(0,48,73,0.6);
+
+  --text-primary:   #FDF0D5;
+  --text-secondary: rgba(253,240,213,0.6);
+  --text-tertiary:  rgba(253,240,213,0.35);
+  --text-accent:    #669BBC;
+
+  --border-subtle:  rgba(102,155,188,0.12);
+  --border-medium:  rgba(102,155,188,0.22);
+  --border-accent:  rgba(102,155,188,0.45);
+
+  --glow-crimson: rgba(193,18,31,0.35);
+  --glow-steel:   rgba(102,155,188,0.25);
+  --glow-molten:  rgba(120,0,0,0.5);
+
+  /* Status */
+  --c-ok-text:      #72D49B; --c-ok-bg:   rgba(114,212,155,0.08); --c-ok-border:   rgba(114,212,155,0.2);
+  --c-warn-text:    #E8C76A; --c-warn-bg: rgba(232,199,106,0.08); --c-warn-border: rgba(232,199,106,0.2);
+  --c-risk-text:    #F07070; --c-risk-bg: rgba(240,112,112,0.08); --c-risk-border: rgba(240,112,112,0.2);
+  --c-info-text:    #669BBC; --c-info-bg: rgba(102,155,188,0.08); --c-info-border: rgba(102,155,188,0.2);
+  --c-neutral-text: rgba(253,240,213,0.45); --c-neutral-bg: rgba(253,240,213,0.05); --c-neutral-border: rgba(253,240,213,0.1);
+
+  /* Notif bg */
+  --notif-bg: #001422;
+  --notif-border: rgba(102,155,188,0.1);
+
+  /* Toast bg */
+  --toast-bg: #001E30;
+  --toast-border: rgba(102,155,188,0.15);
+  --toast-shadow: 0 8px 32px rgba(0,0,0,0.5);
+
+  /* Noise */
+  --noise-opacity: 0.5;
+
+  /* Scrollbar */
+  --scroll-track: #000F18;
+  --scroll-thumb: rgba(102,155,188,0.2);
+
+  /* Ambient visibility */
+  --ambient-abyss-op: 0.4;
+  --ambient-molten-op: 0.18;
+
+  /* App preview sidebar */
+  --sidebar-hover-bg: rgba(253,240,213,0.03);
+  --sidebar-active-bg: rgba(193,18,31,0.08);
+
+  /* Input */
+  --input-bg: var(--bg-surface);
+
+  /* Spacing block */
+  --spacing-block-start: var(--abyss);
+  --spacing-block-end: var(--steel);
+}
+
+/* ── LIGHT THEME ─────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary:   #F5EDDA;
+  --bg-surface:   #FDF0D5;
+  --bg-elevated:  #FFFFFF;
+  --bg-glass:     rgba(253,240,213,0.8);
+
+  --text-primary:   #001E2E;
+  --text-secondary: rgba(0,30,46,0.62);
+  --text-tertiary:  rgba(0,30,46,0.38);
+  --text-accent:    #2B5E7E;
+
+  --border-subtle: rgba(0,48,73,0.1);
+  --border-medium: rgba(0,48,73,0.18);
+  --border-accent: rgba(0,48,73,0.35);
+
+  --glow-crimson: rgba(193,18,31,0.12);
+  --glow-steel:   rgba(102,155,188,0.15);
+  --glow-molten:  rgba(120,0,0,0.1);
+
+  /* Status */
+  --c-ok-text:      #1A7A46; --c-ok-bg:   rgba(26,122,70,0.07);   --c-ok-border:   rgba(26,122,70,0.2);
+  --c-warn-text:    #7A5A0A; --c-warn-bg: rgba(122,90,10,0.07);   --c-warn-border: rgba(122,90,10,0.2);
+  --c-risk-text:    #A00F1A; --c-risk-bg: rgba(160,15,26,0.07);   --c-risk-border: rgba(160,15,26,0.2);
+  --c-info-text:    #2B5E7E; --c-info-bg: rgba(43,94,126,0.07);   --c-info-border: rgba(43,94,126,0.2);
+  --c-neutral-text: rgba(0,30,46,0.42); --c-neutral-bg: rgba(0,48,73,0.05); --c-neutral-border: rgba(0,48,73,0.12);
+
+  /* Notif bg */
+  --notif-bg: #FFFFFF;
+  --notif-border: rgba(0,48,73,0.1);
+
+  /* Toast bg */
+  --toast-bg: #FFFFFF;
+  --toast-border: rgba(0,48,73,0.12);
+  --toast-shadow: 0 4px 20px rgba(0,0,0,0.1);
+
+  /* Noise */
+  --noise-opacity: 0;
+
+  /* Scrollbar */
+  --scroll-track: #F5EDDA;
+  --scroll-thumb: rgba(0,48,73,0.15);
+
+  /* Ambient */
+  --ambient-abyss-op: 0;
+  --ambient-molten-op: 0;
+
+  /* App preview sidebar */
+  --sidebar-hover-bg: rgba(0,48,73,0.04);
+  --sidebar-active-bg: rgba(193,18,31,0.06);
+
+  /* Input */
+  --input-bg: #FFFFFF;
+
+  /* Spacing block */
+  --spacing-block-start: var(--abyss);
+  --spacing-block-end: var(--steel);
+}
+
+/* ═══════════════════════════════════════
+   BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 15px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background var(--dur-base) var(--ease-out-expo),
+              color var(--dur-base) var(--ease-out-expo);
+}
+
+/* Noise overlay */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; opacity: var(--noise-opacity);
+  transition: opacity var(--dur-base);
+}
+
+/* Ambient orbs */
+.ambient {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(80px); animation: drift 20s ease-in-out infinite alternate;
+  transition: opacity var(--dur-slow);
+}
+.ambient-1 {
+  width: 600px; height: 600px; top: -200px; right: -100px;
+  background: radial-gradient(circle, var(--abyss), transparent 70%);
+  opacity: var(--ambient-abyss-op);
+}
+.ambient-2 {
+  width: 400px; height: 400px; bottom: -100px; left: -100px;
+  background: radial-gradient(circle, var(--molten), transparent 70%);
+  opacity: var(--ambient-molten-op); animation-delay: -10s;
+}
+@keyframes drift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(30px,-40px) scale(1.08); }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scroll-track); }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
+
+/* ═══════════════════════════════════════
+   THEME TOGGLE BAR (fixo no topo)
+═══════════════════════════════════════ */
+.theme-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s2) var(--s8);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: blur(16px);
+  transition: background var(--dur-base), border-color var(--dur-base);
+}
+.theme-brand {
+  font-family: var(--font-display); font-size: 16px; font-weight: 300;
+  letter-spacing: 0.1em; color: var(--text-primary);
+  display: flex; align-items: center; gap: var(--s3);
+}
+.theme-brand-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--crimson);
+  box-shadow: 0 0 8px var(--glow-crimson);
+}
+.theme-version {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.15em; color: var(--text-tertiary);
+}
+.theme-toggle {
+  display: flex; align-items: center; gap: var(--s3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--r-full); padding: 3px;
+  cursor: pointer;
+}
+.theme-opt {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px var(--s3); border-radius: var(--r-full);
+  color: var(--text-tertiary); cursor: pointer;
+  transition: all var(--dur-fast);
+  user-select: none;
+}
+.theme-opt.active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.ds-wrapper {
+  position: relative; z-index: 1;
+  max-width: 1080px; margin: 0 auto;
+  padding: calc(var(--s16) + var(--s6)) var(--s8) var(--s10);
+}
+
+.ds-section {
+  margin-bottom: var(--s20);
+  animation: fadeUp var(--dur-enter) var(--ease-out-expo) both;
+}
+.ds-section:nth-child(2)  { animation-delay: 50ms; }
+.ds-section:nth-child(3)  { animation-delay: 100ms; }
+.ds-section:nth-child(4)  { animation-delay: 150ms; }
+.ds-section:nth-child(5)  { animation-delay: 200ms; }
+.ds-section:nth-child(6)  { animation-delay: 250ms; }
+.ds-section:nth-child(7)  { animation-delay: 300ms; }
+.ds-section:nth-child(8)  { animation-delay: 350ms; }
+.ds-section:nth-child(9)  { animation-delay: 400ms; }
+.ds-section:nth-child(10) { animation-delay: 450ms; }
+.ds-section:nth-child(11) { animation-delay: 500ms; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.section-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-bottom: var(--s3);
+  display: flex; align-items: center; gap: var(--s3);
+  transition: color var(--dur-base);
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border-subtle); transition: background var(--dur-base);
+}
+.section-title {
+  font-family: var(--font-display); font-size: 28px; font-weight: 300;
+  color: var(--text-primary); margin-bottom: var(--s8); letter-spacing: -0.01em;
+  transition: color var(--dur-base);
+}
+
+.divider {
+  height: 1px; margin: var(--s8) 0;
+  background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+}
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+.hero {
+  padding: var(--s12) 0 var(--s16); text-align: center; position: relative;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--text-accent); margin-bottom: var(--s6);
+  display: inline-flex; align-items: center; gap: var(--s3);
+  transition: color var(--dur-base);
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; width: 24px; height: 1px; background: currentColor; opacity: 0.5;
+}
+.hero-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(64px,10vw,108px); font-weight: 300;
+  letter-spacing: -0.02em; line-height: 0.9;
+  margin-bottom: var(--s4);
+  transition: all var(--dur-base);
+}
+[data-theme="dark"] .hero-wordmark {
+  background: linear-gradient(135deg, var(--parchment) 0%, rgba(253,240,213,0.7) 40%, var(--steel) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+[data-theme="light"] .hero-wordmark { color: var(--abyss); -webkit-text-fill-color: initial; }
+
+.hero-subtitle {
+  font-family: var(--font-display); font-style: italic; font-size: 18px;
+  font-weight: 300; color: var(--text-secondary); letter-spacing: 0.02em; margin-bottom: var(--s8);
+  transition: color var(--dur-base);
+}
+.hero-rule {
+  width: 1px; height: 60px;
+  background: linear-gradient(to bottom, var(--text-accent), transparent);
+  margin: 0 auto; transition: background var(--dur-base);
+}
+
+/* ═══════════════════════════════════════
+   01 — PALETA
+═══════════════════════════════════════ */
+.palette-grid {
+  display: grid; grid-template-columns: repeat(5,1fr); gap: var(--s2); margin-bottom: var(--s8);
+}
+.swatch {
+  border-radius: var(--r3); overflow: hidden;
+  transition: transform var(--dur-base) var(--ease-out-expo), box-shadow var(--dur-base) var(--ease-out-expo);
+  cursor: default;
+}
+.swatch:hover { transform: translateY(-4px); }
+.swatch-color { height: 100px; position: relative; }
+.swatch-color::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.2));
+}
+.swatch-info {
+  background: var(--bg-elevated); padding: var(--s3) var(--s4);
+  border: 1px solid var(--border-subtle); border-top: none;
+  transition: background var(--dur-base), border-color var(--dur-base);
+}
+.swatch-name { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 2px; }
+.swatch-hex  { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.swatch-role { font-family: var(--font-body); font-size: 11px; color: var(--text-secondary); margin-top: var(--s1); line-height: 1.4; }
+
+.swatch-molten   .swatch-color { background: #780000; }
+.swatch-crimson  .swatch-color { background: #C1121F; }
+.swatch-parchment .swatch-color { background: #FDF0D5; }
+.swatch-abyss    .swatch-color { background: #003049; }
+.swatch-steel    .swatch-color { background: #669BBC; }
+.swatch-molten:hover  { box-shadow: 0 16px 40px var(--glow-molten); }
+.swatch-crimson:hover { box-shadow: 0 16px 40px var(--glow-crimson); }
+.swatch-steel:hover   { box-shadow: 0 16px 40px var(--glow-steel); }
+
+/* Token grid */
+.token-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--s4); }
+.token-card {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r3); padding: var(--s5);
+  transition: background var(--dur-base), border-color var(--dur-base);
+}
+.token-swatch { width: 32px; height: 32px; border-radius: var(--r2); margin-bottom: var(--s3); }
+.token-name { font-family: var(--font-mono); font-size: 11px; color: var(--text-accent); margin-bottom: var(--s1); }
+.token-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+/* ═══════════════════════════════════════
+   02 — TIPOGRAFIA
+═══════════════════════════════════════ */
+.type-row {
+  display: grid; grid-template-columns: 200px 1fr; gap: var(--s6);
+  align-items: baseline; padding: var(--s5) 0; border-bottom: 1px solid var(--border-subtle);
+  transition: border-color var(--dur-base);
+}
+.type-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); }
+.type-meta strong { display: block; color: var(--text-secondary); margin-bottom: 2px; font-weight: 400; }
+
+.t-display-xl  { font-family: var(--font-display); font-size: 56px; font-weight: 300; letter-spacing: -0.02em; line-height: 1; color: var(--text-primary); }
+.t-display-lg  { font-family: var(--font-display); font-size: 36px; font-weight: 400; line-height: 1.1; color: var(--text-primary); }
+.t-display-md  { font-family: var(--font-display); font-style: italic; font-size: 24px; font-weight: 300; color: var(--text-secondary); }
+.t-heading-lg  { font-family: var(--font-body); font-size: 20px; font-weight: 500; letter-spacing: -0.01em; color: var(--text-primary); }
+.t-heading-sm  { font-family: var(--font-body); font-size: 14px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary); }
+.t-body        { font-family: var(--font-body); font-size: 15px; font-weight: 400; line-height: 1.7; color: var(--text-secondary); }
+.t-caption     { font-family: var(--font-body); font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
+.t-mono        { font-family: var(--font-mono); font-size: 13px; color: var(--text-accent); letter-spacing: 0.04em; }
+.t-label       { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-tertiary); }
+
+/* ═══════════════════════════════════════
+   03 — BOTÕES & INPUTS
+═══════════════════════════════════════ */
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; margin-bottom: var(--s6); }
+.btn {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  border-radius: var(--r2); font-family: var(--font-body);
+  cursor: pointer; border: none; outline: none;
+  transition: all var(--dur-base) var(--ease-out-expo);
+  position: relative; overflow: hidden; white-space: nowrap; text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--crimson); color: var(--parchment);
+  padding: var(--s3) var(--s6); font-size: 14px; font-weight: 500; letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.btn-primary::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); }
+.btn-primary:hover { background: #D4161F; box-shadow: 0 0 24px var(--glow-crimson), inset 0 1px 0 rgba(255,255,255,0.12); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: transparent; color: var(--text-primary);
+  padding: var(--s3) var(--s6); font-size: 14px; font-weight: 400;
+  border: 1px solid var(--border-medium); letter-spacing: 0.02em;
+}
+.btn-secondary:hover { border-color: var(--border-accent); background: rgba(102,155,188,0.06); box-shadow: 0 0 16px var(--glow-steel); }
+
+.btn-ghost { background: transparent; color: var(--text-secondary); padding: var(--s3) var(--s5); font-size: 14px; border: 1px solid transparent; }
+.btn-ghost:hover { color: var(--text-primary); border-color: var(--border-subtle); }
+
+.btn-danger { background: rgba(120,0,0,0.35); color: #FF6B6B; padding: var(--s3) var(--s6); font-size: 14px; border: 1px solid rgba(193,18,31,0.35); }
+.btn-danger:hover { background: rgba(193,18,31,0.5); border-color: var(--crimson); box-shadow: 0 0 20px var(--glow-molten); }
+
+[data-theme="light"] .btn-danger { background: rgba(160,15,26,0.06); color: #A00F1A; border-color: rgba(160,15,26,0.2); }
+[data-theme="light"] .btn-danger:hover { background: rgba(160,15,26,0.12); }
+
+.btn-icon { background: var(--bg-elevated); color: var(--text-secondary); padding: var(--s3); border: 1px solid var(--border-subtle); border-radius: var(--r3); width: 40px; height: 40px; justify-content: center; }
+.btn-icon:hover { color: var(--text-primary); border-color: var(--border-medium); }
+
+/* INPUTS */
+.input-group { margin-bottom: var(--s5); }
+.input-label { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: var(--s2); }
+.input {
+  width: 100%; background: var(--input-bg); border: 1px solid var(--border-subtle);
+  border-radius: var(--r2); padding: var(--s3) var(--s4);
+  font-family: var(--font-body); font-size: 14px; color: var(--text-primary); outline: none;
+  transition: border-color var(--dur-base), box-shadow var(--dur-base), background var(--dur-base);
+  -webkit-appearance: none;
+}
+.input::placeholder { color: var(--text-tertiary); }
+.input:focus { border-color: var(--steel); box-shadow: 0 0 0 3px rgba(102,155,188,0.12); }
+.input-error { border-color: var(--c-risk-text) !important; }
+.input-error:focus { box-shadow: 0 0 0 3px rgba(193,18,31,0.12) !important; }
+.input-hint { margin-top: var(--s2); font-size: 12px; color: var(--text-tertiary); }
+.input-hint.error { color: var(--c-risk-text); }
+
+/* ═══════════════════════════════════════
+   04 — CARDS & SURFACES
+═══════════════════════════════════════ */
+.cards-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--s5); }
+.card {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); padding: var(--s6); position: relative; overflow: hidden;
+  transition: all var(--dur-base) var(--ease-out-expo);
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-medium), transparent);
+  transition: background var(--dur-base);
+}
+.card:hover { border-color: var(--border-medium); background: var(--bg-elevated); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.card-elevated { background: linear-gradient(135deg, var(--bg-elevated), var(--bg-surface)); border-color: var(--border-medium); }
+.card-icon { width: 36px; height: 36px; border-radius: var(--r2); display: flex; align-items: center; justify-content: center; margin-bottom: var(--s4); font-size: 16px; }
+.card-icon-authority { background: rgba(193,18,31,0.12); border: 1px solid rgba(193,18,31,0.22); }
+.card-icon-knowledge { background: rgba(102,155,188,0.1); border: 1px solid rgba(102,155,188,0.2); }
+.card-icon-system    { background: var(--bg-elevated); border: 1px solid var(--border-medium); }
+.card-title { font-family: var(--font-body); font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: var(--s2); }
+.card-body  { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+/* AI Response */
+.ai-response {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--steel); border-radius: var(--r3); padding: var(--s6); margin: var(--s5) 0;
+  transition: all var(--dur-base);
+}
+.ai-badge { display: inline-flex; align-items: center; gap: var(--s2); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-accent); margin-bottom: var(--s4); }
+.ai-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-accent); animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.2)} }
+.ai-text { font-family: var(--font-display); font-size: 16px; font-weight: 300; line-height: 1.8; color: var(--text-primary); }
+
+/* ═══════════════════════════════════════
+   05 — BADGES (REDESENHADOS)
+═══════════════════════════════════════ */
+
+/* TIPO 1: Status Tag — borda esquerda institucional */
+.stag {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  padding: 3px var(--s3); border-left: 2px solid currentColor;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  transition: all var(--dur-fast);
+}
+.stag-ok      { color: var(--c-ok-text);      background: var(--c-ok-bg); }
+.stag-warn    { color: var(--c-warn-text);    background: var(--c-warn-bg); }
+.stag-risk    { color: var(--c-risk-text);    background: var(--c-risk-bg); }
+.stag-info    { color: var(--c-info-text);    background: var(--c-info-bg); }
+.stag-neutral { color: var(--c-neutral-text); background: var(--c-neutral-bg); }
+
+/* TIPO 2: Normativo Tag — referência legal */
+.norm-tag {
+  display: inline-flex; align-items: baseline; gap: 3px;
+  padding: 3px var(--s3) 3px var(--s2);
+  border: 1px solid var(--c-info-border);
+  color: var(--c-info-text); background: var(--c-info-bg);
+  border-radius: var(--r1);
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+  cursor: default; transition: all var(--dur-fast);
+}
+.norm-tag:hover { background: var(--c-info-border); }
+.norm-prefix { font-size: 8px; letter-spacing: 0.15em; opacity: 0.6; }
+
+/* TIPO 3: Severity — escala de barras */
+.severity { display: inline-flex; align-items: center; gap: var(--s2); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; }
+.severity-bars { display: flex; gap: 2px; align-items: flex-end; }
+.severity-bar { width: 3px; border-radius: 1px; transition: opacity var(--dur-fast); }
+.severity-bar:nth-child(1) { height: 6px; }
+.severity-bar:nth-child(2) { height: 10px; }
+.severity-bar:nth-child(3) { height: 14px; }
+
+.severity-low  .severity-bar { background: var(--c-ok-text); }
+.severity-low  .severity-bar:nth-child(2), .severity-low .severity-bar:nth-child(3) { opacity: 0.2; }
+.severity-low  span { color: var(--c-ok-text); }
+
+.severity-med  .severity-bar { background: var(--c-warn-text); }
+.severity-med  .severity-bar:nth-child(3) { opacity: 0.2; }
+.severity-med  span { color: var(--c-warn-text); }
+
+.severity-high .severity-bar { background: var(--c-risk-text); }
+.severity-high span { color: var(--c-risk-text); }
+
+/* TIPO 4: Área Chip — produto regulado */
+.area-chip {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  padding: 4px var(--s3); border-radius: var(--r-full);
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  border: 1px solid var(--border-medium); color: var(--text-secondary);
+  background: var(--bg-surface); cursor: default;
+  transition: all var(--dur-fast);
+}
+.area-chip:hover { color: var(--text-primary); border-color: var(--c-info-border); }
+.area-chip-icon { font-size: 10px; opacity: 0.7; }
+.area-chip-pix   { border-color: var(--c-info-border); color: var(--c-info-text); }
+.area-chip-cards { border-color: var(--c-risk-border); color: var(--c-risk-text); }
+.area-chip-of    { border-color: var(--c-ok-border);   color: var(--c-ok-text); }
+
+.badge-row { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+
+/* ═══════════════════════════════════════
+   06 — NOTIFICAÇÕES (REDESENHADAS)
+═══════════════════════════════════════ */
+.notif-stack { display: flex; flex-direction: column; gap: var(--s3); }
+
+.notif {
+  position: relative; overflow: hidden; border-radius: var(--r3);
+  background: var(--notif-bg); border: 1px solid var(--notif-border); border-left: none;
+  cursor: default; transition: transform var(--dur-base) var(--ease-out-expo), box-shadow var(--dur-base);
+}
+[data-theme="dark"]  .notif:hover { transform: translateX(2px); box-shadow: 4px 0 24px rgba(0,0,0,0.35); }
+[data-theme="light"] .notif:hover { transform: translateX(2px); box-shadow: 2px 0 12px rgba(0,48,73,0.1); }
+
+.notif-stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.notif-ok   .notif-stripe { background: var(--c-ok-text); }
+.notif-warn .notif-stripe { background: var(--c-warn-text); }
+.notif-risk .notif-stripe { background: var(--c-risk-text); }
+.notif-info .notif-stripe { background: var(--c-info-text); }
+
+.notif-inner { padding: var(--s4) var(--s5) var(--s4) calc(var(--s5) + 4px); display: flex; flex-direction: column; gap: var(--s2); }
+
+.notif-meta { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.notif-type { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; }
+.notif-ok   .notif-type { color: var(--c-ok-text); }
+.notif-warn .notif-type { color: var(--c-warn-text); }
+.notif-risk .notif-type { color: var(--c-risk-text); }
+.notif-info .notif-type { color: var(--c-info-text); }
+
+.notif-sep  { width: 1px; height: 10px; background: var(--border-medium); flex-shrink: 0; }
+.notif-time { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); }
+
+.notif-title { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.4; }
+.notif-body  { font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
+.notif-ref   { font-family: var(--font-mono); font-size: 11px; color: var(--c-info-text); opacity: 0.85; }
+
+.notif-footer { display: flex; align-items: center; gap: var(--s4); margin-top: var(--s1); }
+.notif-action {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-tertiary); background: none; border: none; cursor: pointer; padding: 0;
+  transition: color var(--dur-fast);
+}
+.notif-action:hover { color: var(--text-primary); }
+.notif-action-primary { color: var(--c-info-text) !important; }
+.notif-action-primary:hover { opacity: 0.8; }
+
+/* ═══════════════════════════════════════
+   07 — TOASTS (REDESENHADOS)
+═══════════════════════════════════════ */
+.toast-stack { display: flex; flex-direction: column; gap: var(--s2); }
+.toast {
+  display: flex; align-items: stretch; border-radius: var(--r3); overflow: hidden; max-width: 380px;
+  background: var(--toast-bg); border: 1px solid var(--toast-border); box-shadow: var(--toast-shadow);
+  animation: toastIn 400ms var(--ease-out-expo) both;
+  transition: background var(--dur-base), border-color var(--dur-base);
+}
+.toast:nth-child(2) { animation-delay: 80ms; }
+.toast:nth-child(3) { animation-delay: 160ms; }
+@keyframes toastIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+
+.toast-accent { width: 3px; flex-shrink: 0; }
+.toast-ok   .toast-accent { background: var(--c-ok-text); }
+.toast-warn .toast-accent { background: var(--c-warn-text); }
+.toast-risk .toast-accent { background: var(--c-risk-text); }
+.toast-info .toast-accent { background: var(--c-info-text); }
+
+.toast-content { padding: var(--s3) var(--s4); flex: 1; }
+.toast-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 3px; }
+.toast-ok   .toast-label { color: var(--c-ok-text); }
+.toast-warn .toast-label { color: var(--c-warn-text); }
+.toast-risk .toast-label { color: var(--c-risk-text); }
+.toast-info .toast-label { color: var(--c-info-text); }
+.toast-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; line-height: 1.3; }
+.toast-desc  { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+.toast-close { padding: var(--s3); display: flex; align-items: flex-start; background: none; border: none; cursor: pointer; font-size: 11px; color: var(--text-tertiary); transition: color var(--dur-fast); }
+.toast-close:hover { color: var(--text-primary); }
+
+/* ═══════════════════════════════════════
+   08 — TABELA
+═══════════════════════════════════════ */
+.table-wrapper { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r4); overflow: hidden; transition: all var(--dur-base); }
+.ds-table { width: 100%; border-collapse: collapse; }
+.ds-table thead { background: var(--bg-elevated); }
+.ds-table thead th { padding: var(--s3) var(--s5); text-align: left; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-tertiary); font-weight: 400; border-bottom: 1px solid var(--border-subtle); }
+.ds-table tbody tr { border-bottom: 1px solid var(--border-subtle); transition: background var(--dur-fast); }
+.ds-table tbody tr:last-child { border-bottom: none; }
+.ds-table tbody tr:hover { background: rgba(102,155,188,0.04); }
+.ds-table td { padding: var(--s3) var(--s5); font-size: 13px; color: var(--text-secondary); }
+.ds-table td.mono { font-family: var(--font-mono); color: var(--text-accent); font-size: 12px; }
+
+/* ═══════════════════════════════════════
+   09 — MOTION
+═══════════════════════════════════════ */
+.motion-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--s5); }
+.motion-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r4); padding: var(--s6); display: flex; flex-direction: column; gap: var(--s4); transition: all var(--dur-base); }
+.motion-demo { height: 60px; display: flex; align-items: center; justify-content: center; background: var(--bg-elevated); border-radius: var(--r2); }
+.motion-bar { height: 3px; background: var(--steel); border-radius: var(--r-full); animation: expandBar 2s var(--ease-out-expo) infinite; }
+@keyframes expandBar { 0%{width:0;opacity:0} 30%{opacity:1} 70%{width:80%} 100%{width:80%;opacity:0.3} }
+.motion-orb { width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle, var(--crimson), var(--molten)); animation: orbFloat 3s ease-in-out infinite; box-shadow: 0 0 20px var(--glow-crimson); }
+@keyframes orbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.motion-ring { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--steel); animation: ringExpand 2s ease-out infinite; }
+@keyframes ringExpand { 0%{transform:scale(0.6);opacity:0.8} 100%{transform:scale(1.4);opacity:0} }
+.motion-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.12em; text-align: center; }
+.motion-value { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); text-align: center; }
+
+/* ═══════════════════════════════════════
+   10 — ELEVAÇÃO & ESPAÇAMENTO
+═══════════════════════════════════════ */
+.shadow-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: var(--s5); }
+.shadow-demo { background: var(--bg-elevated); border-radius: var(--r3); padding: var(--s6); text-align: center; transition: all var(--dur-base); }
+[data-theme="dark"] .shadow-sm   { box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+[data-theme="dark"] .shadow-md   { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+[data-theme="dark"] .shadow-lg   { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+[data-theme="light"] .shadow-sm  { box-shadow: 0 2px 8px rgba(0,48,73,0.08); }
+[data-theme="light"] .shadow-md  { box-shadow: 0 4px 16px rgba(0,48,73,0.12); }
+[data-theme="light"] .shadow-lg  { box-shadow: 0 8px 32px rgba(0,48,73,0.16); }
+.shadow-glow { box-shadow: 0 4px 24px var(--glow-steel); }
+.shadow-name { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); margin-bottom: var(--s2); text-transform: uppercase; letter-spacing: 0.1em; }
+.shadow-val  { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); margin-top: var(--s2); }
+
+.spacing-row { display: flex; align-items: flex-end; gap: var(--s4); padding: var(--s6) 0; border-bottom: 1px solid var(--border-subtle); }
+.spacing-block { background: linear-gradient(135deg, var(--abyss), var(--steel)); border-radius: var(--r1); opacity: 0.6; }
+.spacing-info { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); }
+.spacing-info strong { display: block; color: var(--text-accent); }
+
+/* ═══════════════════════════════════════
+   11 — TEMA CLARO: ORIENTAÇÕES + PREVIEW
+═══════════════════════════════════════ */
+
+/* Token comparison table */
+.theme-compare {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border: 1px solid var(--border-subtle); border-radius: var(--r4); overflow: hidden;
+  margin-bottom: var(--s8);
+}
+.tc-col { padding: var(--s6); }
+.tc-col-dark  { background: #001928; border-right: 1px solid rgba(102,155,188,0.12); }
+.tc-col-light { background: #FDF0D5; }
+.tc-col-label {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: var(--s5); padding-bottom: var(--s3);
+  border-bottom: 1px solid;
+}
+.tc-col-dark  .tc-col-label { color: rgba(102,155,188,0.5); border-color: rgba(102,155,188,0.1); }
+.tc-col-light .tc-col-label { color: rgba(0,48,73,0.4); border-color: rgba(0,48,73,0.1); }
+
+.tc-row { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s3); }
+.tc-swatch { width: 28px; height: 28px; border-radius: var(--r1); flex-shrink: 0; }
+.tc-info { flex: 1; }
+.tc-name { font-family: var(--font-mono); font-size: 10px; }
+.tc-col-dark  .tc-name { color: rgba(253,240,213,0.45); }
+.tc-col-light .tc-name { color: rgba(0,30,46,0.45); }
+.tc-val  { font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+.tc-col-dark  .tc-val { color: rgba(253,240,213,0.8); }
+.tc-col-light .tc-val { color: rgba(0,30,46,0.8); }
+.tc-role { font-size: 11px; margin-top: 1px; }
+.tc-col-dark  .tc-role { color: rgba(253,240,213,0.3); }
+.tc-col-light .tc-role { color: rgba(0,30,46,0.3); }
+
+/* Guidance cards */
+.guidance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); margin-bottom: var(--s8); }
+.guidance-card {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r4); padding: var(--s6);
+  transition: all var(--dur-base);
+}
+.guidance-card-header { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s4); }
+.guidance-icon {
+  width: 28px; height: 28px; border-radius: var(--r2);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;
+}
+.guidance-icon-ok   { background: var(--c-ok-bg);   border: 1px solid var(--c-ok-border); }
+.guidance-icon-warn { background: var(--c-warn-bg);  border: 1px solid var(--c-warn-border); }
+.guidance-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.guidance-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+.guidance-list li {
+  display: flex; align-items: flex-start; gap: var(--s2);
+  font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+}
+.guidance-list li::before {
+  content: '—'; font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-tertiary); flex-shrink: 0; margin-top: 2px;
+}
+
+/* App preview — light mode */
+.light-preview {
+  background: #F5EDDA; border: 1px solid rgba(0,48,73,0.12);
+  border-radius: var(--r5); overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,48,73,0.08), 0 1px 4px rgba(0,0,0,0.06);
+}
+.lp-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s3) var(--s5); background: #FFFFFF;
+  border-bottom: 1px solid rgba(0,48,73,0.1);
+}
+.lp-logo { font-family: var(--font-display); font-size: 18px; font-weight: 300; letter-spacing: 0.06em; color: #001E2E; }
+.lp-logo em { font-style: normal; color: var(--crimson); }
+.lp-nav { display: flex; gap: var(--s5); list-style: none; }
+.lp-nav a { font-size: 12px; color: rgba(0,30,46,0.5); text-decoration: none; font-weight: 400; }
+.lp-nav a.active { color: var(--abyss); font-weight: 500; border-bottom: 1.5px solid var(--crimson); padding-bottom: 2px; }
+
+.lp-body { display: grid; grid-template-columns: 180px 1fr; }
+.lp-sidebar { background: #EDE5CE; border-right: 1px solid rgba(0,48,73,0.08); padding: var(--s4) 0; }
+.lp-sidebar-label { padding: var(--s2) var(--s4); font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(0,30,46,0.35); }
+.lp-sidebar-item { padding: var(--s2) var(--s4); font-size: 12px; color: rgba(0,30,46,0.55); cursor: pointer; display: flex; align-items: center; gap: var(--s2); }
+.lp-sidebar-item.active { color: #001E2E; font-weight: 500; background: rgba(193,18,31,0.06); border-right: 2px solid var(--crimson); }
+.lp-sidebar-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+.lp-main { padding: var(--s5); background: #FDF0D5; }
+.lp-crumb { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; color: rgba(0,30,46,0.38); margin-bottom: var(--s2); }
+.lp-title { font-family: var(--font-display); font-size: 22px; font-weight: 300; color: #001E2E; margin-bottom: var(--s4); }
+.lp-query { background: #FFFFFF; border: 1px solid rgba(0,48,73,0.1); border-radius: var(--r3); padding: var(--s3) var(--s4); font-family: var(--font-display); font-style: italic; font-size: 13px; color: rgba(0,30,46,0.65); margin-bottom: var(--s3); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.lp-response { background: #FFFFFF; border: 1px solid rgba(0,48,73,0.1); border-left: 2px solid var(--steel); border-radius: var(--r3); padding: var(--s4); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.lp-response-label { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--steel); margin-bottom: var(--s3); display: flex; align-items: center; gap: var(--s2); }
+.lp-ai-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--steel); animation: pulse 2.5s ease-in-out infinite; }
+.lp-response-text { font-size: 12px; color: rgba(0,30,46,0.65); line-height: 1.7; }
+.lp-skel { height: 8px; background: rgba(0,48,73,0.06); border-radius: 2px; margin-bottom: var(--s2); animation: shimmer 1.8s ease-in-out infinite; }
+@keyframes shimmer { 0%,100%{opacity:0.5} 50%{opacity:0.9} }
+
+/* ═══════════════════════════════════════
+   12 — APP PREVIEW DARK
+═══════════════════════════════════════ */
+.app-preview {
+  background: var(--bg-primary); border: 1px solid var(--border-medium);
+  border-radius: var(--r5); overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(102,155,188,0.06);
+  transition: all var(--dur-base);
+}
+.app-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s4) var(--s6); background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.app-logo {
+  font-family: var(--font-display); font-size: 20px; font-weight: 300; letter-spacing: 0.06em;
+  background: linear-gradient(135deg, var(--parchment), var(--steel));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.app-nav { display: flex; gap: var(--s6); list-style: none; }
+.app-nav a { font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: color var(--dur-fast); }
+.app-nav a.active { color: var(--text-primary); position: relative; }
+.app-nav a.active::after { content: ''; position: absolute; bottom: -17px; left: 0; right: 0; height: 1px; background: var(--crimson); }
+.app-body { display: grid; grid-template-columns: 220px 1fr; height: 380px; }
+.app-sidebar { background: var(--bg-surface); border-right: 1px solid var(--border-subtle); padding: var(--s5) 0; transition: all var(--dur-base); }
+.sidebar-section-label { padding: var(--s3) var(--s5); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-tertiary); }
+.sidebar-item { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s5); cursor: pointer; transition: background var(--dur-fast); font-size: 13px; color: var(--text-secondary); }
+.sidebar-item:hover { background: var(--sidebar-hover-bg); color: var(--text-primary); }
+.sidebar-item.active { background: var(--sidebar-active-bg); color: var(--text-primary); border-right: 1.5px solid var(--crimson); }
+.sidebar-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.app-main { padding: var(--s8); overflow: hidden; }
+.app-crumb { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.08em; margin-bottom: var(--s2); }
+.app-title { font-family: var(--font-display); font-size: 26px; font-weight: 300; color: var(--text-primary); margin-bottom: var(--s6); }
+.app-query { background: var(--bg-elevated); border: 1px solid var(--border-medium); border-radius: var(--r3); padding: var(--s4) var(--s5); font-family: var(--font-display); font-style: italic; font-size: 15px; color: var(--parchment); opacity: 0.85; margin-bottom: var(--s4); }
+.app-response { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-left: 2px solid var(--steel); border-radius: var(--r3); padding: var(--s5); }
+.app-response-header { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-accent); margin-bottom: var(--s3); display: flex; align-items: center; gap: var(--s2); }
+.app-response-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+.app-skeleton { height: 10px; background: var(--bg-elevated); border-radius: var(--r1); margin-bottom: var(--s2); animation: shimmer 1.8s ease-in-out infinite; }
+.w-90{width:90%} .w-75{width:75%} .w-60{width:60%}
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+.ds-footer {
+  border-top: 1px solid var(--border-subtle); padding: var(--s8) 0; margin-top: var(--s20);
+  display: flex; justify-content: space-between; align-items: center;
+  transition: border-color var(--dur-base);
+}
+.ds-footer-brand { font-family: var(--font-display); font-size: 18px; font-weight: 300; color: var(--text-tertiary); letter-spacing: 0.08em; }
+.ds-footer-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); text-align: right; line-height: 1.8; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .ds-wrapper { padding: calc(var(--s12) + var(--s6)) var(--s5) var(--s8); }
+  .palette-grid { grid-template-columns: repeat(3,1fr); }
+  .cards-grid, .token-grid, .motion-grid, .guidance-grid { grid-template-columns: 1fr; }
+  .shadow-grid { grid-template-columns: repeat(2,1fr); }
+  .type-row, .theme-compare { grid-template-columns: 1fr; }
+  .app-body, .lp-body { grid-template-columns: 1fr; }
+  .app-sidebar, .lp-sidebar, .app-nav, .lp-nav { display: none; }
+  .theme-bar { padding: var(--s2) var(--s5); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ══ AMBIENT ══ -->
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<!-- ══ THEME BAR ══ -->
+<div class="theme-bar">
+  <div class="theme-brand">
+    <div class="theme-brand-dot"></div>
+    LEX
+    <span class="theme-version">Design System v2.0</span>
+  </div>
+  <div class="theme-toggle" id="themeToggle">
+    <span class="theme-opt active" data-t="dark">Dark</span>
+    <span class="theme-opt" data-t="light">Light</span>
+  </div>
+</div>
+
+<div class="ds-wrapper">
+
+  <!-- ══ HERO ══ -->
+  <section class="hero ds-section">
+    <div class="hero-eyebrow">Design System</div>
+    <h1 class="hero-wordmark">LEX</h1>
+    <p class="hero-subtitle">Inteligência jurídica. Autoridade institucional. Precisão absoluta.</p>
+    <div class="hero-rule"></div>
+  </section>
+
+  <!-- ══ 01 PALETA ══ -->
+  <section class="ds-section">
+    <div class="section-label">01 — Identidade Visual</div>
+    <h2 class="section-title">Paleta Cromática — Fiery Ocean</h2>
+
+    <div class="palette-grid">
+      <div class="swatch swatch-molten">
+        <div class="swatch-color"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Molten Lava</div>
+          <div class="swatch-hex">#780000</div>
+          <div class="swatch-role">Autoridade máxima, estados críticos, fundo de marca</div>
+        </div>
+      </div>
+      <div class="swatch swatch-crimson">
+        <div class="swatch-color"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Brick Red</div>
+          <div class="swatch-hex">#C1121F</div>
+          <div class="swatch-role">CTA primário, ação, urgência normativa</div>
+        </div>
+      </div>
+      <div class="swatch swatch-parchment">
+        <div class="swatch-color"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Papaya Whip</div>
+          <div class="swatch-hex">#FDF0D5</div>
+          <div class="swatch-role">Texto primário (dark) · Superfície (light)</div>
+        </div>
+      </div>
+      <div class="swatch swatch-abyss">
+        <div class="swatch-color"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Deep Space Blue</div>
+          <div class="swatch-hex">#003049</div>
+          <div class="swatch-role">Backgrounds (dark) · Texto primário (light)</div>
+        </div>
+      </div>
+      <div class="swatch swatch-steel">
+        <div class="swatch-color"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Steel Blue</div>
+          <div class="swatch-hex">#669BBC</div>
+          <div class="swatch-role">UI de interface, IA, bordas ativas, links</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="token-grid">
+      <div class="token-card">
+        <div class="token-swatch" style="background:var(--bg-primary); border:1px solid var(--border-subtle)"></div>
+        <div class="token-name">--bg-primary</div>
+        <div class="token-desc">Camada base — adapta-se ao tema ativo</div>
+      </div>
+      <div class="token-card">
+        <div class="token-swatch" style="background:var(--bg-surface)"></div>
+        <div class="token-name">--bg-surface</div>
+        <div class="token-desc">Cards, painéis laterais, áreas de conteúdo</div>
+      </div>
+      <div class="token-card">
+        <div class="token-swatch" style="background:var(--bg-elevated)"></div>
+        <div class="token-name">--bg-elevated</div>
+        <div class="token-desc">Modais, dropdowns, toasts, camadas elevadas</div>
+      </div>
+      <div class="token-card">
+        <div class="token-swatch" style="background:var(--text-primary); border:1px solid var(--border-subtle)"></div>
+        <div class="token-name">--text-primary</div>
+        <div class="token-desc">Títulos, labels críticos, alta hierarquia</div>
+      </div>
+      <div class="token-card">
+        <div class="token-swatch" style="background:var(--text-secondary); border:1px solid var(--border-subtle)"></div>
+        <div class="token-name">--text-secondary</div>
+        <div class="token-desc">Corpo de texto, descrições, conteúdo geral</div>
+      </div>
+      <div class="token-card">
+        <div class="token-swatch" style="background:var(--border-accent); border:1px solid var(--border-subtle)"></div>
+        <div class="token-name">--border-accent</div>
+        <div class="token-desc">Bordas em foco, elementos ativos, separadores</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 02 TIPOGRAFIA ══ -->
+  <section class="ds-section">
+    <div class="section-label">02 — Tipografia</div>
+    <h2 class="section-title">Sistema de Tipos</h2>
+
+    <div class="type-row">
+      <div class="type-meta"><strong>Display XL</strong>Cormorant Garamond 300<br>56px / -0.02em</div>
+      <div class="t-display-xl">Jurisprudência</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta"><strong>Display LG</strong>Cormorant Garamond 400<br>36px / 1.1 lh</div>
+      <div class="t-display-lg">Análise Normativa BCB</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta"><strong>Display Italic</strong>Cormorant Garamond 300i<br>24px</div>
+      <div class="t-display-md">Inteligência Artificial Aplicada ao Direito</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta"><strong>Heading LG</strong>Instrument Sans 500<br>20px / -0.01em</div>
+      <div class="t-heading-lg">Resolução CMN nº 4.966/2021</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta"><strong>Heading SM</strong>Instrument Sans 600<br>14px / +0.04em UC</div>
+      <div class="t-heading-sm">Produtos de Varejo Regulados</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta"><strong>Body</strong>Instrument Sans 400<br>15px / 1.7 lh</div>
+      <div class="t-body">O arranjo de pagamento deve observar os requisitos de governança estabelecidos pelo Banco Central do Brasil, conforme disposto na Lei nº 12.865/2013 e regulamentações complementares do CMN.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta"><strong>Mono</strong>DM Mono 400<br>13px / +0.04em</div>
+      <div class="t-mono">ART. 12, §3º — RESOLUÇÃO BCB Nº 80/2021</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta"><strong>Label</strong>DM Mono 400<br>10px / +0.2em UC</div>
+      <div class="t-label">Status da Análise · Risco Regulatório</div>
+    </div>
+  </section>
+
+  <!-- ══ 03 BOTÕES & INPUTS ══ -->
+  <section class="ds-section">
+    <div class="section-label">03 — Componentes</div>
+    <h2 class="section-title">Botões & Campos de Entrada</h2>
+
+    <div class="btn-row">
+      <button class="btn btn-primary">⚖ Analisar Documento</button>
+      <button class="btn btn-secondary">Ver Precedentes</button>
+      <button class="btn btn-ghost">Cancelar</button>
+      <button class="btn btn-danger">⚠ Risco Crítico</button>
+      <button class="btn btn-icon">✦</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s5)">
+      <div>
+        <div class="input-group">
+          <label class="input-label">Consulta Jurídica</label>
+          <input class="input" type="text" placeholder="Descreva sua questão normativa…">
+          <div class="input-hint">Suporta linguagem natural e referências legais</div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Número do Normativo</label>
+          <input class="input" type="text" placeholder="Ex.: Resolução CMN 4.966/2021">
+        </div>
+      </div>
+      <div>
+        <div class="input-group">
+          <label class="input-label">Área de Prática</label>
+          <input class="input input-error" type="text" value="Cartões de Crédito">
+          <div class="input-hint error">Campo obrigatório para contextualização</div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Observações</label>
+          <textarea class="input" rows="3" style="resize:none" placeholder="Contexto adicional para análise…"></textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 04 CARDS & SURFACES ══ -->
+  <section class="ds-section">
+    <div class="section-label">04 — Cards & Surfaces</div>
+    <h2 class="section-title">Hierarquia de Superfícies</h2>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon card-icon-authority">⚖</div>
+        <div class="card-title">Análise Regulatória</div>
+        <div class="card-body">Verificação automática de conformidade com normativos BCB e CMN vigentes, com referência cruzada de dispositivos.</div>
+      </div>
+      <div class="card card-elevated">
+        <div class="card-icon card-icon-knowledge">◈</div>
+        <div class="card-title">Base de Conhecimento</div>
+        <div class="card-body">Acesso indexado a mais de 4.800 normativos do Banco Central, resoluções CMN e circulares vigentes desde 1994.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon card-icon-system">⬡</div>
+        <div class="card-title">Agente de Contratos</div>
+        <div class="card-body">Revisão automatizada de cláusulas com identificação de riscos, lacunas e sugestões de adequação normativa.</div>
+      </div>
+    </div>
+
+    <div class="ai-response" style="margin-top:var(--s6)">
+      <div class="ai-badge"><div class="ai-dot"></div>LEX Intelligence · Análise em curso</div>
+      <div class="ai-text">Com base na Resolução BCB nº 80/2021 e na Lei nº 12.865/2013, a operação de credenciamento descrita enquadra-se como <strong style="color:var(--text-primary)">participante de arranjo de pagamento</strong>, sujeitando a instituição às obrigações de cadastro e às normas de conduta do BCB. Recomenda-se verificação do regime de autorização aplicável conforme art. 6º da referida resolução.</div>
+    </div>
+  </section>
+
+  <!-- ══ 05 BADGES ══ -->
+  <section class="ds-section">
+    <div class="section-label">05 — Badges</div>
+    <h2 class="section-title">Sistema de Sinalizações</h2>
+
+    <div class="t-label" style="margin-bottom:var(--s3)">Status Tag — Borda Institucional</div>
+    <div class="badge-row" style="margin-bottom:var(--s6)">
+      <span class="stag stag-ok">Conforme</span>
+      <span class="stag stag-warn">Atenção</span>
+      <span class="stag stag-risk">Risco</span>
+      <span class="stag stag-info">Em Análise</span>
+      <span class="stag stag-neutral">Arquivo</span>
+    </div>
+
+    <div class="t-label" style="margin-bottom:var(--s3)">Normativo Tag — Referência Legal</div>
+    <div class="badge-row" style="margin-bottom:var(--s6)">
+      <span class="norm-tag"><span class="norm-prefix">RES.</span> BCB 80/2021</span>
+      <span class="norm-tag"><span class="norm-prefix">RES.</span> CMN 4.966</span>
+      <span class="norm-tag"><span class="norm-prefix">LEI</span> 12.865/13</span>
+      <span class="norm-tag"><span class="norm-prefix">CIRC.</span> BCB 3.952</span>
+      <span class="norm-tag"><span class="norm-prefix">INSTR.</span> Normativa 01</span>
+    </div>
+
+    <div class="t-label" style="margin-bottom:var(--s3)">Severity Level — Escala Visual</div>
+    <div class="badge-row" style="margin-bottom:var(--s6)">
+      <div class="severity severity-low">
+        <div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div>
+        <span>Baixo</span>
+      </div>
+      <div class="severity severity-med">
+        <div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div>
+        <span>Médio</span>
+      </div>
+      <div class="severity severity-high">
+        <div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div>
+        <span>Alto</span>
+      </div>
+    </div>
+
+    <div class="t-label" style="margin-bottom:var(--s3)">Área Chip — Produto Regulado</div>
+    <div class="badge-row">
+      <span class="area-chip area-chip-pix"><span class="area-chip-icon">◈</span>Pix</span>
+      <span class="area-chip area-chip-cards"><span class="area-chip-icon">⬡</span>Cartões</span>
+      <span class="area-chip area-chip-of"><span class="area-chip-icon">◎</span>Open Finance</span>
+      <span class="area-chip"><span class="area-chip-icon">◫</span>Contas</span>
+      <span class="area-chip"><span class="area-chip-icon">⬛</span>Crédito</span>
+      <span class="area-chip"><span class="area-chip-icon">◉</span>Credenciadora</span>
+    </div>
+  </section>
+
+  <!-- ══ 06 NOTIFICAÇÕES ══ -->
+  <section class="ds-section">
+    <div class="section-label">06 — Feedback & Notificações</div>
+    <h2 class="section-title">Notificações & Toasts</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s8)">
+      <div>
+        <div class="t-label" style="margin-bottom:var(--s4)">Notificações Inline</div>
+        <div class="notif-stack">
+          <div class="notif notif-risk">
+            <div class="notif-stripe"></div>
+            <div class="notif-inner">
+              <div class="notif-meta"><span class="notif-type">Risco Regulatório</span><div class="notif-sep"></div><span class="notif-time">agora</span></div>
+              <div class="notif-title">Cláusula 4.2 — possível conflito normativo</div>
+              <div class="notif-body">Dispositivo pode contrariar o art. 14 da <span class="notif-ref">Res. BCB nº 80/2021</span>. Revisão jurídica recomendada.</div>
+              <div class="notif-footer">
+                <button class="notif-action notif-action-primary">Ver análise</button>
+                <button class="notif-action">Ignorar</button>
+              </div>
+            </div>
+          </div>
+          <div class="notif notif-warn">
+            <div class="notif-stripe"></div>
+            <div class="notif-inner">
+              <div class="notif-meta"><span class="notif-type">Atenção Requerida</span><div class="notif-sep"></div><span class="notif-time">2 min</span></div>
+              <div class="notif-title">Novo normativo BCB publicado</div>
+              <div class="notif-body">Circular BCB nº 3.952 pode impactar 3 contratos em aberto na área de Credenciadora.</div>
+              <div class="notif-footer">
+                <button class="notif-action notif-action-primary">Revisar contratos</button>
+                <button class="notif-action">Ver circular</button>
+              </div>
+            </div>
+          </div>
+          <div class="notif notif-ok">
+            <div class="notif-stripe"></div>
+            <div class="notif-inner">
+              <div class="notif-meta"><span class="notif-type">Análise Concluída</span><div class="notif-sep"></div><span class="notif-time">14 min</span></div>
+              <div class="notif-title">Contrato de Credenciamento — sem irregularidades</div>
+              <div class="notif-body">Nenhuma cláusula conflita com a base normativa vigente. Parecer disponível.</div>
+              <div class="notif-footer"><button class="notif-action notif-action-primary">Ver parecer</button></div>
+            </div>
+          </div>
+          <div class="notif notif-info">
+            <div class="notif-stripe"></div>
+            <div class="notif-inner">
+              <div class="notif-meta"><span class="notif-type">LEX Intelligence</span><div class="notif-sep"></div><span class="notif-time">processando</span></div>
+              <div class="notif-title">Análise de Open Finance em curso</div>
+              <div class="notif-body">Consultando base normativa atualizada. Estimativa: 30 segundos.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="t-label" style="margin-bottom:var(--s4)">Toasts — Sobreposição Flutuante</div>
+        <div class="toast-stack">
+          <div class="toast toast-risk">
+            <div class="toast-accent"></div>
+            <div class="toast-content">
+              <div class="toast-label">Risco Detectado</div>
+              <div class="toast-title">Conflito normativo identificado</div>
+              <div class="toast-desc">Cláusula 4.2 vs art. 14 Res. BCB 80/2021</div>
+            </div>
+            <button class="toast-close">✕</button>
+          </div>
+          <div class="toast toast-ok">
+            <div class="toast-accent"></div>
+            <div class="toast-content">
+              <div class="toast-label">Concluído</div>
+              <div class="toast-title">Parecer jurídico gerado</div>
+              <div class="toast-desc">Contrato analisado sem irregularidades</div>
+            </div>
+            <button class="toast-close">✕</button>
+          </div>
+          <div class="toast toast-warn">
+            <div class="toast-accent"></div>
+            <div class="toast-content">
+              <div class="toast-label">Atenção Requerida</div>
+              <div class="toast-title">Normativo atualizado</div>
+              <div class="toast-desc">Circular BCB 3.952 afeta 3 contratos ativos</div>
+            </div>
+            <button class="toast-close">✕</button>
+          </div>
+          <div class="toast toast-info">
+            <div class="toast-accent"></div>
+            <div class="toast-content">
+              <div class="toast-label">LEX Intelligence</div>
+              <div class="toast-title">Base normativa atualizada</div>
+              <div class="toast-desc">23 novos normativos BCB indexados</div>
+            </div>
+            <button class="toast-close">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 07 TABELA ══ -->
+  <section class="ds-section">
+    <div class="section-label">07 — Dados Normativos</div>
+    <h2 class="section-title">Tabelas & Registros</h2>
+
+    <div class="table-wrapper">
+      <table class="ds-table">
+        <thead>
+          <tr>
+            <th>Normativo</th><th>Dispositivo</th><th>Área</th><th>Risco</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">Res. BCB nº 80/2021</td>
+            <td>Arranjos de Pagamento</td>
+            <td><span class="area-chip area-chip-cards" style="font-size:11px;padding:2px var(--s2)"><span class="area-chip-icon">⬡</span>Credenciadora</span></td>
+            <td><div class="severity severity-med" style="font-size:9px"><div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div><span>Médio</span></div></td>
+            <td><span class="stag stag-ok" style="font-size:9px">Vigente</span></td>
+          </tr>
+          <tr>
+            <td class="mono">Res. CMN nº 4.966/2021</td>
+            <td>Limite de Crédito</td>
+            <td><span class="area-chip area-chip-cards" style="font-size:11px;padding:2px var(--s2)"><span class="area-chip-icon">⬡</span>Cartões</span></td>
+            <td><div class="severity severity-low" style="font-size:9px"><div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div><span>Baixo</span></div></td>
+            <td><span class="stag stag-ok" style="font-size:9px">Vigente</span></td>
+          </tr>
+          <tr>
+            <td class="mono">Resolução BCB nº 1/2020</td>
+            <td>Pix — Regulamento</td>
+            <td><span class="area-chip area-chip-pix" style="font-size:11px;padding:2px var(--s2)"><span class="area-chip-icon">◈</span>Pix</span></td>
+            <td><div class="severity severity-high" style="font-size:9px"><div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div><span>Alto</span></div></td>
+            <td><span class="stag stag-ok" style="font-size:9px">Vigente</span></td>
+          </tr>
+          <tr>
+            <td class="mono">Lei nº 12.865/2013</td>
+            <td>Arranjos e Inst. de Pagamento</td>
+            <td><span class="stag stag-neutral" style="font-size:9px">Geral</span></td>
+            <td><div class="severity severity-low" style="font-size:9px"><div class="severity-bars"><div class="severity-bar"></div><div class="severity-bar"></div><div class="severity-bar"></div></div><span>Baixo</span></div></td>
+            <td><span class="stag stag-ok" style="font-size:9px">Vigente</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ 08 MOTION ══ -->
+  <section class="ds-section">
+    <div class="section-label">08 — Motion Design</div>
+    <h2 class="section-title">Tokens de Movimento — "Fluido, Previsível, Elegante"</h2>
+
+    <div class="motion-grid">
+      <div class="motion-card">
+        <div class="motion-demo"><div class="motion-bar" style="width:80%"></div></div>
+        <div class="motion-label">Entrada de Conteúdo</div>
+        <div class="motion-value">650ms · ease-out-expo</div>
+      </div>
+      <div class="motion-card">
+        <div class="motion-demo"><div class="motion-orb"></div></div>
+        <div class="motion-label">Indicador de IA</div>
+        <div class="motion-value">3s · ease-in-out · infinite</div>
+      </div>
+      <div class="motion-card">
+        <div class="motion-demo" style="position:relative"><div class="motion-ring"></div></div>
+        <div class="motion-label">Pulse de Atenção</div>
+        <div class="motion-value">2s · ease-out · infinite</div>
+      </div>
+    </div>
+
+    <div style="margin-top:var(--s8);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r4);padding:var(--s6)">
+      <div class="t-label" style="margin-bottom:var(--s5)">Curvas de Easing</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s6)">
+        <div><div class="t-mono" style="margin-bottom:var(--s2);font-size:11px">ease-out-expo</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-bottom:var(--s2)">cubic-bezier(0.16, 1, 0.3, 1)</div><div class="t-caption">Entradas — rápido no início, suave no fim</div></div>
+        <div><div class="t-mono" style="margin-bottom:var(--s2);font-size:11px">ease-in-expo</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-bottom:var(--s2)">cubic-bezier(0.7, 0, 0.84, 0)</div><div class="t-caption">Saídas — suave no início, rápido no fim</div></div>
+        <div><div class="t-mono" style="margin-bottom:var(--s2);font-size:11px">ease-inout</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-bottom:var(--s2)">cubic-bezier(0.45, 0, 0.55, 1)</div><div class="t-caption">Transições de estado — simétrico</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 09 ELEVAÇÃO ══ -->
+  <section class="ds-section">
+    <div class="section-label">09 — Elevação & Espaçamento</div>
+    <h2 class="section-title">Sombras & Grid de Espaço</h2>
+
+    <div class="shadow-grid" style="margin-bottom:var(--s10)">
+      <div class="shadow-demo shadow-sm"><div class="shadow-name">sm</div><div class="t-caption">Hover de card</div><div class="shadow-val">0 2px 8px</div></div>
+      <div class="shadow-demo shadow-md"><div class="shadow-name">md</div><div class="t-caption">Dropdowns</div><div class="shadow-val">0 4px 16px</div></div>
+      <div class="shadow-demo shadow-lg"><div class="shadow-name">lg</div><div class="t-caption">Modais</div><div class="shadow-val">0 8px 32px</div></div>
+      <div class="shadow-demo shadow-glow"><div class="shadow-name">glow</div><div class="t-caption">Foco de IA</div><div class="shadow-val">steel glow</div></div>
+    </div>
+
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r4);padding:var(--s6)">
+      <div class="t-label" style="margin-bottom:var(--s4)">Grid de 8pt</div>
+      <div class="spacing-row">
+        <div><div class="spacing-block" style="width:4px;height:16px"></div><div class="spacing-info"><strong>s1</strong>4px</div></div>
+        <div><div class="spacing-block" style="width:8px;height:24px"></div><div class="spacing-info"><strong>s2</strong>8px</div></div>
+        <div><div class="spacing-block" style="width:12px;height:32px"></div><div class="spacing-info"><strong>s3</strong>12px</div></div>
+        <div><div class="spacing-block" style="width:16px;height:40px"></div><div class="spacing-info"><strong>s4</strong>16px</div></div>
+        <div><div class="spacing-block" style="width:24px;height:48px"></div><div class="spacing-info"><strong>s6</strong>24px</div></div>
+        <div><div class="spacing-block" style="width:32px;height:60px"></div><div class="spacing-info"><strong>s8</strong>32px</div></div>
+        <div><div class="spacing-block" style="width:48px;height:72px"></div><div class="spacing-info"><strong>s12</strong>48px</div></div>
+        <div><div class="spacing-block" style="width:64px;height:84px"></div><div class="spacing-info"><strong>s16</strong>64px</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 10 TEMA CLARO ══ -->
+  <section class="ds-section">
+    <div class="section-label">10 — Tema Claro</div>
+    <h2 class="section-title">Orientações & Tokens Light Mode</h2>
+
+    <!-- Token comparison -->
+    <div class="theme-compare">
+      <div class="tc-col tc-col-dark">
+        <div class="tc-col-label">Dark Mode — padrão</div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#000F18;border:1px solid rgba(255,255,255,0.08)"></div>
+          <div class="tc-info"><div class="tc-name">--bg-primary</div><div class="tc-val">#000F18</div><div class="tc-role">Base da aplicação</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#001928"></div>
+          <div class="tc-info"><div class="tc-name">--bg-surface</div><div class="tc-val">#001928</div><div class="tc-role">Cards, painéis</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#002036"></div>
+          <div class="tc-info"><div class="tc-name">--bg-elevated</div><div class="tc-val">#002036</div><div class="tc-role">Modais, dropdowns</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#FDF0D5"></div>
+          <div class="tc-info"><div class="tc-name">--text-primary</div><div class="tc-val">#FDF0D5</div><div class="tc-role">Texto de destaque</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#669BBC"></div>
+          <div class="tc-info"><div class="tc-name">--text-accent</div><div class="tc-val">#669BBC</div><div class="tc-role">IA, labels, links</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:rgba(102,155,188,0.12);border:1px solid rgba(255,255,255,0.04)"></div>
+          <div class="tc-info"><div class="tc-name">--border-subtle</div><div class="tc-val">steel / 12%</div><div class="tc-role">Divisores finos</div></div>
+        </div>
+      </div>
+      <div class="tc-col tc-col-light">
+        <div class="tc-col-label">Light Mode — alternativo</div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#F5EDDA;border:1px solid rgba(0,48,73,0.15)"></div>
+          <div class="tc-info"><div class="tc-name">--bg-primary</div><div class="tc-val">#F5EDDA</div><div class="tc-role">Parchment escurecido</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#FDF0D5;border:1px solid rgba(0,48,73,0.1)"></div>
+          <div class="tc-info"><div class="tc-name">--bg-surface</div><div class="tc-val">#FDF0D5</div><div class="tc-role">Parchment puro</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#FFFFFF;border:1px solid rgba(0,48,73,0.1)"></div>
+          <div class="tc-info"><div class="tc-name">--bg-elevated</div><div class="tc-val">#FFFFFF</div><div class="tc-role">Superfície mais alta</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#001E2E"></div>
+          <div class="tc-info"><div class="tc-name">--text-primary</div><div class="tc-val">#001E2E</div><div class="tc-role">Abyss derivado escuro</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:#2B5E7E"></div>
+          <div class="tc-info"><div class="tc-name">--text-accent</div><div class="tc-val">#2B5E7E</div><div class="tc-role">Steel mais escuro para contraste</div></div>
+        </div>
+        <div class="tc-row">
+          <div class="tc-swatch" style="background:rgba(0,48,73,0.1);border:1px solid rgba(0,48,73,0.12)"></div>
+          <div class="tc-info"><div class="tc-name">--border-subtle</div><div class="tc-val">abyss / 10%</div><div class="tc-role">Divisores suaves</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guidance cards -->
+    <div class="guidance-grid">
+      <div class="guidance-card">
+        <div class="guidance-card-header">
+          <div class="guidance-icon guidance-icon-ok">✓</div>
+          <div class="guidance-title">Faça no tema claro</div>
+        </div>
+        <ul class="guidance-list">
+          <li>Use Parchment (#FDF0D5) como fundo de surface — não branco puro</li>
+          <li>Mantenha Crimson (#C1121F) como CTA primário, sem ajuste de tom</li>
+          <li>Escureça o Steel para #2B5E7E nos textos de accent — o original não passa WCAG no fundo claro</li>
+          <li>Remova os ambient orbs e o noise texture — são recursos exclusivos do dark</li>
+          <li>Aumente peso das sombras para rgba(0,48,73,X) em vez de rgba(0,0,0,X)</li>
+          <li>Use borda de 1px em todos os cards — sem ela, superfícies brancas se fundem no fundo bege</li>
+          <li>Sidebar usa #EDE5CE — um degrau mais escuro que o surface, não cinza genérico</li>
+        </ul>
+      </div>
+      <div class="guidance-card">
+        <div class="guidance-card-header">
+          <div class="guidance-icon guidance-icon-warn">✕</div>
+          <div class="guidance-title">Evite no tema claro</div>
+        </div>
+        <ul class="guidance-list">
+          <li>Não use branco (#FFFFFF) como fundo base — destrói a identidade da paleta</li>
+          <li>Não use Steel (#669BBC) diretamente em texto sobre fundo claro — falha WCAG AA</li>
+          <li>Não inverta cores de status: verde escuro (#1A7A46) no lugar do verde claro (#72D49B)</li>
+          <li>Não mantenha os glows neon — background claro os torna agressivos e sem sofisticação</li>
+          <li>Não use gradientes de texto (webkit-text-fill-color) no wordmark — prefira cor sólida</li>
+          <li>Não descarte o Cormorant Garamond — ele funciona ainda melhor sobre fundo claro</li>
+          <li>Não teste o fundo bege apenas em monitor calibrado — validar em dispositivos reais</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Light preview -->
+    <div class="t-label" style="margin-bottom:var(--s4)">Preview de Interface — Tema Claro</div>
+    <div class="light-preview">
+      <div class="lp-topbar">
+        <div class="lp-logo">LEX<em>·</em></div>
+        <ul class="lp-nav">
+          <li><a href="#" class="active">Análise</a></li>
+          <li><a href="#">Normativos</a></li>
+          <li><a href="#">Contratos</a></li>
+          <li><a href="#">Histórico</a></li>
+        </ul>
+        <span class="stag stag-ok" style="font-size:9px">IA Online</span>
+      </div>
+      <div class="lp-body">
+        <div class="lp-sidebar">
+          <div class="lp-sidebar-label">Recentes</div>
+          <div class="lp-sidebar-item active"><div class="lp-sidebar-dot" style="background:var(--crimson)"></div>Credenciadora / PAN</div>
+          <div class="lp-sidebar-item"><div class="lp-sidebar-dot" style="background:#669BBC"></div>Pix — Resolução BCB</div>
+          <div class="lp-sidebar-item"><div class="lp-sidebar-dot" style="background:#669BBC"></div>Open Finance LGPD</div>
+          <div class="lp-sidebar-item"><div class="lp-sidebar-dot" style="background:#669BBC"></div>Cartões — CMN 4.966</div>
+          <div class="lp-sidebar-label" style="margin-top:8px">Normativos</div>
+          <div class="lp-sidebar-item"><div class="lp-sidebar-dot" style="background:rgba(0,30,46,0.3)"></div>Res. BCB 80/2021</div>
+          <div class="lp-sidebar-item"><div class="lp-sidebar-dot" style="background:rgba(0,30,46,0.3)"></div>Lei 12.865/2013</div>
+        </div>
+        <div class="lp-main">
+          <div class="lp-crumb">Análise Regulatória · Produtos de Varejo</div>
+          <div class="lp-title">Credenciadora — Regime de Participação</div>
+          <div class="lp-query">"A nossa credenciadora precisa se cadastrar formalmente no BCB para operar como participante indireta de arranjo de pagamento Mastercard?"</div>
+          <div class="lp-response">
+            <div class="lp-response-label"><div class="lp-ai-dot"></div>LEX Intelligence</div>
+            <div class="lp-response-text">Sim. Nos termos da Resolução BCB nº 80/2021, participantes indiretos de arranjos de pagamento estão sujeitos a cadastro junto ao BCB quando o volume de operações supera os limites do art. 6º...</div>
+            <div style="margin-top:12px">
+              <div class="lp-skel" style="width:85%"></div>
+              <div class="lp-skel" style="width:70%"></div>
+              <div class="lp-skel" style="width:55%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 11 APP PREVIEW DARK ══ -->
+  <section class="ds-section">
+    <div class="section-label">11 — Interface de Referência</div>
+    <h2 class="section-title">App Preview — Tema Escuro</h2>
+
+    <div class="app-preview">
+      <div class="app-topbar">
+        <div class="app-logo">LEX</div>
+        <ul class="app-nav">
+          <li><a href="#" class="active">Análise</a></li>
+          <li><a href="#">Normativos</a></li>
+          <li><a href="#">Contratos</a></li>
+          <li><a href="#">Histórico</a></li>
+        </ul>
+        <div style="display:flex;gap:var(--s3);align-items:center">
+          <span class="stag stag-ok" style="font-size:9px">IA Online</span>
+          <button class="btn btn-icon" style="width:32px;height:32px;font-size:12px">F</button>
+        </div>
+      </div>
+      <div class="app-body">
+        <div class="app-sidebar">
+          <div class="sidebar-section-label">Consultas Recentes</div>
+          <div class="sidebar-item active"><div class="sidebar-dot" style="background:var(--crimson)"></div>Credenciadora / PAN</div>
+          <div class="sidebar-item"><div class="sidebar-dot" style="background:var(--steel)"></div>Pix — Resolução BCB</div>
+          <div class="sidebar-item"><div class="sidebar-dot" style="background:var(--steel)"></div>Open Finance LGPD</div>
+          <div class="sidebar-item"><div class="sidebar-dot" style="background:var(--steel)"></div>Cartões — CMN 4.966</div>
+          <div class="sidebar-section-label" style="margin-top:var(--s4)">Normativos Salvos</div>
+          <div class="sidebar-item"><div class="sidebar-dot" style="background:rgba(253,240,213,0.3)"></div>Res. BCB 80/2021</div>
+          <div class="sidebar-item"><div class="sidebar-dot" style="background:rgba(253,240,213,0.3)"></div>Lei 12.865/2013</div>
+        </div>
+        <div class="app-main">
+          <div class="app-crumb">Análise Regulatória · Produtos de Varejo</div>
+          <div class="app-title">Credenciadora — Regime de Participação</div>
+          <div class="app-query">"A nossa credenciadora precisa se cadastrar formalmente no BCB para operar como participante indireta de arranjo de pagamento Mastercard?"</div>
+          <div class="app-response">
+            <div class="app-response-header"><div class="ai-dot"></div>LEX Intelligence</div>
+            <div class="app-response-text">Sim. Nos termos da Resolução BCB nº 80/2021, participantes indiretos de arranjos de pagamento estão sujeitos a cadastro junto ao BCB quando o volume de operações supera os limites estabelecidos no art. 6º...</div>
+            <div style="margin-top:var(--s4)">
+              <div class="app-skeleton w-90"></div>
+              <div class="app-skeleton w-75"></div>
+              <div class="app-skeleton w-60"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <div class="ds-footer">
+    <div class="ds-footer-brand">LEX · Design System v2.0</div>
+    <div class="ds-footer-meta">
+      Arquétipo: Sábio × Governante × Mago<br>
+      Paleta: Fiery Ocean · Cormorant Garamond + Instrument Sans + DM Mono<br>
+      Temas: Dark (padrão) · Light
+    </div>
+  </div>
+
+</div>
+
+<script>
+const toggle = document.getElementById('themeToggle');
+const opts = toggle.querySelectorAll('.theme-opt');
+const html = document.documentElement;
+
+opts.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const theme = opt.dataset.t;
+    html.setAttribute('data-theme', theme);
+    opts.forEach(o => o.classList.toggle('active', o.dataset.t === theme));
+  });
+});
+</script>
+</body>
+</html>

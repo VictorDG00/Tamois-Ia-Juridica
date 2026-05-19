@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tamois — Inteligência Jurídica · light v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tamois-v2.css">
+
+<template id="__bundler_thumbnail" data-bg-color="#000F18">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#C1121F"/>
+        <stop offset="1" stop-color="#780000"/>
+      </linearGradient>
+    </defs>
+    <rect x="60" y="60" width="80" height="80" rx="10" fill="url(#g)"/>
+    <rect x="62" y="62" width="76" height="76" rx="8" fill="none" stroke="#FDF0D5" stroke-opacity="0.18" stroke-width="1"/>
+    <text x="100" y="118" font-family="Georgia, serif" font-size="56" font-weight="300" text-anchor="middle" fill="#FDF0D5">T</text>
+  </svg>
+</template>
+<style>
+  /* ── HERO ──────────────────────────────────────── */
+  .hero {
+    position: relative; padding: var(--s20) 0 var(--s16);
+    display: grid; grid-template-columns: 1.15fr 0.85fr; gap: var(--s12); align-items: center;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--text-accent); margin-bottom: var(--s5);
+    display: inline-flex; align-items: center; gap: var(--s3);
+  }
+  .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: currentColor; opacity: 0.5; }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 7vw, 92px); font-weight: 300;
+    letter-spacing: -0.025em; line-height: 0.95;
+    margin-bottom: var(--s6);
+  }
+  [data-theme="dark"] .hero-title {
+    background: linear-gradient(135deg, var(--parchment) 0%, rgba(253,240,213,0.78) 45%, var(--steel) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  [data-theme="light"] .hero-title { color: var(--abyss); }
+  .hero-title em { font-style: italic; font-weight: 400; }
+
+  .hero-lead {
+    font-size: 17px; color: var(--text-secondary); line-height: 1.7;
+    margin-bottom: var(--s8); max-width: 520px;
+  }
+
+  .hero-cta { display: flex; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s8); }
+  .hero-meta { display: flex; gap: var(--s6); flex-wrap: wrap; align-items: center; }
+  .hero-meta-item { display: flex; gap: var(--s2); align-items: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-tertiary); }
+  .hero-meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--c-ok-text); box-shadow: 0 0 8px var(--c-ok-text); }
+
+  /* hero card — preview of AI response */
+  .hero-card {
+    position: relative;
+    background: linear-gradient(155deg, var(--bg-elevated), var(--bg-surface));
+    border: 1px solid var(--border-medium); border-radius: var(--r5);
+    padding: var(--s6); overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(102,155,188,0.06);
+  }
+  .hero-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+  }
+  .hc-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: var(--s4); margin-bottom: var(--s4);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .hc-doc { display: flex; align-items: center; gap: var(--s3); }
+  .hc-doc-icon {
+    width: 32px; height: 40px; border-radius: 2px;
+    background: linear-gradient(135deg, var(--bg-surface), var(--bg-elevated));
+    border: 1px solid var(--border-medium);
+    position: relative; flex-shrink: 0;
+  }
+  .hc-doc-icon::before { content: ''; position: absolute; top: 6px; left: 6px; right: 6px; height: 1px; background: var(--text-tertiary); box-shadow: 0 4px 0 var(--text-tertiary), 0 8px 0 var(--text-tertiary); }
+  .hc-doc-name { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+  .hc-doc-meta { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: var(--text-tertiary); }
+
+  .hc-section { margin-top: var(--s4); }
+  .hc-section-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-accent); margin-bottom: var(--s3); display: flex; align-items: center; gap: var(--s2); }
+  .hc-bullets { display: flex; flex-direction: column; gap: var(--s2); }
+  .hc-bullet { display: flex; gap: var(--s3); padding: var(--s3); background: rgba(102,155,188,0.04); border-left: 2px solid var(--steel); border-radius: 0 var(--r2) var(--r2) 0; }
+  .hc-bullet.risk { border-color: var(--c-risk-text); background: var(--c-risk-bg); }
+  .hc-bullet.warn { border-color: var(--c-warn-text); background: var(--c-warn-bg); }
+  .hc-bullet-num { font-family: var(--font-mono); font-size: 10px; color: var(--text-accent); flex-shrink: 0; min-width: 18px; }
+  .hc-bullet-body { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .hc-bullet-body strong { color: var(--text-primary); font-weight: 500; }
+
+  .hc-tags { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s4); }
+
+  /* ── PRINCIPLES ─────────────────────────────────── */
+  .principles {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);
+    padding: var(--s8) 0; margin: var(--s10) 0;
+  }
+  .principle {
+    padding: 0 var(--s5); border-right: 1px solid var(--border-subtle);
+  }
+  .principle:last-child { border-right: none; }
+  .principle-num { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.15em; margin-bottom: var(--s3); }
+  .principle-title { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text-primary); margin-bottom: var(--s2); line-height: 1.15; }
+  .principle-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ── CAPABILITIES (3 col) ───────────────────────── */
+  .caps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--s5); margin-top: var(--s8);
+  }
+  .cap {
+    background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: var(--r4); padding: var(--s8); position: relative; overflow: hidden;
+    transition: all var(--dur-base) var(--ease-out-expo);
+  }
+  .cap::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-medium), transparent);
+  }
+  .cap:hover { border-color: var(--border-medium); transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.25); }
+  .cap-num { font-family: var(--font-mono); font-size: 10px; color: var(--text-accent); letter-spacing: 0.2em; margin-bottom: var(--s5); }
+  .cap-glyph {
+    width: 56px; height: 56px; border-radius: var(--r3);
+    display: grid; place-items: center; margin-bottom: var(--s5);
+    background: var(--bg-elevated); border: 1px solid var(--border-medium);
+    font-family: var(--font-display); font-size: 26px; color: var(--text-accent);
+  }
+  .cap-title { font-family: var(--font-display); font-size: 26px; font-weight: 400; color: var(--text-primary); margin-bottom: var(--s3); line-height: 1.1; }
+  .cap-body { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: var(--s5); }
+  .cap-list { display: flex; flex-direction: column; gap: var(--s2); list-style: none; }
+  .cap-list li { display: flex; gap: var(--s3); font-size: 12px; color: var(--text-tertiary); }
+  .cap-list li::before { content: '—'; font-family: var(--font-mono); color: var(--text-tertiary); }
+
+  /* ── FLOW STRIP ─────────────────────────────────── */
+  .flow {
+    background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: var(--r5); padding: var(--s10);
+    margin-top: var(--s10);
+  }
+  .flow-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s6); }
+  .flow-step { position: relative; padding-right: var(--s6); }
+  .flow-step:not(:last-child)::after {
+    content: ''; position: absolute; right: var(--s2); top: 12px; bottom: auto;
+    width: var(--s6); height: 1px; background: var(--border-subtle);
+  }
+  .flow-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-accent); letter-spacing: 0.2em; margin-bottom: var(--s3); }
+  .flow-title { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: var(--s2); }
+  .flow-body { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ── PLANS ──────────────────────────────────────── */
+  .plans {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border: 1px solid var(--border-subtle); border-radius: var(--r4); overflow: hidden;
+    margin-top: var(--s8);
+  }
+  .plan {
+    padding: var(--s8); border-right: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    display: flex; flex-direction: column; gap: var(--s4);
+  }
+  .plan:last-child { border-right: none; }
+  .plan.featured { background: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface)); position: relative; }
+  .plan.featured::before {
+    content: 'Recomendado'; position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%);
+    background: var(--crimson); color: var(--parchment); font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase; padding: 4px var(--s3); border-radius: var(--r-full);
+  }
+  .plan-name { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-accent); }
+  .plan-price { font-family: var(--font-display); font-size: 48px; font-weight: 300; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1; }
+  .plan-price em { font-family: var(--font-body); font-size: 14px; font-style: normal; color: var(--text-tertiary); font-weight: 400; letter-spacing: 0; margin-left: var(--s2); }
+  .plan-tag { font-family: var(--font-display); font-style: italic; font-size: 14px; color: var(--text-secondary); }
+  .plan-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); padding: var(--s4) 0; border-top: 1px solid var(--border-subtle); }
+  .plan-list li { display: flex; gap: var(--s3); font-size: 13px; color: var(--text-secondary); }
+  .plan-list li::before { content: '✓'; color: var(--c-ok-text); font-size: 11px; }
+  .plan-list li.off { color: var(--text-tertiary); }
+  .plan-list li.off::before { content: '—'; color: var(--text-tertiary); }
+
+  /* ── TRUST STRIP ────────────────────────────────── */
+  .trust {
+    display: flex; align-items: center; justify-content: center;
+    gap: var(--s10); flex-wrap: wrap;
+    padding: var(--s8) 0; margin: var(--s12) 0;
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .trust-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-tertiary); }
+  .trust-item { font-family: var(--font-display); font-size: 20px; font-weight: 400; color: var(--text-secondary); letter-spacing: 0.04em; }
+
+  /* ── QUOTE ──────────────────────────────────────── */
+  .quote {
+    margin-top: var(--s10);
+    padding: var(--s10);
+    background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--crimson);
+    border-radius: 0 var(--r4) var(--r4) 0;
+  }
+  .quote-text {
+    font-family: var(--font-display); font-style: italic; font-weight: 300;
+    font-size: 26px; line-height: 1.5; color: var(--text-primary);
+    margin-bottom: var(--s5);
+  }
+  .quote-cite { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.15em; color: var(--text-tertiary); }
+  .quote-cite strong { color: var(--text-secondary); font-weight: 500; }
+
+  /* ── FINAL CTA ──────────────────────────────────── */
+  .final-cta {
+    margin-top: var(--s12);
+    text-align: center;
+    padding: var(--s12) var(--s8);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--r5);
+    background:
+      radial-gradient(ellipse at 50% 0%, var(--glow-crimson), transparent 60%),
+      linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
+  }
+  .final-cta-title {
+    font-family: var(--font-display); font-size: clamp(36px, 5vw, 52px);
+    font-weight: 300; letter-spacing: -0.02em; line-height: 1.05;
+    margin-bottom: var(--s4); color: var(--text-primary);
+  }
+  .final-cta-sub {
+    font-family: var(--font-display); font-style: italic; font-size: 18px;
+    color: var(--text-secondary); margin-bottom: var(--s8);
+  }
+  .final-cta-row { display: inline-flex; gap: var(--s3); }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .principles { grid-template-columns: repeat(2, 1fr); }
+    .principle { border-right: none; border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--s5); margin-bottom: var(--s5); }
+    .caps, .flow-grid, .plans { grid-template-columns: 1fr; }
+    .plan { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+    .flow-step::after { display: none !important; }
+  }
+</style>
+</head>
+
+<body data-page="landing">
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<nav class="nav">
+  <a class="brand" href="01-landing-v2.html">
+    <div class="brand-mark">T</div>
+    <div class="brand-name">Tamois</div>
+    <span class="brand-tag">IA Jurídica</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="01-landing-v2.html" data-page="landing"><span class="nav-num">01</span>Início</a></li>
+    <li><a href="02-analise-v2.html" data-page="analise"><span class="nav-num">02</span>Análise</a></li>
+    <li><a href="03-chat-v2.html" data-page="chat"><span class="nav-num">03</span>Chat</a></li>
+    <li><a href="05-painel-v2.html" data-page="painel"><span class="nav-num">05</span>Painel</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a class="version-pill" href="01-landing.html" title="Ver versão original do light mode"><span class="version-pill-dot"></span>Light v2 · ver v1</a>
+    <div class="theme-toggle" id="themeToggle">
+      <button class="theme-opt active" data-t="dark">Dark</button>
+      <button class="theme-opt" data-t="light">Light</button>
+    </div>
+    <a href="04-cadastro-v2.html" class="btn btn-ghost btn-sm">Entrar</a>
+    <a href="04-cadastro-v2.html" class="btn btn-primary btn-sm">Cadastre-se</a>
+  </div>
+</nav>
+
+<main class="page">
+<div class="container container-wide">
+
+  <!-- ── HERO ────────────────────────────────────── -->
+  <section class="hero">
+    <div class="fade-up fade-up-1">
+      <div class="hero-eyebrow">Inteligência aplicada ao Direito</div>
+      <h1 class="hero-title">A IA que pensa como <em>advogado</em>.</h1>
+      <p class="hero-lead">
+        Tamois lê seus contratos, petições e pareceres, identifica riscos com referência normativa
+        e sugere os próximos passos jurídicos — direto no seu fluxo de trabalho.
+      </p>
+      <div class="hero-cta">
+        <a href="04-cadastro-v2.html" class="btn btn-primary btn-lg">Criar conta gratuita</a>
+        <a href="02-analise-v2.html" class="btn btn-secondary btn-lg">Ver demonstração</a>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><div class="hero-meta-dot"></div>LGPD compliant</div>
+        <div class="hero-meta-item"><span style="color:var(--text-accent)">◈</span>Base normativa atualizada diariamente</div>
+        <div class="hero-meta-item"><span style="color:var(--text-accent)">✦</span>Treinada com jurisprudência BR</div>
+      </div>
+    </div>
+
+    <div class="hero-card fade-up fade-up-2">
+      <div class="hc-head">
+        <div class="hc-doc">
+          <div class="hc-doc-icon"></div>
+          <div>
+            <div class="hc-doc-name">Contrato de Prestação de Serviços</div>
+            <div class="hc-doc-meta">12 PÁGINAS · ANALISADO EM 8s</div>
+          </div>
+        </div>
+        <span class="stag stag-ok">Concluído</span>
+      </div>
+
+      <div class="ai-response" style="padding: var(--s5); margin-bottom: var(--s4)">
+        <div class="ai-badge"><div class="ai-dot"></div>Tamois · Resumo executivo</div>
+        <div class="ai-text" style="font-size: 14px; line-height: 1.7">
+          Contrato de natureza <strong>civil</strong> entre prestador e tomador, com prazo de 24 meses
+          e cláusula de não-concorrência. Estrutura geral adequada, com <strong>2 pontos críticos</strong>
+          e <strong>3 ajustes recomendados</strong>.
+        </div>
+      </div>
+
+      <div class="hc-section">
+        <div class="hc-section-title"><div class="ai-dot"></div>Próximos passos sugeridos</div>
+        <div class="hc-bullets">
+          <div class="hc-bullet risk">
+            <div class="hc-bullet-num">01</div>
+            <div class="hc-bullet-body"><strong>Revisar cláusula 7.2</strong> — multa rescisória superior ao limite jurisprudencial pacificado (STJ Tema 1.027).</div>
+          </div>
+          <div class="hc-bullet warn">
+            <div class="hc-bullet-num">02</div>
+            <div class="hc-bullet-body"><strong>Adequar foro de eleição</strong> — incluir hipótese de hipossuficiência conforme art. 63, §3º do CPC.</div>
+          </div>
+          <div class="hc-bullet">
+            <div class="hc-bullet-num">03</div>
+            <div class="hc-bullet-body"><strong>Detalhar obrigações de LGPD</strong> — definir base legal de tratamento (art. 7º) e prazo de retenção.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hc-tags">
+        <span class="norm-tag"><span class="norm-prefix">LEI</span> 13.709/18</span>
+        <span class="norm-tag"><span class="norm-prefix">CPC</span> art. 63</span>
+        <span class="norm-tag"><span class="norm-prefix">STJ</span> Tema 1.027</span>
+        <span class="norm-tag"><span class="norm-prefix">CC</span> art. 422</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRINCIPLES ─────────────────────────────── -->
+  <section class="principles fade-up fade-up-3">
+    <div class="principle">
+      <div class="principle-num">— I —</div>
+      <div class="principle-title">Sigilo absoluto</div>
+      <div class="principle-body">Documentos criptografados em trânsito e em repouso. Nada é usado para treinar modelos.</div>
+    </div>
+    <div class="principle">
+      <div class="principle-num">— II —</div>
+      <div class="principle-title">Citação obrigatória</div>
+      <div class="principle-body">Toda afirmação da IA vem acompanhada do dispositivo legal ou julgado que a fundamenta.</div>
+    </div>
+    <div class="principle">
+      <div class="principle-num">— III —</div>
+      <div class="principle-title">Base brasileira</div>
+      <div class="principle-body">Treinada com legislação, jurisprudência e doutrina nacional — sem traduções de modelos estrangeiros.</div>
+    </div>
+    <div class="principle">
+      <div class="principle-num">— IV —</div>
+      <div class="principle-title">Advogado no comando</div>
+      <div class="principle-body">A IA sugere. A decisão jurídica continua sendo, sempre, do operador do Direito.</div>
+    </div>
+  </section>
+
+  <!-- ── CAPABILITIES ───────────────────────────── -->
+  <section style="margin-top: var(--s16)">
+    <div class="page-header" style="margin-bottom: var(--s6)">
+      <div>
+        <div class="section-label">O que Tamois faz por você</div>
+        <h2 class="t-display-lg">Três frentes de trabalho jurídico.</h2>
+      </div>
+    </div>
+
+    <div class="caps">
+      <div class="cap">
+        <div class="cap-num">— 01 —</div>
+        <div class="cap-glyph">⚖</div>
+        <div class="cap-title">Análise de documentos</div>
+        <div class="cap-body">
+          Envie contratos, petições, pareceres ou decisões. Receba resumo executivo, mapa de riscos
+          e próximos passos com fundamento normativo.
+        </div>
+        <ul class="cap-list">
+          <li>Resumo executivo e cronograma</li>
+          <li>Identificação de cláusulas críticas</li>
+          <li>Comentários direto no .docx</li>
+          <li>Referências legais cruzadas</li>
+        </ul>
+      </div>
+
+      <div class="cap">
+        <div class="cap-num">— 02 —</div>
+        <div class="cap-glyph">◈</div>
+        <div class="cap-title">Pesquisa conversacional</div>
+        <div class="cap-body">
+          Faça perguntas em linguagem natural. Tamois consulta legislação, jurisprudência e doutrina
+          e refina a resposta com você.
+        </div>
+        <ul class="cap-list">
+          <li>Refinamento jurídico passo a passo</li>
+          <li>Citação de julgados pertinentes</li>
+          <li>Comparativo entre teses</li>
+          <li>Histórico salvo por matéria</li>
+        </ul>
+      </div>
+
+      <div class="cap">
+        <div class="cap-num">— 03 —</div>
+        <div class="cap-glyph">⬡</div>
+        <div class="cap-title">Redação assistida</div>
+        <div class="cap-body">
+          Modelos contextualizados para sua área e revisão automática de minutas em .doc/.docx
+          com comentários inline.
+        </div>
+        <ul class="cap-list">
+          <li>Comentários inline no Word</li>
+          <li>Sugestões de redação alternativa</li>
+          <li>Conformidade com CPC e LGPD</li>
+          <li>Exportação direta</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FLOW ───────────────────────────────────── -->
+  <section style="margin-top: var(--s16)">
+    <div class="page-header" style="margin-bottom: var(--s6)">
+      <div>
+        <div class="section-label">Como funciona</div>
+        <h2 class="t-display-lg">Quatro passos. Sem fricção.</h2>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-grid">
+        <div class="flow-step">
+          <div class="flow-num">— PASSO 01 —</div>
+          <div class="flow-title">Cadastre-se como operador</div>
+          <div class="flow-body">Conta gratuita em segundos. Indique se é estudante, advogado ou área correlata.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">— PASSO 02 —</div>
+          <div class="flow-title">Contextualize a análise</div>
+          <div class="flow-body">Área do Direito, tipo de documento, objetivo e parte representada — em 30 segundos.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">— PASSO 03 —</div>
+          <div class="flow-title">Envie ou pergunte</div>
+          <div class="flow-body">Faça upload do documento, peça uma análise, ou abra um chat conversacional.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">— PASSO 04 —</div>
+          <div class="flow-title">Receba o parecer</div>
+          <div class="flow-body">Resumo, riscos, próximos passos e — quando aplicável — o arquivo comentado.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── QUOTE ──────────────────────────────────── -->
+  <section class="quote">
+    <p class="quote-text">
+      "Tamois não substitui o advogado. Substitui as horas que ele gasta em tarefas que não exigem
+      o seu melhor julgamento — para que sobre tempo para o que exige."
+    </p>
+    <div class="quote-cite">— <strong>Manifesto Tamois</strong> · Inteligência Jurídica</div>
+  </section>
+
+  <!-- ── PLANS ──────────────────────────────────── -->
+  <section style="margin-top: var(--s16)">
+    <div class="page-header" style="margin-bottom: var(--s4)">
+      <div>
+        <div class="section-label">Planos</div>
+        <h2 class="t-display-lg">Comece grátis. Escale quando precisar.</h2>
+      </div>
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">R$ 0<em>/ mês</em></div>
+        <div class="plan-tag">Para conhecer e estudar.</div>
+        <ul class="plan-list">
+          <li>10 análises de documento / mês</li>
+          <li>Chat conversacional ilimitado</li>
+          <li>Documentos até 20 páginas</li>
+          <li class="off">Comentários em .docx</li>
+          <li class="off">Equipe e colaboradores</li>
+        </ul>
+        <a href="04-cadastro-v2.html" class="btn btn-secondary btn-block">Começar grátis</a>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">R$ 89<em>/ mês</em></div>
+        <div class="plan-tag">Para o advogado individual.</div>
+        <ul class="plan-list">
+          <li>Análises ilimitadas</li>
+          <li>Chat com refinamento avançado</li>
+          <li>Documentos até 300 páginas</li>
+          <li>Comentários inline em .docx</li>
+          <li class="off">Multi-usuário</li>
+        </ul>
+        <a href="04-cadastro-v2.html" class="btn btn-primary btn-block">Assinar Pro</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Escritório</div>
+        <div class="plan-price">R$ 249<em>/ mês</em></div>
+        <div class="plan-tag">Para times jurídicos.</div>
+        <ul class="plan-list">
+          <li>Tudo do Pro</li>
+          <li>Até 8 usuários inclusos</li>
+          <li>Pastas e modelos do escritório</li>
+          <li>Compartilhamento e revisão</li>
+          <li>Faturamento centralizado</li>
+        </ul>
+        <a href="04-cadastro-v2.html" class="btn btn-secondary btn-block">Falar com vendas</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TRUST ──────────────────────────────────── -->
+  <div class="trust">
+    <div class="trust-label">Construído sobre</div>
+    <div class="trust-item">Legislação Federal</div>
+    <div class="trust-item">·</div>
+    <div class="trust-item">STF · STJ · TST</div>
+    <div class="trust-item">·</div>
+    <div class="trust-item">Doutrina Nacional</div>
+    <div class="trust-item">·</div>
+    <div class="trust-item">LGPD</div>
+  </div>
+
+  <!-- ── FINAL CTA ──────────────────────────────── -->
+  <section class="final-cta">
+    <h2 class="final-cta-title">Comece pela primeira análise.</h2>
+    <p class="final-cta-sub">Gratuita, sem cartão de crédito, sem instalação.</p>
+    <div class="final-cta-row">
+      <a href="04-cadastro-v2.html" class="btn btn-primary btn-lg">Criar minha conta</a>
+      <a href="03-chat-v2.html" class="btn btn-ghost btn-lg">Testar o chat antes</a>
+    </div>
+  </section>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-brand">
+    <div class="brand-mark" style="width:22px;height:22px;font-size:13px">T</div>
+    Tamois
+  </div>
+  <div class="footer-meta">
+    Inteligência Jurídica · São Paulo, BR<br>
+    Tamois não constitui consultoria jurídica · LGPD ANPD 2024<br>
+    © 2026 Tamois Tecnologia Jurídica Ltda.
+  </div>
+</footer>
+
+</main>
+
+<!-- ── TWEAKS PANEL ── -->
+<aside class="tweaks" id="tweaks">
+  <div class="tweaks-title">Tweaks · Variações</div>
+  <div class="tweaks-row">
+    <div class="tweaks-label">Cor de acento</div>
+    <div class="tweaks-seg" data-key="accent" data-default="crimson">
+      <button data-v="crimson">Crimson</button>
+      <button data-v="abyss">Abyss</button>
+      <button data-v="molten">Molten</button>
+    </div>
+  </div>
+  <div class="tweaks-row">
+    <div class="tweaks-label">Densidade</div>
+    <div class="tweaks-seg" data-key="density" data-default="default">
+      <button data-v="compact">Compacto</button>
+      <button data-v="default">Padrão</button>
+      <button data-v="comfortable">Amplo</button>
+    </div>
+  </div>
+  <div class="tweaks-row">
+    <div class="tweaks-label">Fundo claro</div>
+    <div class="tweaks-seg" data-key="light-bg" data-default="linho" style="flex-wrap: wrap; gap: 2px">
+      <button data-v="linho" style="flex: 1 1 30%">Linho</button>
+      <button data-v="nevoa" style="flex: 1 1 30%">Névoa</button>
+      <button data-v="pedra" style="flex: 1 1 30%">Pedra</button>
+      <button data-v="ostra" style="flex: 1 1 30%">Ostra</button>
+      <button data-v="parchment" style="flex: 1 1 30%">Parchment</button>
+    </div>
+  </div>
+</aside>
+
+<script>/* TAMOIS_V2_FORCE_LIGHT */ try{ if(!localStorage.getItem('tamois.theme.v2seen')){ localStorage.setItem('tamois.theme','light'); localStorage.setItem('tamois.theme.v2seen','1'); document.documentElement.setAttribute('data-theme','light'); } }catch(e){}</script>
+<script src="tamois.js"></script>
+</body>
+</html>
