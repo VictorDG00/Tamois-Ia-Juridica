@@ -19,7 +19,12 @@
       </div>
     </div>
     <div style="display:flex;gap:var(--s3)">
-      <%= link_to "💬 Chat", analysis_chat_path(@analysis), class: "btn btn-secondary" %>
+      <% if @analysis.completed? %>
+        <%= link_to download_analysis_path(@analysis), class: "btn btn-primary" do %>
+          ↓ Baixar DOCX anotado
+        <% end %>
+        <%= link_to "💬 Chat", analysis_chat_path(@analysis), class: "btn btn-secondary" %>
+      <% end %>
       <%= link_to "← Histórico", analyses_path, class: "btn btn-ghost" %>
     </div>
   </div>

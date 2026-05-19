@@ -1,6 +1,6 @@
 class AnalysesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_analysis, only: %i[show]
+  before_action :set_analysis, only: %i[show download]
 
   def index
     @analyses = current_user.analyses.order(created_at: :desc)
@@ -44,6 +44,23 @@ class AnalysesController < ApplicationController
   end
 
   def show
+  end
+
+  def download
+    unless @analysis.completed?
+      return redirect_to @analysis, alert: "A análise ainda não foi concluída."
+    end
+
+    docx_bytes = DocxAnnotator.new(@analysis).generate
+    filename   = "tamois_#{@analysis.filename.delete_suffix(".docx")}_anotado.docx"
+
+    send_data docx_bytes,
+      filename:    filename,
+      type:        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      disposition: "attachment"
+  rescue => e
+    Rails.logger.error("DocxAnnotator error: #{e.class} — #{e.message}")
+    redirect_to @analysis, alert: "Erro ao gerar o documento anotado. Tente novamente."
   end
 
   private

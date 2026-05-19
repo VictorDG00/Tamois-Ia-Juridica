@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   root "pages#home"
 
   resources :analyses, only: %i[new create show index] do
+    member { get :download }
     resource :chat, only: %i[show create]
   end
 
