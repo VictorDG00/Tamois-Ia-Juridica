@@ -1,6 +1,7 @@
 class Analysis < ApplicationRecord
   belongs_to :user
   has_many :chat_messages, dependent: :destroy
+  has_many :analysis_feedbacks, dependent: :destroy
   has_one_attached :docx_file
 
   STATUSES = %w[pending processing completed failed].freeze

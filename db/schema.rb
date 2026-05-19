@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_19_030157) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_19_033030) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -54,6 +54,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_030157) do
     t.index ["user_id"], name: "index_analyses_on_user_id"
   end
 
+  create_table "analysis_feedbacks", force: :cascade do |t|
+    t.integer "analysis_id", null: false
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.integer "item_index"
+    t.text "item_snapshot"
+    t.string "section"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.string "verdict"
+    t.index ["analysis_id"], name: "index_analysis_feedbacks_on_analysis_id"
+    t.index ["user_id"], name: "index_analysis_feedbacks_on_user_id"
+  end
+
   create_table "chat_messages", force: :cascade do |t|
     t.integer "analysis_id", null: false
     t.text "content"
@@ -80,5 +94,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_030157) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "analyses", "users"
+  add_foreign_key "analysis_feedbacks", "analyses"
+  add_foreign_key "analysis_feedbacks", "users"
   add_foreign_key "chat_messages", "analyses"
 end

@@ -44,6 +44,8 @@ class AnalysesController < ApplicationController
   end
 
   def show
+    @feedbacks_by_key = @analysis.analysis_feedbacks
+      .each_with_object({}) { |f, h| h["#{f.section}-#{f.item_index}"] = f }
   end
 
   def download

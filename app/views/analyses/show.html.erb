@@ -184,6 +184,7 @@
               <% if item["reason"].present? %>
                 <div class="analysis-item-reason"><%= item["reason"] %></div>
               <% end %>
+              <%= render "analyses/feedback_button", analysis: @analysis, section: "orthography", item_index: idx, feedbacks_by_key: @feedbacks_by_key %>
             </div>
           <% end %>
         <% end %>
@@ -207,6 +208,7 @@
               <% if item["reason"].present? %>
                 <div class="analysis-item-reason"><%= item["reason"] %></div>
               <% end %>
+              <%= render "analyses/feedback_button", analysis: @analysis, section: "writing", item_index: idx, feedbacks_by_key: @feedbacks_by_key %>
             </div>
           <% end %>
         <% end %>
@@ -235,6 +237,7 @@
                 </span>
               </div>
               <div style="font-size:14px;color:var(--text-secondary);line-height:1.6"><%= item["insight"] %></div>
+              <%= render "analyses/feedback_button", analysis: @analysis, section: "insights", item_index: idx, feedbacks_by_key: @feedbacks_by_key %>
             </div>
           <% end %>
         <% end %>

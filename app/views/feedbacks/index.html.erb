@@ -1,0 +1,81 @@
+<% content_for :title, "Revisão de Feedbacks — Tamois" %>
+
+<div class="container page-content">
+  <div class="page-header">
+    <div class="page-title-group">
+      <div class="t-label">Qualidade do motor</div>
+      <h1 style="font-family:var(--font-display);font-size:32px;font-weight:300">
+        Revisão de <em>feedbacks</em>
+      </h1>
+    </div>
+    <div style="display:flex;gap:var(--s3);align-items:center">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)"><%= @total %> item(ns) marcado(s)</span>
+      <%= link_to "← Painel", dashboard_path, class: "btn btn-ghost" %>
+    </div>
+  </div>
+
+  <% if @feedbacks.empty? %>
+    <div class="empty-state">
+      <div class="empty-icon">✓</div>
+      <div class="empty-title">Nenhum feedback ainda</div>
+      <div class="empty-desc">Quando você ou seus sócios marcarem um item como impreciso, ele aparecerá aqui para revisão.</div>
+    </div>
+  <% else %>
+    <%# Resumo por seção %>
+    <div class="kpi-grid" style="margin-bottom:var(--s6)">
+      <% { "orthography" => ["Ortografia", "var(--c-risk-text)"],
+           "writing"     => ["Redação", "var(--c-warn-text)"],
+           "insights"    => ["Insights jurídicos", "var(--text-accent)"] }.each do |section, (label, color)| %>
+        <div class="kpi-card">
+          <div class="kpi-value" style="color:<%= color %>"><%= (@by_section[section] || []).length %></div>
+          <div class="kpi-label"><%= label %></div>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Lista de feedbacks agrupados por documento %>
+    <% @feedbacks.group_by(&:analysis).each do |analysis, feedbacks| %>
+      <div class="card" style="margin-bottom:var(--s5)">
+        <div class="card-header">
+          <div>
+            <div style="font-weight:500"><%= analysis.filename %></div>
+            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary);margin-top:4px">
+              <%= feedbacks.length %> item(ns) · <%= analysis.created_at.strftime("%d/%m/%Y") %>
+            </div>
+          </div>
+          <%= link_to "Ver análise", analysis_path(analysis), class: "btn btn-ghost btn-sm" %>
+        </div>
+
+        <% feedbacks.each do |fb| %>
+          <div style="padding:var(--s4) 0;border-bottom:1px solid var(--border-subtle);display:grid;grid-template-columns:120px 1fr;gap:var(--s4)">
+            <div>
+              <span class="badge <%= fb.section == 'insights' ? 'badge-risk' : fb.section == 'writing' ? 'badge-warn' : 'badge-ok' %>">
+                <%= fb.section_label %>
+              </span>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:var(--s2)">
+                item #<%= fb.item_index + 1 %><br>
+                <%= fb.created_at.strftime("%d/%m %H:%M") %>
+              </div>
+            </div>
+            <div>
+              <% data = fb.item_data %>
+              <% preview = case fb.section
+                when "orthography" then "\"#{data["original"]}\" → \"#{data["suggestion"]}\""
+                when "writing"     then data["excerpt"]&.first(120)
+                when "insights"    then data["topic"]
+                else fb.section
+              end %>
+              <div style="font-size:13px;color:var(--text-primary);margin-bottom:var(--s2)"><%= preview %></div>
+              <% if fb.comment.present? %>
+                <div style="font-size:12px;color:var(--text-tertiary);font-style:italic">"<%= fb.comment %>"</div>
+              <% end %>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:var(--s2)">
+                por <%= fb.user.name %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

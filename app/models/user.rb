@@ -3,6 +3,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_many :analyses, dependent: :destroy
+  has_many :analysis_feedbacks, dependent: :destroy
 
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
 

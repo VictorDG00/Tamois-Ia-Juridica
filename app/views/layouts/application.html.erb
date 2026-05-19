@@ -28,6 +28,7 @@
           <li><%= link_to "Painel", dashboard_path, class: controller_name == "dashboard" ? "active" : "" %></li>
           <li><%= link_to "Nova Análise", new_analysis_path, class: controller_name == "analyses" && action_name == "new" ? "active" : "" %></li>
           <li><%= link_to "Histórico", analyses_path, class: controller_name == "analyses" && action_name == "index" ? "active" : "" %></li>
+          <li><%= link_to "Feedbacks", feedbacks_path, class: controller_name == "feedbacks" ? "active" : "" %></li>
         </ul>
       <% end %>
 

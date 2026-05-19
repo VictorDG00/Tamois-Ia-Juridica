@@ -1,0 +1,20 @@
+<%# Locals: analysis, section, item_index, feedbacks_by_key %>
+<% key = "#{section}-#{item_index}" %>
+<% already_flagged = feedbacks_by_key&.key?(key) %>
+
+<div style="margin-top:var(--s3);display:flex;justify-content:flex-end" id="feedback-<%= key %>">
+  <% if already_flagged %>
+    <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-ok-text)">
+      ✓ Feedback registrado
+    </span>
+  <% else %>
+    <%= button_to analysis_feedbacks_path(analysis, section: section, item_index: item_index),
+          method: :post,
+          class: "btn btn-ghost btn-sm",
+          style: "font-size:11px;color:var(--text-tertiary);padding:4px 10px;border:1px solid transparent",
+          data: { confirm: nil },
+          title: "Marcar este item como impreciso ou incorreto" do %>
+      ⚑ Marcar como impreciso
+    <% end %>
+  <% end %>
+</div>
