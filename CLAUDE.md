@@ -64,12 +64,30 @@ Acesse `http://localhost:3000`.
 
 ## Testes
 
+**73 testes · 124 assertions** — rodar antes de qualquer commit.
+
 ```bash
-bundle exec rails test          # todos os 58 testes
+bundle exec rails test                    # suite completa
 bundle exec rails test test/models/
 bundle exec rails test test/services/
 bundle exec rails test test/controllers/
+bundle exec rails test test/jobs/
 ```
+
+Cobertura atual:
+
+| Arquivo de teste | O que cobre |
+|---|---|
+| `test/models/user_test.rb` | Validações, associações, contagem de análises |
+| `test/models/analysis_test.rb` | Status, JSON parsing, defaults, associações |
+| `test/models/chat_message_test.rb` | Roles, validações de conteúdo |
+| `test/services/deepseek_client_test.rb` | Normalização, anti-alucinação, parsing JSON |
+| `test/services/docx_extractor_test.rb` | Extração de texto, indexação de parágrafos |
+| `test/services/docx_annotator_test.rb` | Track Changes, comentários, ZIP válido |
+| `test/jobs/analysis_job_test.rb` | Enfileiramento, resiliência a análise inexistente |
+| `test/controllers/analyses_controller_test.rb` | Auth, upload, acesso entre usuários |
+| `test/controllers/dashboard_controller_test.rb` | Auth, stats |
+| `test/controllers/pages_controller_test.rb` | Landing, redirect autenticado |
 
 ---
 
@@ -83,22 +101,51 @@ bundle exec rails test test/controllers/
 }
 ```
 
-Limites: máx 8 itens por seção · 400 chars por campo · disclaimer automático nos insights.
+Sem limite de itens por seção · 600 chars por campo · disclaimer automático nos insights · temperatura 0.1.
 
 ---
 
 ## Fluxo de Análise
 
-1. Usuário faz upload de `.docx` em `POST /analyses`
-2. `AnalysesController#create` salva o arquivo via Active Storage
-3. `AnalysisService#run` chama `DocxExtractor` → extrai texto parágrafo a parágrafo
-4. Texto enviado para `DeepseekClient#analyze` → DeepSeek API
-5. JSON normalizado salvo nas colunas `*_json` do `Analysis`
-6. Usuário redirecionado para `analyses#show` com os resultados
+1. Upload em `POST /analyses` → salva DOCX via Active Storage, enfileira `AnalysisJob`
+2. `AnalysisJob` chama `AnalysisService#run` em background (SolidQueue)
+3. `DocxExtractor` abre o DOCX como ZIP, extrai texto indexado por parágrafo
+4. `DeepseekClient#analyze_section` — **3 chamadas separadas** ao DeepSeek:
+   - `:orthography` → salva `orthography_json` (checkpoint 1 acende na UI)
+   - `:writing` → salva `writing_suggestions_json` (checkpoint 2 acende)
+   - `:insights` → salva `legal_insights_json`, status → `completed` (checkpoint 3 acende)
+5. UI faz meta-refresh a cada 3s enquanto `status != completed`
+6. Download via `GET /analyses/:id/download` → `DocxAnnotator` gera DOCX anotado
 
-## Regras de Commit
+## Estrutura de serviços
 
-A cada 2 alterações significativas, fazer commit para rastreabilidade.
+| Serviço | Responsabilidade |
+|---|---|
+| `DocxExtractor` | Abre DOCX como ZIP, extrai `word/document.xml` com Nokogiri |
+| `DeepseekClient` | 3 chamadas focadas, temperatura 0.1, anti-alucinação |
+| `AnalysisService` | Orquestra extração → 3 chamadas → saves incrementais |
+| `DocxAnnotator` | Gera DOCX com Track Changes (ortografia) e comentários (redação/insights) |
+
+## Regras de Commit e Push
+
+**A cada 2 alterações significativas:**
+
+```bash
+bundle exec rails test                    # obrigatório — nenhum commit com testes falhando
+git add <arquivos alterados>
+git commit -m "tipo: descrição curta"
+git push origin main
+```
+
+- Rodar a suite completa antes de todo commit — sem exceção
+- Push vai direto para `main` (branch único de produção)
+- Tipos de commit: `feat`, `fix`, `chore`, `test`, `docs`, `refactor`
+- Se os testes falharem após uma mudança: corrigir antes de continuar
+
+**Nunca commitar:**
+- Arquivos `.env` (chaves de API)
+- `storage/` (uploads dos usuários)
+- `tmp/` e `log/`
 
 ## Design
 
