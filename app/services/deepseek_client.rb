@@ -94,10 +94,13 @@ class DeepseekClient
       BODY
     when :writing
       <<~BODY
-        Analise APENAS trechos onde a ambiguidade ou fraqueza de redação é objetiva e clara.
+        Analise APENAS problemas de REDAÇÃO JURÍDICA: ambiguidade semântica, contradições
+        lógicas entre cláusulas, imprecisão que gera insegurança jurídica, cláusulas incompletas.
+        NÃO reporte: erros ortográficos, erros de digitação, erros de acentuação, erros
+        de concordância gramatical — esses são tratados em seção separada.
         NÃO reporte: estilo pessoal, preferências subjetivas, trechos já corretos.
         Use 'excerpt' com o trecho EXATO do texto (copie literalmente).
-        Reporte TODOS os trechos problemáticos encontrados, sem limite.
+        Reporte TODOS os problemas de redação encontrados, sem limite.
 
         Retorne SOMENTE JSON válido:
         {"writing_suggestions":[{"excerpt":"...","suggestion":"...","reason":"..."}]}
