@@ -1,0 +1,105 @@
+<% content_for :title, "Painel — Tamois" %>
+
+<div class="container page-content">
+  <div class="page-header">
+    <div class="page-title-group">
+      <div class="t-label">Painel</div>
+      <h1 style="font-family:var(--font-display);font-size:32px;font-weight:300">
+        Olá, <em><%= current_user.name.split(" ").first %></em>
+      </h1>
+    </div>
+    <%= link_to "Analisar documento", new_analysis_path, class: "btn btn-primary" %>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-value"><%= @stats[:total] %></div>
+      <div class="kpi-label">Total de análises</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--c-ok-text)"><%= @stats[:completed] %></div>
+      <div class="kpi-label">Concluídas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--c-risk-text)"><%= @stats[:high_risk] %></div>
+      <div class="kpi-label">Com riscos altos</div>
+    </div>
+  </div>
+
+  <!-- Análises recentes -->
+  <div class="card">
+    <div class="card-header">
+      <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary)">Análises recentes</span>
+      <%= link_to "Ver todas", analyses_path, class: "btn btn-ghost btn-sm" %>
+    </div>
+
+    <% if @recent_analyses.empty? %>
+      <div class="empty-state" style="padding:var(--s10)">
+        <div class="empty-icon">📄</div>
+        <div class="empty-title">Nenhuma análise ainda</div>
+        <div class="empty-desc">Envie seu primeiro documento DOCX para começar.</div>
+        <%= link_to "Analisar documento", new_analysis_path, class: "btn btn-primary" %>
+      </div>
+    <% else %>
+      <table class="analyses-table">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Status</th>
+            <th>Riscos</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @recent_analyses.each do |analysis| %>
+            <tr>
+              <td><%= link_to analysis.filename, analysis_path(analysis) %></td>
+              <td>
+                <span class="badge <%= analysis.completed? ? 'badge-ok' : analysis.failed? ? 'badge-risk' : 'badge-warn' %>">
+                  <%= { "completed" => "Concluída", "failed" => "Falhou", "processing" => "Processando", "pending" => "Pendente" }[analysis.status] || analysis.status %>
+                </span>
+              </td>
+              <td>
+                <% if analysis.completed? %>
+                  <% high = analysis.legal_insights.count { |i| i["risk_level"] == "high" } %>
+                  <% if high > 0 %>
+                    <span class="badge badge-risk"><%= high %> alto</span>
+                  <% else %>
+                    <span class="badge badge-ok"><%= analysis.legal_insights.length %> insight(s)</span>
+                  <% end %>
+                <% else %>
+                  <span style="color:var(--text-tertiary)">—</span>
+                <% end %>
+              </td>
+              <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">
+                <%= analysis.created_at.strftime("%d/%m/%Y") %>
+              </td>
+              <td style="text-align:right">
+                <%= link_to "Ver", analysis_path(analysis), class: "btn btn-ghost btn-sm" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+
+  <!-- Guia rápido -->
+  <% if @stats[:total] == 0 %>
+    <div class="card" style="margin-top:var(--s5)">
+      <div class="card-header">
+        <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary)">Como usar o Tamois</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s5)">
+        <% [["1. Envie o DOCX", "Carregue seu contrato ou documento jurídico no formato .docx"], ["2. Aguarde a análise", "A IA revisa o documento em segundos e identifica riscos"], ["3. Revise os resultados", "Veja correções, sugestões e riscos jurídicos classificados"]].each do |title, desc| %>
+          <div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:400;margin-bottom:var(--s2)"><%= title %></div>
+            <div style="font-size:13px;color:var(--text-secondary)"><%= desc %></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

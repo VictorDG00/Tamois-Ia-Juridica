@@ -1,0 +1,84 @@
+<% content_for :title, "Tamois — IA Jurídica para Contratos" %>
+
+<div class="container page-content" style="padding-top:var(--s16)">
+  <section style="display:grid;grid-template-columns:1.15fr 0.85fr;gap:var(--s12);align-items:center;padding:var(--s12) 0 var(--s16)">
+    <div>
+      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-accent);margin-bottom:var(--s5);display:inline-flex;align-items:center;gap:var(--s3)">
+        <span style="width:32px;height:1px;background:currentColor;opacity:0.5;display:inline-block"></span>
+        Revisão jurídica com IA
+      </div>
+      <h1 style="font-family:var(--font-display);font-size:clamp(52px,6vw,88px);font-weight:300;letter-spacing:-0.025em;line-height:0.95;margin-bottom:var(--s6)">
+        Contratos mais<br><em>seguros.</em><br>Revisão mais<br>rápida.
+      </h1>
+      <p style="font-size:17px;color:var(--text-secondary);line-height:1.7;margin-bottom:var(--s8);max-width:520px">
+        Tamois analisa seus documentos jurídicos com IA, identificando riscos contratuais, erros ortográficos e sugestões de redação — em segundos.
+      </p>
+      <div style="display:flex;gap:var(--s3);flex-wrap:wrap;margin-bottom:var(--s8)">
+        <%= link_to "Analisar documento", new_user_registration_path, class: "btn btn-primary btn-lg" %>
+        <%= link_to "Entrar na conta", new_user_session_path, class: "btn btn-secondary btn-lg" %>
+      </div>
+      <div style="display:flex;gap:var(--s6);flex-wrap:wrap;align-items:center">
+        <% [["Análise em segundos"], ["Direito brasileiro"], ["Upload de DOCX"]].each do |item| %>
+          <div style="display:flex;gap:var(--s2);align-items:center;font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-tertiary)">
+            <span style="width:4px;height:4px;border-radius:50%;background:var(--c-ok-text);box-shadow:0 0 8px var(--c-ok-text)"></span>
+            <%= item.first %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card" style="border-radius:var(--r5);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:var(--s3);padding-bottom:var(--s4);margin-bottom:var(--s4);border-bottom:1px solid var(--border-subtle)">
+        <div style="width:32px;height:40px;border-radius:2px;background:linear-gradient(135deg,var(--bg-surface),var(--bg-elevated));border:1px solid var(--border-medium);display:grid;place-items:center;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">.docx</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">contrato_servicos.docx</div>
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary)">Análise concluída · 2s</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--s3)">
+        <div style="display:flex;align-items:flex-start;gap:var(--s3);padding:var(--s3);border-radius:var(--r3);background:var(--c-risk-bg);border:1px solid var(--c-risk-border)">
+          <span class="badge badge-risk">Alto risco</span>
+          <div>
+            <div style="font-size:13px;font-weight:500;margin-bottom:4px">Cláusula de responsabilidade</div>
+            <div style="font-size:12px;color:var(--text-secondary)">Isenção ilimitada pode configurar cláusula abusiva (CDC art. 51).</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:var(--s3);padding:var(--s3);border-radius:var(--r3);background:var(--c-warn-bg);border:1px solid var(--c-warn-border)">
+          <span class="badge badge-warn">Médio</span>
+          <div>
+            <div style="font-size:13px;font-weight:500;margin-bottom:4px">Prazo de vigência</div>
+            <div style="font-size:12px;color:var(--text-secondary)">Renovação automática sem prazo de notificação pode gerar conflito.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:var(--s3);padding:var(--s3);border-radius:var(--r3);background:var(--c-ok-bg);border:1px solid var(--c-ok-border)">
+          <span class="badge badge-ok">Ortografia</span>
+          <div style="font-size:12px;font-family:var(--font-mono);color:var(--c-risk-text)">"rescição" → <span style="color:var(--c-ok-text)">"rescisão"</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:var(--s16) 0;border-top:1px solid var(--border-subtle)">
+    <div style="text-align:center;margin-bottom:var(--s12)">
+      <div class="t-label" style="margin-bottom:var(--s3)">O que o Tamois faz</div>
+      <h2 style="font-family:var(--font-display);font-size:36px;font-weight:300">Análise completa em três dimensões</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s6)">
+      <div class="card">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-risk-text);margin-bottom:var(--s4)">01 / Ortografia</div>
+        <h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:var(--s3)">Correções gramaticais</h3>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.6">Identifica erros ortográficos e gramaticais preservando o jargão jurídico latino e técnico.</p>
+      </div>
+      <div class="card">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-warn-text);margin-bottom:var(--s4)">02 / Redação</div>
+        <h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:var(--s3)">Sugestões de redação</h3>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.6">Propõe reescritas para trechos ambíguos, redundantes ou de redação jurídica fraca.</p>
+      </div>
+      <div class="card">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-accent);margin-bottom:var(--s4)">03 / Jurídico</div>
+        <h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:var(--s3)">Insights jurídicos</h3>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.6">Classifica riscos jurídicos por cláusula: alto, médio e baixo — com análise objetiva.</p>
+      </div>
+    </div>
+  </section>
+</div>

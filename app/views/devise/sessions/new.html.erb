@@ -1,0 +1,43 @@
+<% content_for :title, "Entrar — Tamois" %>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div style="width:40px;height:40px;border-radius:var(--r3);background:linear-gradient(135deg,var(--crimson),var(--molten));display:grid;place-items:center;font-family:var(--font-display);font-size:24px;color:var(--parchment);margin:0 auto var(--s4)">T</div>
+    </div>
+    <div class="auth-title">Entrar no Tamois</div>
+    <div class="auth-subtitle">Acesse sua conta para continuar</div>
+
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="auth-form">
+        <div class="field">
+          <label class="label">E-mail</label>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input", placeholder: "seu@email.com" %>
+        </div>
+
+        <div class="field">
+          <label class="label">Senha</label>
+          <%= f.password_field :password, autocomplete: "current-password", class: "input", placeholder: "••••••••" %>
+        </div>
+
+        <% if devise_mapping.rememberable? %>
+          <label class="checkbox">
+            <%= f.check_box :remember_me %>
+            Manter conectado
+          </label>
+        <% end %>
+
+        <%= f.submit "Entrar", class: "btn btn-primary btn-block btn-lg" %>
+      </div>
+    <% end %>
+
+    <div class="auth-footer">
+      Não tem conta? <%= link_to "Criar conta", new_user_registration_path %><br>
+      <% if devise_mapping.recoverable? %>
+        <%= link_to "Esqueci minha senha", new_user_password_path %>
+      <% end %>
+    </div>
+  </div>
+</div>

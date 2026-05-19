@@ -1,0 +1,73 @@
+<% content_for :title, "Histórico — Tamois" %>
+
+<div class="container page-content">
+  <div class="page-header">
+    <div class="page-title-group">
+      <div class="t-label">Histórico</div>
+      <h1 style="font-family:var(--font-display);font-size:32px;font-weight:300">Suas análises</h1>
+    </div>
+    <%= link_to "Nova análise", new_analysis_path, class: "btn btn-primary" %>
+  </div>
+
+  <% if @analyses.empty? %>
+    <div class="empty-state">
+      <div class="empty-icon">📄</div>
+      <div class="empty-title">Nenhuma análise ainda</div>
+      <div class="empty-desc">Envie seu primeiro documento DOCX para começar.</div>
+      <%= link_to "Analisar documento", new_analysis_path, class: "btn btn-primary" %>
+    </div>
+  <% else %>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="analyses-table">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Modo</th>
+            <th>Status</th>
+            <th>Riscos</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @analyses.each do |analysis| %>
+            <tr>
+              <td>
+                <%= link_to analysis.filename, analysis_path(analysis) %>
+              </td>
+              <td>
+                <span class="badge badge-neutral"><%= analysis.analysis_mode == "fast" ? "Rápida" : "Profunda" %></span>
+              </td>
+              <td>
+                <span class="badge <%= analysis.completed? ? 'badge-ok' : analysis.failed? ? 'badge-risk' : 'badge-warn' %>">
+                  <%= { "completed" => "Concluída", "failed" => "Falhou", "processing" => "Processando", "pending" => "Pendente" }[analysis.status] || analysis.status %>
+                </span>
+              </td>
+              <td>
+                <% if analysis.completed? %>
+                  <% high = analysis.legal_insights.count { |i| i["risk_level"] == "high" } %>
+                  <% if high > 0 %>
+                    <span class="badge badge-risk"><%= high %> alto</span>
+                  <% else %>
+                    <span class="badge badge-ok"><%= analysis.legal_insights.length %> insight(s)</span>
+                  <% end %>
+                <% else %>
+                  <span style="color:var(--text-tertiary)">—</span>
+                <% end %>
+              </td>
+              <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">
+                <%= analysis.created_at.strftime("%d/%m/%Y") %>
+              </td>
+              <td style="text-align:right">
+                <%= link_to "Ver", analysis_path(analysis), class: "btn btn-ghost btn-sm" %>
+                <% if analysis.completed? %>
+                  <%= link_to "Chat", analysis_chat_path(analysis), class: "btn btn-secondary btn-sm" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

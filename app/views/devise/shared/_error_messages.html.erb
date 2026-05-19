@@ -1,0 +1,12 @@
+<% if resource.errors.any? %>
+  <div style="background:var(--c-risk-bg);border:1px solid var(--c-risk-border);border-radius:var(--r3);padding:var(--s4);margin-bottom:var(--s5)" data-turbo-cache="false">
+    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-risk-text);margin-bottom:var(--s3)">
+      <%= resource.errors.count %> erro(s) encontrado(s)
+    </div>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s2)">
+      <% resource.errors.full_messages.each do |message| %>
+        <li style="font-size:13px;color:var(--c-risk-text)">• <%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

@@ -1,0 +1,154 @@
+<% content_for :title, "#{@analysis.filename} — Tamois" %>
+
+<div class="container page-content">
+  <div class="page-header">
+    <div class="page-title-group">
+      <div class="t-label">Resultado da análise</div>
+      <h1 style="font-family:var(--font-display);font-size:28px;font-weight:300"><%= @analysis.filename %></h1>
+      <div style="display:flex;align-items:center;gap:var(--s3);margin-top:var(--s2)">
+        <span class="badge <%= @analysis.completed? ? 'badge-ok' : 'badge-risk' %>">
+          <%= @analysis.status.capitalize %>
+        </span>
+        <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary)">
+          <%= @analysis.analysis_mode == "fast" ? "Análise rápida" : "Análise profunda" %> ·
+          <%= @analysis.created_at.strftime("%d/%m/%Y %H:%M") %>
+        </span>
+      </div>
+    </div>
+    <div style="display:flex;gap:var(--s3)">
+      <%= link_to "💬 Chat", analysis_chat_path(@analysis), class: "btn btn-secondary" %>
+      <%= link_to "← Histórico", analyses_path, class: "btn btn-ghost" %>
+    </div>
+  </div>
+
+  <% if @analysis.failed? %>
+    <div style="background:var(--c-risk-bg);border:1px solid var(--c-risk-border);border-radius:var(--r4);padding:var(--s6);text-align:center;margin-bottom:var(--s8)">
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:300;margin-bottom:var(--s3)">Falha na análise</div>
+      <p style="font-size:14px;color:var(--text-secondary)">Não foi possível processar o documento. Verifique se o arquivo é um DOCX válido.</p>
+      <%= link_to "Tentar novamente", new_analysis_path, class: "btn btn-primary", style: "margin-top:var(--s4)" %>
+    </div>
+  <% else %>
+    <!-- Resumo -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card">
+        <div class="kpi-value" style="color:var(--c-risk-text)"><%= @analysis.orthography.length %></div>
+        <div class="kpi-label">Correções ortográficas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color:var(--c-warn-text)"><%= @analysis.writing_suggestions.length %></div>
+        <div class="kpi-label">Sugestões de redação</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color:var(--text-accent)"><%= @analysis.legal_insights.length %></div>
+        <div class="kpi-label">Insights jurídicos</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card">
+      <div class="result-tabs" id="result-tabs">
+        <button class="result-tab is-active" data-tab="orthography" onclick="switchTab('orthography')">
+          Ortografia <span class="tab-count"><%= @analysis.orthography.length %></span>
+        </button>
+        <button class="result-tab" data-tab="writing" onclick="switchTab('writing')">
+          Redação <span class="tab-count"><%= @analysis.writing_suggestions.length %></span>
+        </button>
+        <button class="result-tab" data-tab="insights" onclick="switchTab('insights')">
+          Jurídico <span class="tab-count"><%= @analysis.legal_insights.length %></span>
+        </button>
+      </div>
+
+      <!-- Ortografia -->
+      <div id="tab-orthography" class="tab-panel is-active">
+        <% if @analysis.orthography.empty? %>
+          <div class="empty-state" style="padding:var(--s10)">
+            <div class="empty-icon">✓</div>
+            <div class="empty-title">Nenhum erro ortográfico</div>
+            <div class="empty-desc">O documento não apresenta erros gramaticais identificáveis.</div>
+          </div>
+        <% else %>
+          <% @analysis.orthography.each_with_index do |item, idx| %>
+            <div class="analysis-item">
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:var(--s3)">Erro <%= idx + 1 %></div>
+              <div class="analysis-item-original">✗ <%= item["original"] %></div>
+              <div class="analysis-item-suggestion">✓ <%= item["suggestion"] %></div>
+              <% if item["reason"].present? %>
+                <div class="analysis-item-reason"><%= item["reason"] %></div>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Redação -->
+      <div id="tab-writing" class="tab-panel">
+        <% if @analysis.writing_suggestions.empty? %>
+          <div class="empty-state" style="padding:var(--s10)">
+            <div class="empty-icon">✓</div>
+            <div class="empty-title">Nenhuma sugestão de redação</div>
+            <div class="empty-desc">O documento apresenta boa qualidade de redação jurídica.</div>
+          </div>
+        <% else %>
+          <% @analysis.writing_suggestions.each_with_index do |item, idx| %>
+            <div class="analysis-item">
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:var(--s3)">Sugestão <%= idx + 1 %></div>
+              <div class="analysis-item-excerpt">"<%= item["excerpt"] %>"</div>
+              <div style="font-size:11px;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--c-ok-text);margin-bottom:var(--s2)">Sugestão</div>
+              <div style="font-size:14px;color:var(--text-primary);padding:var(--s3);background:var(--c-ok-bg);border:1px solid var(--c-ok-border);border-radius:var(--r2)"><%= item["suggestion"] %></div>
+              <% if item["reason"].present? %>
+                <div class="analysis-item-reason"><%= item["reason"] %></div>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Insights -->
+      <div id="tab-insights" class="tab-panel">
+        <% if @analysis.legal_insights.empty? %>
+          <div class="empty-state" style="padding:var(--s10)">
+            <div class="empty-icon">✓</div>
+            <div class="empty-title">Nenhum risco identificado</div>
+            <div class="empty-desc">O documento não apresenta riscos jurídicos evidentes.</div>
+          </div>
+        <% else %>
+          <% @analysis.legal_insights.sort_by { |i| %w[high medium low].index(i["risk_level"]) || 99 }.each_with_index do |item, idx| %>
+            <div class="analysis-item" style="border-left:3px solid <%= item["risk_level"] == "high" ? "var(--c-risk-text)" : item["risk_level"] == "medium" ? "var(--c-warn-text)" : "var(--c-ok-text)" %>">
+              <div class="analysis-item-header">
+                <div>
+                  <div style="font-size:14px;font-weight:500;margin-bottom:var(--s2)"><%= item["topic"] %></div>
+                  <% if item["paragraph_id"] && item["paragraph_id"] >= 0 %>
+                    <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary)">¶ parágrafo <%= item["paragraph_id"] %></span>
+                  <% end %>
+                </div>
+                <span class="badge badge-<%= item["risk_level"] == "high" ? "risk" : item["risk_level"] == "medium" ? "warn" : "ok" %>">
+                  <%= item["risk_level"] == "high" ? "Alto" : item["risk_level"] == "medium" ? "Médio" : "Baixo" %>
+                </span>
+              </div>
+              <div style="font-size:14px;color:var(--text-secondary);line-height:1.6"><%= item["insight"] %></div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Texto original -->
+    <% if @analysis.original_text.present? %>
+      <div class="card" style="margin-top:var(--s5)">
+        <div class="card-header">
+          <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary)">Texto do documento</span>
+        </div>
+        <div style="font-size:13px;line-height:1.8;color:var(--text-secondary);white-space:pre-wrap;max-height:400px;overflow-y:auto;font-family:var(--font-body)"><%= @analysis.original_text.truncate(3000) %></div>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('is-active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
+    document.querySelector(`[data-tab="${name}"]`).classList.add('is-active');
+    document.getElementById(`tab-${name}`).classList.add('is-active');
+  }
+</script>

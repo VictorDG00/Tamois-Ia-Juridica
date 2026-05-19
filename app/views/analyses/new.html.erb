@@ -1,0 +1,131 @@
+<% content_for :title, "Nova Análise — Tamois" %>
+
+<div class="container page-content">
+  <div class="page-header">
+    <div class="page-title-group">
+      <div class="t-label">Nova análise</div>
+      <h1 style="font-family:var(--font-display);font-size:32px;font-weight:300">Enviar documento</h1>
+    </div>
+    <%= link_to "← Voltar", analyses_path, class: "btn btn-ghost" %>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:var(--s8);align-items:start">
+    <div>
+      <%= form_with url: analyses_path, method: :post, multipart: true, id: "upload-form" do |f| %>
+        <div class="card" style="margin-bottom:var(--s5)">
+          <div class="card-header">
+            <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary)">Arquivo</span>
+          </div>
+
+          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('docx-input').click()">
+            <div id="upload-placeholder">
+              <div style="font-size:40px;margin-bottom:var(--s4);opacity:0.3">📄</div>
+              <div style="font-family:var(--font-display);font-size:22px;font-weight:300;margin-bottom:var(--s3)">Arraste seu arquivo DOCX</div>
+              <div style="font-size:14px;color:var(--text-tertiary);margin-bottom:var(--s5)">ou clique para selecionar</div>
+              <span class="badge badge-neutral">.docx · até 10 MB</span>
+            </div>
+            <div id="upload-selected" style="display:none">
+              <div style="font-size:32px;margin-bottom:var(--s3)">✓</div>
+              <div id="upload-filename" style="font-weight:500;margin-bottom:var(--s2)"></div>
+              <div id="upload-size" style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)"></div>
+            </div>
+            <%= f.file_field :docx_file, id: "docx-input", accept: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document", name: "analysis[docx_file]" %>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--s5)">
+          <div class="card-header">
+            <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary)">Modo de análise</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)">
+            <label style="cursor:pointer;padding:var(--s4);border:1px solid var(--border-subtle);border-radius:var(--r3);transition:all var(--dur-fast)" id="mode-fast-label">
+              <%= f.radio_button :analysis_mode, "fast", id: "mode-fast", name: "analysis[analysis_mode]", checked: true, style: "display:none", onchange: "updateModeSelection()" %>
+              <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-accent);margin-bottom:var(--s2)">Rápido</div>
+              <div style="font-size:14px;font-weight:500;margin-bottom:var(--s2)">DeepSeek Chat</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Análise em 5–15 segundos. Ideal para revisões rápidas.</div>
+            </label>
+            <label style="cursor:pointer;padding:var(--s4);border:1px solid var(--border-subtle);border-radius:var(--r3);transition:all var(--dur-fast)" id="mode-deep-label">
+              <%= f.radio_button :analysis_mode, "deep", id: "mode-deep", name: "analysis[analysis_mode]", style: "display:none", onchange: "updateModeSelection()" %>
+              <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-warn-text);margin-bottom:var(--s2)">Profunda</div>
+              <div style="font-size:14px;font-weight:500;margin-bottom:var(--s2)">DeepSeek Reasoner</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Análise mais detalhada. Pode levar 30–90 segundos.</div>
+            </label>
+          </div>
+        </div>
+
+        <div id="loading-state" style="display:none;text-align:center;padding:var(--s8);background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r4);margin-bottom:var(--s5)">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:300;margin-bottom:var(--s3)">Analisando documento…</div>
+          <div style="font-size:13px;color:var(--text-tertiary)">A IA está revisando seu contrato. Aguarde.</div>
+        </div>
+
+        <%= f.submit "Analisar documento", class: "btn btn-primary btn-block btn-lg", id: "submit-btn",
+            data: { disable_with: "Analisando…" }, onclick: "showLoading()" %>
+      <% end %>
+    </div>
+
+    <!-- Side info -->
+    <div style="position:sticky;top:calc(var(--nav-h) + var(--s8));display:flex;flex-direction:column;gap:var(--s5)">
+      <div class="card">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:var(--s5)">O que será analisado</div>
+        <div style="display:flex;flex-direction:column;gap:var(--s4)">
+          <% [["Correções ortográficas", "Erros gramaticais e tipográficos", "badge-ok"], ["Sugestões de redação", "Trechos ambíguos ou fracos", "badge-warn"], ["Riscos jurídicos", "Cláusulas problemáticas por nível", "badge-risk"]].each do |title, desc, badge| %>
+            <div style="display:flex;align-items:flex-start;gap:var(--s3)">
+              <span class="badge <%= badge %>" style="margin-top:2px;flex-shrink:0">✓</span>
+              <div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:2px"><%= title %></div>
+                <div style="font-size:12px;color:var(--text-tertiary)"><%= desc %></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:var(--s4)">Conta</div>
+        <div style="font-size:14px;color:var(--text-secondary)">
+          <%= current_user.name %><br>
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)"><%= current_user.analyses.count %> análise(s) realizadas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const zone = document.getElementById('upload-zone');
+  const input = document.getElementById('docx-input');
+
+  input.addEventListener('change', () => updateFile(input.files[0]));
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragging');
+    const file = e.dataTransfer.files[0];
+    if (file) { const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; updateFile(file); }
+  });
+
+  function updateFile(file) {
+    if (!file) return;
+    document.getElementById('upload-placeholder').style.display = 'none';
+    document.getElementById('upload-selected').style.display = 'block';
+    document.getElementById('upload-filename').textContent = file.name;
+    document.getElementById('upload-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+  }
+
+  function showLoading() {
+    document.getElementById('loading-state').style.display = 'block';
+  }
+
+  function updateModeSelection() {
+    const fast = document.getElementById('mode-fast').checked;
+    document.getElementById('mode-fast-label').style.borderColor = fast ? 'var(--steel)' : 'var(--border-subtle)';
+    document.getElementById('mode-fast-label').style.background = fast ? 'rgba(102,155,188,0.05)' : '';
+    document.getElementById('mode-deep-label').style.borderColor = !fast ? 'var(--steel)' : 'var(--border-subtle)';
+    document.getElementById('mode-deep-label').style.background = !fast ? 'rgba(102,155,188,0.05)' : '';
+  }
+
+  updateModeSelection();
+  document.getElementById('mode-fast').addEventListener('change', updateModeSelection);
+  document.getElementById('mode-deep').addEventListener('change', updateModeSelection);
+</script>

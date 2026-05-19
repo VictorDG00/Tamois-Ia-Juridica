@@ -1,0 +1,97 @@
+<% content_for :title, "Chat — #{@analysis.filename} — Tamois" %>
+
+<div class="container page-content">
+  <div class="page-header">
+    <div class="page-title-group">
+      <div class="t-label">Chat jurídico</div>
+      <h1 style="font-family:var(--font-display);font-size:28px;font-weight:300"><%= @analysis.filename %></h1>
+    </div>
+    <div style="display:flex;gap:var(--s3)">
+      <%= link_to "Ver análise", analysis_path(@analysis), class: "btn btn-secondary" %>
+      <%= link_to "← Histórico", analyses_path, class: "btn btn-ghost" %>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:260px 1fr;gap:var(--s6);align-items:start">
+    <!-- Sidebar: resumo -->
+    <div style="position:sticky;top:calc(var(--nav-h) + var(--s8))">
+      <div class="card" style="margin-bottom:var(--s4)">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:var(--s4)">Resumo</div>
+        <div style="display:flex;flex-direction:column;gap:var(--s3)">
+          <div style="display:flex;justify-content:space-between;font-size:13px">
+            <span style="color:var(--text-tertiary)">Ortografia</span>
+            <span style="font-weight:500"><%= @analysis.orthography.length %></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px">
+            <span style="color:var(--text-tertiary)">Redação</span>
+            <span style="font-weight:500"><%= @analysis.writing_suggestions.length %></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px">
+            <span style="color:var(--text-tertiary)">Insights</span>
+            <span style="font-weight:500"><%= @analysis.legal_insights.length %></span>
+          </div>
+          <% high = @analysis.legal_insights.count { |i| i["risk_level"] == "high" } %>
+          <% if high > 0 %>
+            <div style="margin-top:var(--s2)">
+              <span class="badge badge-risk"><%= high %> risco(s) alto(s)</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:var(--s4)">Perguntas sugeridas</div>
+        <div style="display:flex;flex-direction:column;gap:var(--s2)">
+          <% ["Quais são os maiores riscos deste contrato?", "Explique a cláusula de maior risco.", "Como posso melhorar a redação?"].each do |q| %>
+            <button onclick="document.getElementById('chat-input').value = this.textContent; document.getElementById('chat-input').focus()"
+              style="text-align:left;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r2);padding:var(--s2) var(--s3);font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all var(--dur-fast)"
+              onmouseover="this.style.borderColor='var(--border-accent)'"
+              onmouseout="this.style.borderColor='var(--border-subtle)'">
+              "<%= q %>"
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="chat-messages" id="chat-messages">
+        <% if @messages.empty? %>
+          <div style="text-align:center;padding:var(--s8);color:var(--text-tertiary)">
+            <div style="font-size:32px;margin-bottom:var(--s4)">💬</div>
+            <div style="font-family:var(--font-display);font-size:20px;font-weight:300;margin-bottom:var(--s3)">Olá! Sou o Tamois.</div>
+            <div style="font-size:14px">Faça perguntas sobre o documento <strong><%= @analysis.filename %></strong>.</div>
+          </div>
+        <% else %>
+          <% @messages.each do |msg| %>
+            <div class="chat-bubble chat-bubble-<%= msg.role %>">
+              <div class="bubble-content"><%= simple_format(msg.content) %></div>
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary);margin-top:4px;padding:0 var(--s2)">
+                <%= msg.role == "user" ? "Você" : "Tamois" %> · <%= msg.created_at.strftime("%H:%M") %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="chat-composer">
+        <%= form_with url: analysis_chat_path(@analysis), method: :post do |f| %>
+          <div class="chat-composer" style="border:none;padding:0">
+            <div style="display:flex;gap:var(--s3)">
+              <%= f.text_area :message, id: "chat-input", class: "input", placeholder: "Pergunte sobre o documento…", rows: 2,
+                  style: "resize:none;flex:1",
+                  onkeydown: "if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.closest('form').submit()}" %>
+              <%= f.submit "Enviar", class: "btn btn-primary", style: "align-self:flex-end" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const msgs = document.getElementById('chat-messages');
+  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+</script>

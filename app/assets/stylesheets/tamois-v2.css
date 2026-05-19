@@ -1,0 +1,263 @@
+/* ═══════════════════════════════════════════════════════
+   TAMOIS v2 — LIGHT MODE REFINADO
+   Estende tamois.css, sobrescreve apenas tokens do light theme
+   Mudanças principais:
+   · Base mais profunda (parchment escurecido) com hierarquia clara
+   · Cards = branco puro (popam sobre a base)
+   · Texto warm-black em vez de abyss-blue (combina melhor com parchment)
+   · Bordas em tom quente (tan), não frio (abyss)
+   · Sombras com matiz quente
+═══════════════════════════════════════════════════════ */
+
+@import url('tamois.css');
+
+[data-theme="light"] {
+  /* ── BACKGROUNDS — hierarquia clara em 3 degraus ── */
+  --bg-primary:   #E8DEC2;   /* base mais profunda — contraste real */
+  --bg-surface:   #FAF6E9;   /* surface intermediária */
+  --bg-elevated:  #FFFFFF;   /* cards/elevated: branco puro */
+  --bg-glass:     rgba(255,255,255,0.82);
+
+  /* ── TEXT — warm-black em vez de cold abyss ── */
+  --text-primary:   #1F1A14;
+  --text-secondary: rgba(31,26,20,0.66);
+  --text-tertiary:  rgba(31,26,20,0.42);
+  --text-accent:    #2F5C7A;    /* steel um pouco mais saturado */
+
+  /* ── BORDERS — tom quente (tan), não frio ── */
+  --border-subtle: rgba(120,75,30,0.10);
+  --border-medium: rgba(120,75,30,0.18);
+  --border-accent: rgba(120,75,30,0.32);
+
+  /* ── GLOWS — discretos sobre fundo claro ── */
+  --glow-crimson: rgba(193,18,31,0.10);
+  --glow-steel:   rgba(102,155,188,0.12);
+  --glow-molten:  rgba(120,0,0,0.08);
+
+  /* ── STATUS — bases brancas + acento mais escuro ── */
+  --c-ok-text:   #156B3A;   --c-ok-bg:   rgba(21,107,58,0.06);  --c-ok-border:   rgba(21,107,58,0.22);
+  --c-warn-text: #6E4F08;   --c-warn-bg: rgba(110,79,8,0.06);   --c-warn-border: rgba(110,79,8,0.22);
+  --c-risk-text: #9C0F1A;   --c-risk-bg: rgba(156,15,26,0.06);  --c-risk-border: rgba(156,15,26,0.22);
+  --c-info-text: #2A5670;   --c-info-bg: rgba(42,86,112,0.06);  --c-info-border: rgba(42,86,112,0.22);
+  --c-neutral-text: rgba(31,26,20,0.48);
+  --c-neutral-bg: rgba(31,26,20,0.04);
+  --c-neutral-border: rgba(31,26,20,0.12);
+
+  /* ── NOTIF / TOAST ── */
+  --notif-bg: #FFFFFF;
+  --notif-border: rgba(120,75,30,0.12);
+  --toast-bg: #FFFFFF;
+  --toast-border: rgba(120,75,30,0.14);
+  --toast-shadow: 0 8px 24px rgba(80,50,15,0.10), 0 2px 4px rgba(80,50,15,0.05);
+
+  /* ── EFFECTS ── */
+  --noise-opacity: 0;
+  --scroll-track: var(--bg-primary);
+  --scroll-thumb: rgba(120,75,30,0.20);
+  --ambient-abyss-op: 0;
+  --ambient-molten-op: 0;
+
+  /* sidebar/inputs */
+  --sidebar-hover-bg: rgba(120,75,30,0.05);
+  --sidebar-active-bg: rgba(193,18,31,0.08);
+  --input-bg: #FFFFFF;
+}
+
+/* ─── LIGHT V2 — variantes de fundo (selecionáveis via Tweaks) ─── */
+/* "linho" é o padrão — menos saturado que o parchment original */
+[data-theme="light"][data-light-bg="linho"]   { --bg-primary: #EAE3D2; }   /* warm linen, baixa saturação */
+[data-theme="light"][data-light-bg="parchment"] { --bg-primary: #E8DEC2; } /* o parchment v2 original */
+[data-theme="light"][data-light-bg="nevoa"]   { --bg-primary: #ECEAE3; }   /* warm fog, quase neutro */
+[data-theme="light"][data-light-bg="pedra"]   { --bg-primary: #E4E2DA; }   /* stone, levemente fria */
+[data-theme="light"][data-light-bg="ostra"]   { --bg-primary: #EFEBE0; }   /* oyster, mais clara */
+
+/* Default fallback se nenhum data-light-bg estiver presente */
+[data-theme="light"]:not([data-light-bg]) { --bg-primary: #EAE3D2; }
+
+/* ─── AJUSTES VISUAIS ESPECÍFICOS DO LIGHT V2 ─── */
+
+/* Body ganha textura sutil de papel */
+[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse at 80% -10%, rgba(193,18,31,0.04), transparent 50%),
+    radial-gradient(ellipse at 0% 110%, rgba(0,48,73,0.04), transparent 50%),
+    var(--bg-primary);
+}
+
+/* Cards e surfaces ganham sombras quentes para "flutuar" sobre a base */
+[data-theme="light"] .card,
+[data-theme="light"] .panel,
+[data-theme="light"] .dash-section,
+[data-theme="light"] .stepper,
+[data-theme="light"] .ctx,
+[data-theme="light"] .doc-head,
+[data-theme="light"] .quick,
+[data-theme="light"] .kpi-card,
+[data-theme="light"] .alert,
+[data-theme="light"] .source-card,
+[data-theme="light"] .thread-item,
+[data-theme="light"] .step-card,
+[data-theme="light"] .risk-item,
+[data-theme="light"] .role,
+[data-theme="light"] .plan-card,
+[data-theme="light"] .plan,
+[data-theme="light"] .cap,
+[data-theme="light"] .benefit,
+[data-theme="light"] .signup-form,
+[data-theme="light"] .hero-card,
+[data-theme="light"] .workspace-card {
+  box-shadow:
+    0 1px 2px rgba(80,50,15,0.04),
+    0 4px 16px rgba(80,50,15,0.06);
+}
+
+[data-theme="light"] .card:hover,
+[data-theme="light"] .quick:hover,
+[data-theme="light"] .thread-item:hover,
+[data-theme="light"] .source-card:hover,
+[data-theme="light"] .step-card:hover,
+[data-theme="light"] .role:hover,
+[data-theme="light"] .plan-card:hover {
+  box-shadow:
+    0 2px 4px rgba(80,50,15,0.06),
+    0 12px 28px rgba(80,50,15,0.10);
+}
+
+/* Hero card no light fica branco com borda quente sutil */
+[data-theme="light"] .hero-card {
+  background: linear-gradient(160deg, #FFFFFF 0%, #FFFCF4 100%);
+  border-color: rgba(120,75,30,0.14);
+}
+
+/* Nav com fundo branco translúcido + sombra inferior */
+[data-theme="light"] .nav {
+  background: rgba(255,255,255,0.85);
+  border-bottom: 1px solid rgba(120,75,30,0.10);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 2px 12px rgba(80,50,15,0.04);
+}
+
+/* Brand mark: borda quente em vez de glow */
+[data-theme="light"] .brand-mark {
+  box-shadow: 0 2px 8px rgba(193,18,31,0.25), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* Hero title em sólido com leve gradiente warm */
+[data-theme="light"] .hero-title {
+  background: linear-gradient(135deg, #1F1A14 0%, #3A2818 60%, #6B2A1F 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+[data-theme="light"] .signup-title {
+  background: linear-gradient(135deg, #1F1A14 0%, #3A2818 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* App-side surfaces no chat (history sidebar e composer) ganham contraste extra */
+[data-theme="light"] .history,
+[data-theme="light"] .sources {
+  background: #FAF6E9;
+}
+[data-theme="light"] .chat {
+  background: var(--bg-primary);
+}
+[data-theme="light"] .composer {
+  background: rgba(255,255,255,0.85);
+  border-top-color: rgba(120,75,30,0.12);
+}
+[data-theme="light"] .composer-box {
+  background: #FFFFFF;
+}
+
+/* Doc page (preview) — fundo creme um pouco mais quente */
+[data-theme="light"] .doc-page {
+  background: #FFFDF6;
+  border-right: 1px solid rgba(120,75,30,0.12);
+  color: #1F1A14;
+}
+
+/* AI response no light: borda esquerda steel, fundo branco */
+[data-theme="light"] .bubble-ai,
+[data-theme="light"] .ai-response,
+[data-theme="light"] .executive {
+  background: #FFFFFF;
+}
+
+/* Inputs no light: fundo branco, sombra interna sutil */
+[data-theme="light"] .input,
+[data-theme="light"] .select,
+[data-theme="light"] .textarea {
+  background: #FFFFFF;
+  box-shadow: inset 0 1px 2px rgba(80,50,15,0.04);
+}
+
+/* Severity bars no light: tons mais saturados */
+[data-theme="light"] .severity-low  .severity-bar { background: #156B3A; }
+[data-theme="light"] .severity-med  .severity-bar { background: #B6800A; }
+[data-theme="light"] .severity-high .severity-bar { background: #9C0F1A; }
+
+/* tweaks panel: branco sobre creme */
+[data-theme="light"] .tweaks {
+  background: #FFFFFF;
+  box-shadow: 0 16px 40px rgba(80,50,15,0.14);
+}
+[data-theme="light"] .tweaks-seg { background: #FAF6E9; }
+[data-theme="light"] .tweaks-seg button.active { background: #FFFFFF; box-shadow: 0 1px 3px rgba(80,50,15,0.10); }
+
+/* Plan featured no light */
+[data-theme="light"] .plan.featured {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFCF4 100%);
+}
+[data-theme="light"] .plans { background: #FFFFFF; }
+
+/* Plan card de cadastro selecionado */
+[data-theme="light"] .plan-card.is-active {
+  background: linear-gradient(135deg, #FFFCF4, #FFFFFF);
+}
+[data-theme="light"] .role.is-active {
+  background: linear-gradient(135deg, #FFFCF4, #FFFFFF);
+}
+
+/* Final-cta hero gradient ajustado */
+[data-theme="light"] .final-cta {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(193,18,31,0.10), transparent 60%),
+    linear-gradient(180deg, #FFFFFF, #FFFCF4);
+  border-color: rgba(120,75,30,0.16);
+}
+
+/* Quote */
+[data-theme="light"] .quote { background: #FFFFFF; }
+
+/* Trust */
+[data-theme="light"] .trust { border-color: rgba(120,75,30,0.12); }
+
+/* doc-preview no light */
+[data-theme="light"] .doc-preview { background: #FFFFFF; }
+[data-theme="light"] .comments-rail { background: #FAF6E9; }
+[data-theme="light"] .comment { background: #FFFFFF; }
+
+/* Tabela dashboard no light: zebra mais visível */
+[data-theme="light"] .docs-table tr:hover td { background: rgba(120,75,30,0.04); }
+
+/* History items no light */
+[data-theme="light"] .history-item.is-active { background: rgba(193,18,31,0.06); }
+
+/* Workspace card especial */
+[data-theme="light"] .workspace-card { background: #FFFFFF; }
+[data-theme="light"] .ws-avatar { background: linear-gradient(135deg, #003049, #00405F); color: #FDF0D5; }
+
+/* Footer divider */
+[data-theme="light"] .footer { border-color: rgba(120,75,30,0.12); }
+
+/* Cross-version pill (link entre v1 e v2) */
+.version-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 3px var(--s3); border-radius: var(--r-full);
+  background: var(--c-info-bg); color: var(--c-info-text);
+  border: 1px solid var(--c-info-border);
+  text-decoration: none; cursor: pointer;
+  transition: all var(--dur-fast);
+}
+.version-pill:hover { background: var(--c-info-border); }
+.version-pill-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }

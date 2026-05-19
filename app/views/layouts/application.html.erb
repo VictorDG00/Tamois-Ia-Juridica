@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <title><%= content_for(:title) || "Tamois — IA Jurídica" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <div class="ambient ambient-1"></div>
+    <div class="ambient ambient-2"></div>
+
+    <nav class="nav">
+      <%= link_to root_path, class: "brand" do %>
+        <div class="brand-mark">T</div>
+        <span class="brand-name">Tamois</span>
+        <span class="brand-tag">IA Jurídica</span>
+      <% end %>
+
+      <% if user_signed_in? %>
+        <ul class="nav-links">
+          <li><%= link_to "Painel", dashboard_path, class: controller_name == "dashboard" ? "active" : "" %></li>
+          <li><%= link_to "Nova Análise", new_analysis_path, class: controller_name == "analyses" && action_name == "new" ? "active" : "" %></li>
+          <li><%= link_to "Histórico", analyses_path, class: controller_name == "analyses" && action_name == "index" ? "active" : "" %></li>
+        </ul>
+      <% end %>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
+          <span class="theme-opt" data-theme-btn="light">Claro</span>
+          <span class="theme-opt" data-theme-btn="dark">Escuro</span>
+        </button>
+
+        <% if user_signed_in? %>
+          <span style="font-size:13px;color:var(--text-tertiary);font-family:var(--font-mono)"><%= current_user.name.split(" ").first %></span>
+          <%= link_to "Sair", destroy_user_session_path, data: { turbo_method: :delete }, class: "btn btn-ghost btn-sm" %>
+        <% else %>
+          <%= link_to "Entrar", new_user_session_path, class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Começar", new_user_registration_path, class: "btn btn-primary btn-sm" %>
+        <% end %>
+      </div>
+    </nav>
+
+    <div class="flash-container">
+      <% flash.each do |type, msg| %>
+        <div class="flash-msg <%= type %>">
+          <%= msg %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="page-wrap">
+      <%= yield %>
+    </div>
+
+    <script>
+      function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('tamois-theme', next);
+        updateThemeButtons(next);
+      }
+
+      function updateThemeButtons(theme) {
+        document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.themeBtn === theme);
+        });
+      }
+
+      (function() {
+        const saved = localStorage.getItem('tamois-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+        updateThemeButtons(saved);
+      })();
+
+      setTimeout(() => {
+        document.querySelectorAll('.flash-msg').forEach(el => {
+          el.style.transition = 'opacity 0.5s';
+          el.style.opacity = '0';
+          setTimeout(() => el.remove(), 500);
+        });
+      }, 4000);
+    </script>
+  </body>
+</html>
