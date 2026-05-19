@@ -6,11 +6,16 @@ class DocxExtractor
   NS = { "w" => "http://schemas.openxmlformats.org/wordprocessingml/2006/main" }.freeze
 
   def self.extract(file_path)
-    new(file_path).extract
+    new(file_path: file_path).extract
   end
 
-  def initialize(file_path)
+  def self.extract_from_string(docx_bytes)
+    new(bytes: docx_bytes).extract
+  end
+
+  def initialize(file_path: nil, bytes: nil)
     @file_path = file_path
+    @bytes     = bytes
   end
 
   def extract
@@ -28,10 +33,13 @@ class DocxExtractor
   private
 
   def read_document_xml
-    Zip::File.open(@file_path) do |zip|
+    xml = nil
+    zip_source = @bytes ? Zip::File.open_buffer(StringIO.new(@bytes)) : Zip::File.open(@file_path)
+    zip_source.tap do |zip|
       entry = zip.find_entry(WORD_DOCUMENT_PATH)
       raise ArgumentError, "Arquivo DOCX inválido: word/document.xml não encontrado" unless entry
-      entry.get_input_stream.read
+      xml = entry.get_input_stream.read
     end
+    xml
   end
 end

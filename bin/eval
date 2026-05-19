@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# bin/eval — Roda os evals do motor de análise Tamois contra a API DeepSeek real.
+#
+# Uso:
+#   bin/eval               # roda todos os evals
+#   bin/eval --verbose     # mostra saída completa do Rails test
+#
+# Requer DEEPSEEK_API_KEY no .env ou no ambiente.
+
+require "English"
+
+BOLD   = "\e[1m"
+GREEN  = "\e[32m"
+RED    = "\e[31m"
+YELLOW = "\e[33m"
+RESET  = "\e[0m"
+CYAN   = "\e[36m"
+
+verbose = ARGV.include?("--verbose")
+
+puts
+puts "#{BOLD}#{CYAN}╔══════════════════════════════════════════════╗#{RESET}"
+puts "#{BOLD}#{CYAN}║   Tamois — Eval System · Motor de Análise   ║#{RESET}"
+puts "#{BOLD}#{CYAN}╚══════════════════════════════════════════════╝#{RESET}"
+puts
+
+# Verifica API key antes de começar
+env_file = File.join(__dir__, "../.env")
+if File.exist?(env_file)
+  File.readlines(env_file).each do |line|
+    key, val = line.strip.split("=", 2)
+    ENV[key] = val if key && val && !ENV.key?(key)
+  end
+end
+
+api_key = ENV.fetch("DEEPSEEK_API_KEY", "")
+if api_key.blank? || api_key.start_with?("sua_")
+  puts "#{RED}✗ DEEPSEEK_API_KEY não configurada.#{RESET}"
+  puts "  Configure em .env ou exporte no shell antes de rodar bin/eval."
+  exit 1
+end
+
+puts "  API key: #{api_key[0, 8]}...#{api_key[-4..]}"
+puts "  Modelo:  deepseek-chat"
+puts "  Fixture: test/evals/fixtures/contrato_fixture.rb"
+puts
+
+puts "#{YELLOW}⟳ Conectando ao DeepSeek (3 chamadas — pode levar 30-90s)...#{RESET}"
+puts
+
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+cmd = "bundle exec rails test test/evals/ 2>&1"
+output = `#{cmd}`
+exit_code = $CHILD_STATUS.exitstatus
+
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).round(1)
+
+if verbose
+  puts output
+else
+  # Filtra apenas linhas relevantes
+  output.each_line do |line|
+    next if line.match?(/DEPRECATION|Booting|Starting|SolidQueue|Puma/)
+    print line
+  end
+end
+
+puts
+puts "─" * 50
+
+# Extrai contagem do resumo do rails test
+if (summary = output.match(/(\d+) runs, (\d+) assertions, (\d+) failures, (\d+) errors/))
+  runs       = summary[1].to_i
+  assertions = summary[2].to_i
+  failures   = summary[3].to_i
+  errors     = summary[4].to_i
+  skipped    = output.match(/(\d+) skips/)&.[](1).to_i
+
+  puts
+  if skipped == runs
+    puts "#{YELLOW}⚠  Todos os testes foram SKIPPED — DEEPSEEK_API_KEY não estava disponível em runtime.#{RESET}"
+    exit 1
+  elsif failures == 0 && errors == 0
+    puts "#{GREEN}#{BOLD}✓ EVAL PASSOU#{RESET} — #{runs} testes, #{assertions} assertions em #{elapsed}s"
+  else
+    puts "#{RED}#{BOLD}✗ EVAL FALHOU#{RESET} — #{failures} falhas, #{errors} erros em #{elapsed}s"
+    puts
+    puts "  O que isso significa:"
+    puts "  • Uma falha = o DeepSeek não encontrou algo que deveria encontrar"
+    puts "  • Pode ser problema de prompt, temperatura, ou contrato mudou"
+    puts "  • Rode com --verbose para ver os detalhes completos"
+  end
+else
+  puts "#{YELLOW}Não foi possível parsear o resultado. Saída completa:#{RESET}"
+  puts output
+end
+
+puts
+exit exit_code

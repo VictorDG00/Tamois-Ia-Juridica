@@ -1,0 +1,51 @@
+# Gabarito do contrato fixture — erros INTENCIONAIS que o motor DEVE encontrar.
+# Cada entrada tem:
+#   match: substring que deve aparecer no campo indicado (case-insensitive)
+#   field: campo do resultado onde buscar (original, suggestion, insight, excerpt)
+#   description: descrição humana do erro (usada no relatório de falha)
+#
+# Atualizar este arquivo sempre que o contrato fixture for alterado.
+# Referência: test/evals/fixtures/contrato_fixture.rb
+
+orthography:
+  - match: "rescição"
+    field: original
+    description: "Grafia incorreta de 'rescisão' — erro clássico em contratos"
+
+  - match: "inicio"
+    field: original
+    description: "Falta acento em 'início' (Cláusula 2ª)"
+
+  - match: "util"
+    field: original
+    description: "Falta acento em 'útil' — '5º dia util' (Cláusula 3ª)"
+
+  - match: "juridica"
+    field: original
+    description: "Falta acento em 'jurídica' (Cláusula 1ª)"
+
+  - match: "duvidas"
+    field: original
+    description: "Falta acento em 'dúvidas' (Cláusula 7ª)"
+
+legal_insights:
+  - match: "multa"
+    field: insight
+    description: "Multa de 30% pode ser excessiva — deve ser flagrada como risco"
+
+  - match: "unilateral"
+    field: insight
+    description: "Rescisão unilateral e imediata sem notificação é risco jurídico"
+
+  - match: "indeterminado"
+    field: insight
+    description: "Confidencialidade por prazo indeterminado pode ser problemática"
+
+  - match: "propriedade"
+    field: insight
+    description: "Cessão de direitos autorais sem compensação pode gerar conflito"
+
+writing_suggestions:
+  - match: "rescição"
+    field: excerpt
+    description: "Trecho com erro ortográfico deve ter sugestão de redação"
