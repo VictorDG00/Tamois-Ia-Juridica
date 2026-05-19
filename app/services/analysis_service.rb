@@ -10,20 +10,23 @@ class AnalysisService
     text = DocxExtractor.extract(file_path)
     raise ArgumentError, "Documento vazio ou ilegível." if text.blank?
 
+    @analysis.update!(original_text: text)
+
     client = DeepseekClient.new(
       model: @analysis.analysis_mode == "deep" ? "deepseek-reasoner" : "deepseek-chat"
     )
-    result = client.analyze(text)
 
-    @analysis.update!(
-      original_text: text,
-      orthography_json: result["orthography"].to_json,
-      writing_suggestions_json: result["writing_suggestions"].to_json,
-      legal_insights_json: result["legal_insights"].to_json,
-      status: "completed"
-    )
+    # Cada seção é analisada e salva individualmente — a UI acende os
+    # checkpoints em tempo real conforme cada chamada termina.
+    orthography = client.analyze_section(text, :orthography)
+    @analysis.update!(orthography_json: orthography.to_json)
 
-    result
+    writing = client.analyze_section(text, :writing)
+    @analysis.update!(writing_suggestions_json: writing.to_json)
+
+    insights = client.analyze_section(text, :insights)
+    @analysis.update!(legal_insights_json: insights.to_json, status: "completed")
+
   rescue => e
     @analysis.update!(status: "failed")
     Rails.logger.error("AnalysisService error: #{e.class} — #{e.message}")

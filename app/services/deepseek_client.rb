@@ -31,6 +31,16 @@ class DeepseekClient
     normalize(parsed)
   end
 
+  def analyze_section(text, section)
+    raise ProviderError, "DEEPSEEK_API_KEY não configurada." if @api_key.blank?
+
+    truncated = text.to_s[0, MAX_TEXT_LENGTH]
+    payload = build_section_payload(truncated, section)
+    response = post(payload)
+    content = extract_content(response)
+    parse_section_json(content, section)
+  end
+
   def chat(messages)
     raise ProviderError, "DEEPSEEK_API_KEY não configurada." if @api_key.blank?
 
@@ -45,6 +55,87 @@ class DeepseekClient
   end
 
   private
+
+  def build_section_payload(text, section)
+    {
+      model: @model,
+      messages: [
+        { role: "system", content: "Responda somente em JSON válido." },
+        { role: "user", content: build_section_prompt(text, section) }
+      ],
+      temperature: 0.1
+    }
+  end
+
+  def build_section_prompt(text, section)
+    header = <<~HEADER
+      Você é um revisor jurídico especializado em direito brasileiro.
+      REGRA FUNDAMENTAL: Só reporte itens com CERTEZA ABSOLUTA. Em caso de dúvida, não reporte.
+      Prefira lista pequena e precisa a lista grande com itens duvidosos.
+      O texto contém parágrafos indexados (ex: [Paragrafo 0] ...).
+
+    HEADER
+
+    body = case section
+    when :orthography
+      <<~BODY
+        Analise APENAS erros ortográficos e gramaticais inequívocos.
+        NÃO reporte: jargão jurídico, latinismos, termos técnicos, variações aceitas, palavras corretas em contexto jurídico.
+        Reporte TODOS os erros encontrados, sem limite de quantidade.
+
+        Retorne SOMENTE JSON válido:
+        {"orthography":[{"original":"...","suggestion":"...","reason":"..."}]}
+        Se não houver erros, retorne: {"orthography":[]}
+      BODY
+    when :writing
+      <<~BODY
+        Analise APENAS trechos onde a ambiguidade ou fraqueza de redação é objetiva e clara.
+        NÃO reporte: estilo pessoal, preferências subjetivas, trechos já corretos.
+        Use 'excerpt' com o trecho EXATO do texto (copie literalmente).
+        Reporte TODOS os trechos problemáticos encontrados, sem limite.
+
+        Retorne SOMENTE JSON válido:
+        {"writing_suggestions":[{"excerpt":"...","suggestion":"...","reason":"..."}]}
+        Se não houver sugestões, retorne: {"writing_suggestions":[]}
+      BODY
+    when :insights
+      <<~BODY
+        Analise APENAS riscos jurídicos baseados em norma específica e identificável.
+        NÃO reporte: especulações, riscos hipotéticos, interpretações forçadas.
+        Classifique risco_level como: high (nulidade, inconstitucionalidade, violação de direito fundamental),
+        medium (cláusula abusiva confirmada, ambiguidade que gera conflito real, falta de elemento essencial),
+        low (imprecisão terminológica clara, redundância evidente).
+        Reporte TODOS os riscos reais, sem limite de quantidade.
+        Use paragraph_id com o número inteiro do parágrafo de origem.
+
+        Retorne SOMENTE JSON válido:
+        {"legal_insights":[{"topic":"...","insight":"...","risk_level":"low|medium|high","paragraph_id":INT}]}
+        Se não houver riscos, retorne: {"legal_insights":[]}
+      BODY
+    end
+
+    "#{header}#{body}\nTexto:\n#{text}"
+  end
+
+  def parse_section_json(content, section)
+    clean = strip_markdown(content.to_s.strip)
+    parsed = begin
+      JSON.parse(clean)
+    rescue JSON::ParserError
+      extracted = extract_json_object(clean)
+      raise ResponseError, "DeepSeek retornou JSON inválido." if extracted.nil?
+      JSON.parse(extracted)
+    end
+
+    key = { orthography: "orthography", writing: "writing_suggestions", insights: "legal_insights" }[section]
+    items = parsed[key] || []
+
+    case section
+    when :orthography then normalize_orthography(items)
+    when :writing     then normalize_writing(items)
+    when :insights    then normalize_insights(items)
+    end
+  end
 
   def build_payload(text)
     {

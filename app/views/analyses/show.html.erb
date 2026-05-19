@@ -1,6 +1,6 @@
 <% content_for :title, "#{@analysis.filename} — Tamois" %>
 <% if @analysis.pending? || @analysis.processing? %>
-  <meta http-equiv="refresh" content="4">
+  <meta http-equiv="refresh" content="3">
 <% end %>
 
 <div class="container page-content">
@@ -25,24 +25,72 @@
   </div>
 
   <% if @analysis.pending? || @analysis.processing? %>
-    <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r4);padding:var(--s10);text-align:center;margin-bottom:var(--s8)">
-      <div style="font-size:40px;margin-bottom:var(--s5)">⏳</div>
-      <div style="font-family:var(--font-display);font-size:24px;font-weight:300;margin-bottom:var(--s3)">Analisando documento…</div>
-      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:var(--s6)">
-        A IA está revisando seu contrato. Esta página vai atualizar automaticamente.<br>
-        <% if @analysis.analysis_mode == "deep" %>
-          <span style="color:var(--c-warn-text)">Modo profundo pode levar até 2 minutos.</span>
-        <% else %>
-          Modo rápido costuma terminar em menos de 30 segundos.
-        <% end %>
-      </p>
-      <div style="width:200px;height:3px;background:var(--border-subtle);border-radius:var(--r-full);margin:0 auto;overflow:hidden">
-        <div style="height:100%;background:var(--crimson);border-radius:var(--r-full);animation:progress-bar 2s ease-in-out infinite alternate"></div>
+    <%
+      ortho_done   = @analysis.orthography_json.present?
+      writing_done = @analysis.writing_suggestions_json.present?
+      insights_done = @analysis.legal_insights_json.present?
+    %>
+    <div style="max-width:520px;margin:0 auto var(--s8)">
+
+      <%# Aviso de saída %>
+      <div style="display:flex;align-items:flex-start;gap:var(--s3);background:var(--c-info-bg);border:1px solid var(--c-info-border);border-radius:var(--r3);padding:var(--s4);margin-bottom:var(--s6)">
+        <span style="font-size:18px;flex-shrink:0">💡</span>
+        <p style="font-size:13px;color:var(--c-info-text);line-height:1.6;margin:0">
+          <strong>Pode fechar esta página.</strong> A análise continua rodando no servidor.
+          Volte quando quiser pelo <a href="<%= analyses_path %>" style="color:var(--c-info-text);font-weight:600;text-decoration:underline">histórico de análises</a> para ver o resultado.
+        </p>
       </div>
-      <style>
-        @keyframes progress-bar { from { width: 20%; } to { width: 90%; } }
-      </style>
+
+      <%# Card principal %>
+      <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r4);padding:var(--s8)">
+        <div style="text-align:center;margin-bottom:var(--s8)">
+          <div style="font-family:var(--font-display);font-size:26px;font-weight:300;margin-bottom:var(--s2)">Analisando documento…</div>
+          <div style="font-size:13px;color:var(--text-tertiary)">
+            <% if @analysis.analysis_mode == "deep" %>
+              Modo profundo — pode levar até 3 minutos
+            <% else %>
+              Modo rápido — geralmente menos de 45 segundos
+            <% end %>
+          </div>
+        </div>
+
+        <%# Checkpoints %>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <% [
+            [ortho_done,    "Correções ortográficas",  "Verificando grafia, concordância e gramática"],
+            [writing_done,  "Sugestões de redação",    "Identificando trechos ambíguos e redação fraca"],
+            [insights_done, "Insights jurídicos",      "Mapeando riscos contratuais por cláusula"]
+          ].each_with_index do |(done, title, desc), idx| %>
+            <div style="display:flex;align-items:center;gap:var(--s4);padding:var(--s4) 0;<%= idx < 2 ? 'border-bottom:1px solid var(--border-subtle);' : '' %>">
+
+              <%# Ícone do checkpoint %>
+              <% if done %>
+                <div style="width:36px;height:36px;border-radius:50%;background:var(--c-ok-bg);border:1px solid var(--c-ok-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.4s">
+                  <span style="color:var(--c-ok-text);font-size:16px">✓</span>
+                </div>
+              <% else %>
+                <div style="width:36px;height:36px;border-radius:50%;background:var(--bg-surface);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <div style="width:10px;height:10px;border-radius:50%;background:var(--border-medium)"></div>
+                </div>
+              <% end %>
+
+              <div style="flex:1">
+                <div style="font-size:14px;font-weight:500;color:<%= done ? 'var(--c-ok-text)' : 'var(--text-primary)' %>;margin-bottom:2px"><%= title %></div>
+                <div style="font-size:12px;color:var(--text-tertiary)"><%= done ? "Concluído" : desc %></div>
+              </div>
+
+              <% unless done %>
+                <div style="width:16px;height:16px;border:2px solid var(--border-medium);border-top-color:var(--crimson);border-radius:50%;animation:spin 1s linear infinite;flex-shrink:0"></div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
+
+    <style>
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   <% elsif @analysis.failed? %>
     <div style="background:var(--c-risk-bg);border:1px solid var(--c-risk-border);border-radius:var(--r4);padding:var(--s6);text-align:center;margin-bottom:var(--s8)">
       <div style="font-family:var(--font-display);font-size:22px;font-weight:300;margin-bottom:var(--s3)">Falha na análise</div>
