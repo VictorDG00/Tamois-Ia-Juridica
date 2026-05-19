@@ -24,6 +24,9 @@ Rails.application.configure do
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
 
+  # Active Storage — armazena arquivos em disco (volume Docker mapeado em /rails/storage)
+  config.active_storage.service = :local
+
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
 
