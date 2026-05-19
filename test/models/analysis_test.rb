@@ -65,6 +65,13 @@ class AnalysisTest < ActiveSupport::TestCase
     assert analysis.completed?
     assert_not analysis.failed?
     assert_not analysis.processing?
+    assert_not analysis.pending?
+  end
+
+  test "pending? returns true when status is pending" do
+    analysis = create_analysis(user: @user, status: "pending")
+    assert analysis.pending?
+    assert_not analysis.completed?
   end
 
   test "failed? returns true when status is failed" do

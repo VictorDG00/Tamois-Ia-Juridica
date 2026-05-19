@@ -41,6 +41,10 @@ class Analysis < ApplicationRecord
     status == "processing"
   end
 
+  def pending?
+    status == "pending"
+  end
+
   private
 
   def set_defaults

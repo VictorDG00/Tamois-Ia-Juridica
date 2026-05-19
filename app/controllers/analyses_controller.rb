@@ -35,13 +35,8 @@ class AnalysesController < ApplicationController
     @analysis.docx_file.attach(file)
 
     if @analysis.save
-      begin
-        AnalysisService.new(@analysis).run
-        redirect_to @analysis, notice: "Análise concluída com sucesso."
-      rescue => e
-        flash[:alert] = "Erro ao analisar o documento: #{e.message}"
-        redirect_to new_analysis_path
-      end
+      AnalysisJob.perform_later(@analysis.id)
+      redirect_to @analysis, notice: "Documento enviado. A análise está sendo processada…"
     else
       flash[:alert] = "Erro ao salvar o arquivo."
       redirect_to new_analysis_path

@@ -1,4 +1,7 @@
 <% content_for :title, "#{@analysis.filename} — Tamois" %>
+<% if @analysis.pending? || @analysis.processing? %>
+  <meta http-equiv="refresh" content="4">
+<% end %>
 
 <div class="container page-content">
   <div class="page-header">
@@ -21,7 +24,26 @@
     </div>
   </div>
 
-  <% if @analysis.failed? %>
+  <% if @analysis.pending? || @analysis.processing? %>
+    <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r4);padding:var(--s10);text-align:center;margin-bottom:var(--s8)">
+      <div style="font-size:40px;margin-bottom:var(--s5)">⏳</div>
+      <div style="font-family:var(--font-display);font-size:24px;font-weight:300;margin-bottom:var(--s3)">Analisando documento…</div>
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:var(--s6)">
+        A IA está revisando seu contrato. Esta página vai atualizar automaticamente.<br>
+        <% if @analysis.analysis_mode == "deep" %>
+          <span style="color:var(--c-warn-text)">Modo profundo pode levar até 2 minutos.</span>
+        <% else %>
+          Modo rápido costuma terminar em menos de 30 segundos.
+        <% end %>
+      </p>
+      <div style="width:200px;height:3px;background:var(--border-subtle);border-radius:var(--r-full);margin:0 auto;overflow:hidden">
+        <div style="height:100%;background:var(--crimson);border-radius:var(--r-full);animation:progress-bar 2s ease-in-out infinite alternate"></div>
+      </div>
+      <style>
+        @keyframes progress-bar { from { width: 20%; } to { width: 90%; } }
+      </style>
+    </div>
+  <% elsif @analysis.failed? %>
     <div style="background:var(--c-risk-bg);border:1px solid var(--c-risk-border);border-radius:var(--r4);padding:var(--s6);text-align:center;margin-bottom:var(--s8)">
       <div style="font-family:var(--font-display);font-size:22px;font-weight:300;margin-bottom:var(--s3)">Falha na análise</div>
       <p style="font-size:14px;color:var(--text-secondary)">Não foi possível processar o documento. Verifique se o arquivo é um DOCX válido.</p>
