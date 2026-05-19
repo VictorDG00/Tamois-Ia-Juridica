@@ -45,6 +45,23 @@ legal_insights:
     field: insight
     description: "Cessão de direitos autorais sem compensação pode gerar conflito"
 
+entities:
+  - field: contratante
+    contains: "Alpha"
+    description: "Identifica a Empresa Alpha Ltda. como contratante"
+
+  - field: contratada
+    contains: "Beta"
+    description: "Identifica a Consultoria Beta S.A. como contratada"
+
+  - field: valor
+    contains: "15.000"
+    description: "Extrai o valor mensal de R$ 15.000,00"
+
+  - field: foro
+    contains: "Paulo"
+    description: "Identifica São Paulo como foro de eleição"
+
 writing_suggestions:
   - match: "rescição"
     field: excerpt

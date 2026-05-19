@@ -29,6 +29,12 @@ class Analysis < ApplicationRecord
     []
   end
 
+  def entities
+    JSON.parse(entities_json || "{}")
+  rescue JSON::ParserError
+    {}
+  end
+
   def completed?
     status == "completed"
   end

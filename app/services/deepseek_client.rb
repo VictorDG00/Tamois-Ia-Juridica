@@ -9,6 +9,11 @@ class DeepseekClient
 
   VALID_RISK_LEVELS = %w[low medium high].freeze
 
+  ENTITY_FIELDS = %w[
+    contratante contratada objeto valor vigencia
+    prazo_pagamento multa foro
+  ].freeze
+
   class ProviderError < StandardError; end
   class TimeoutError < ProviderError; end
   class ResponseError < ProviderError; end
@@ -112,6 +117,28 @@ class DeepseekClient
         {"legal_insights":[{"topic":"...","insight":"...","risk_level":"low|medium|high","paragraph_id":INT}]}
         Se não houver riscos, retorne: {"legal_insights":[]}
       BODY
+    when :entities
+      <<~BODY
+        Extraia as informações-chave deste contrato jurídico.
+        REGRA ABSOLUTA: Copie EXATAMENTE o que está escrito no texto.
+        Se uma informação não estiver explicitamente no texto, retorne null para esse campo.
+        NUNCA invente, NUNCA infira, NUNCA complete com suposições.
+
+        Retorne SOMENTE JSON válido com exatamente estas chaves:
+        {
+          "entities": {
+            "contratante": "nome completo de quem contrata (cliente/comprador)",
+            "contratada": "nome completo de quem presta o serviço",
+            "objeto": "descrição objetiva do serviço ou produto (máx 150 chars)",
+            "valor": "valor da remuneração com periodicidade (ex: R$ 5.000,00/mês)",
+            "vigencia": "duração do contrato (ex: 12 meses a partir de 01/01/2026)",
+            "prazo_pagamento": "quando o pagamento deve ser efetuado",
+            "multa": "percentual ou valor da multa por descumprimento",
+            "foro": "comarca ou cidade eleita para resolução de disputas"
+          }
+        }
+        Use null (sem aspas) para campos não encontrados.
+      BODY
     end
 
     "#{header}#{body}\nTexto:\n#{text}"
@@ -127,13 +154,17 @@ class DeepseekClient
       JSON.parse(extracted)
     end
 
-    key = { orthography: "orthography", writing: "writing_suggestions", insights: "legal_insights" }[section]
-    items = parsed[key] || []
-
     case section
-    when :orthography then normalize_orthography(items)
-    when :writing     then normalize_writing(items)
-    when :insights    then normalize_insights(items)
+    when :entities
+      normalize_entities(parsed["entities"])
+    else
+      key   = { orthography: "orthography", writing: "writing_suggestions", insights: "legal_insights" }[section]
+      items = parsed[key] || []
+      case section
+      when :orthography then normalize_orthography(items)
+      when :writing     then normalize_writing(items)
+      when :insights    then normalize_insights(items)
+      end
     end
   end
 
@@ -286,6 +317,14 @@ class DeepseekClient
         "risk_level" => risk_level,
         "paragraph_id" => paragraph_id
       }
+    end
+  end
+
+  def normalize_entities(raw)
+    return ENTITY_FIELDS.index_with(nil) unless raw.is_a?(Hash)
+    ENTITY_FIELDS.each_with_object({}) do |field, result|
+      value = raw[field].to_s.strip
+      result[field] = value.present? ? value[0, 200] : nil
     end
   end
 

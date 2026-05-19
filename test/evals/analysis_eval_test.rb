@@ -29,6 +29,7 @@ class AnalysisEvalTest < ActiveSupport::TestCase
     client = DeepseekClient.new(api_key: key, model: "deepseek-chat")
 
     @eval_results = {
+      entities:    client.analyze_section(text, :entities),
       orthography: client.analyze_section(text, :orthography),
       writing:     client.analyze_section(text, :writing),
       insights:    client.analyze_section(text, :insights)
@@ -39,6 +40,25 @@ class AnalysisEvalTest < ActiveSupport::TestCase
     results = self.class.eval_results
     skip "DEEPSEEK_API_KEY não configurada — evals requerem API real" unless results
     @results = results
+  end
+
+  # ── Entidades ───────────────────────────────────────────────────────────────
+
+  FINDINGS["entities"].each do |exp|
+    test "entidade: extrai campo '#{exp["field"]}' contendo '#{exp["contains"]}' — #{exp["description"]}" do
+      entities = @results[:entities]
+      value    = entities.fetch(exp["field"], "").to_s
+      assert value.downcase.include?(exp["contains"].downcase),
+        "Campo '#{exp["field"]}' = #{value.inspect}\nEsperava conter: '#{exp["contains"]}'"
+    end
+  end
+
+  test "entidades: retorna hash com todas as chaves conhecidas" do
+    entities = @results[:entities]
+    assert entities.is_a?(Hash), "Esperava Hash, recebeu #{entities.class}"
+    DeepseekClient::ENTITY_FIELDS.each do |field|
+      assert entities.key?(field), "Campo '#{field}' ausente no hash de entidades"
+    end
   end
 
   # ── Ortografia ──────────────────────────────────────────────────────────────
@@ -96,6 +116,12 @@ class AnalysisEvalTest < ActiveSupport::TestCase
     field = exp["field"]
     found = items.any? { |item| item.fetch(field, "").downcase.include?(exp["match"].downcase) }
     assert found, eval_failure_message(section, exp, items)
+  end
+
+  def assert_entity(field, contains)
+    value = @results[:entities].fetch(field, "").to_s
+    assert value.downcase.include?(contains.downcase),
+      "Campo '#{field}' = #{value.inspect} — esperava conter '#{contains}'"
   end
 
   def eval_failure_message(section, exp, items)

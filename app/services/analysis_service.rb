@@ -16,8 +16,10 @@ class AnalysisService
       model: @analysis.analysis_mode == "deep" ? "deepseek-reasoner" : "deepseek-chat"
     )
 
-    # Cada seção é analisada e salva individualmente — a UI acende os
-    # checkpoints em tempo real conforme cada chamada termina.
+    # Cada seção é salva individualmente — a UI acende os checkpoints em tempo real.
+    entities = client.analyze_section(text, :entities)
+    @analysis.update!(entities_json: entities.to_json)
+
     orthography = client.analyze_section(text, :orthography)
     @analysis.update!(orthography_json: orthography.to_json)
 

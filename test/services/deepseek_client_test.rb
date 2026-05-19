@@ -103,6 +103,40 @@ class DeepseekClientTest < ActiveSupport::TestCase
     assert_equal -1, @client.send(:parse_paragraph_id, "abc")
   end
 
+  test "normalize_entities retorna hash com campos conhecidos" do
+    raw = {
+      "contratante" => "Empresa Alpha Ltda.",
+      "contratada"  => "Consultoria Beta S.A.",
+      "objeto"      => "Serviços de consultoria",
+      "valor"       => nil,
+      "vigencia"    => "",
+      "foro"        => "São Paulo"
+    }
+    result = @client.send(:normalize_entities, raw)
+    assert_equal "Empresa Alpha Ltda.", result["contratante"]
+    assert_equal "Consultoria Beta S.A.", result["contratada"]
+    assert_nil result["valor"]
+    assert_nil result["vigencia"]
+    assert_equal "São Paulo", result["foro"]
+    assert DeepseekClient::ENTITY_FIELDS.all? { |f| result.key?(f) }
+  end
+
+  test "normalize_entities retorna todos os campos como nil para input vazio" do
+    result = @client.send(:normalize_entities, {})
+    assert DeepseekClient::ENTITY_FIELDS.all? { |f| result[f].nil? }
+  end
+
+  test "normalize_entities retorna todos os campos como nil para input nil" do
+    result = @client.send(:normalize_entities, nil)
+    assert DeepseekClient::ENTITY_FIELDS.all? { |f| result[f].nil? }
+  end
+
+  test "normalize_entities trunca valores longos em 200 chars" do
+    raw = { "objeto" => "A" * 300 }
+    result = @client.send(:normalize_entities, raw)
+    assert_equal 200, result["objeto"].length
+  end
+
   test "normalize validates complete contract" do
     payload = {
       "orthography" => [{ "original" => "a", "suggestion" => "b", "reason" => "r" }],

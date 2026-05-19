@@ -31,8 +31,9 @@
 
   <% if @analysis.pending? || @analysis.processing? %>
     <%
-      ortho_done   = @analysis.orthography_json.present?
-      writing_done = @analysis.writing_suggestions_json.present?
+      entities_done = @analysis.entities_json.present?
+      ortho_done    = @analysis.orthography_json.present?
+      writing_done  = @analysis.writing_suggestions_json.present?
       insights_done = @analysis.legal_insights_json.present?
     %>
     <div style="max-width:520px;margin:0 auto var(--s8)">
@@ -62,6 +63,7 @@
         <%# Checkpoints %>
         <div style="display:flex;flex-direction:column;gap:0">
           <% [
+            [entities_done, "Identificação de partes e cláusulas", "Extraindo contratante, contratada, valores e prazos"],
             [ortho_done,    "Correções ortográficas",  "Verificando grafia, concordância e gramática"],
             [writing_done,  "Sugestões de redação",    "Identificando trechos ambíguos e redação fraca"],
             [insights_done, "Insights jurídicos",      "Mapeando riscos contratuais por cláusula"]
@@ -103,6 +105,38 @@
       <%= link_to "Tentar novamente", new_analysis_path, class: "btn btn-primary", style: "margin-top:var(--s4)" %>
     </div>
   <% else %>
+    <%# Ficha do contrato — aparece só quando entities foi extraído %>
+    <% if @analysis.entities.any? { |_, v| v.present? } %>
+      <%
+        labels = {
+          "contratante"     => "Contratante",
+          "contratada"      => "Contratada",
+          "objeto"          => "Objeto",
+          "valor"           => "Valor",
+          "vigencia"        => "Vigência",
+          "prazo_pagamento" => "Prazo de pagamento",
+          "multa"           => "Multa",
+          "foro"            => "Foro de eleição"
+        }
+      %>
+      <div class="card" style="margin-bottom:var(--s5)">
+        <div class="card-header">
+          <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-tertiary)">Ficha do contrato</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">Extraído pela IA · pode conter imprecisões</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse">
+          <% labels.each do |field, label| %>
+            <% value = @analysis.entities[field] %>
+            <% next if value.blank? %>
+            <tr style="border-bottom:1px solid var(--border-subtle)">
+              <td style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary);padding:var(--s3) var(--s4) var(--s3) 0;white-space:nowrap;width:160px"><%= label %></td>
+              <td style="font-size:14px;color:var(--text-primary);padding:var(--s3) 0"><%= value %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+    <% end %>
+
     <!-- Resumo -->
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
       <div class="kpi-card">

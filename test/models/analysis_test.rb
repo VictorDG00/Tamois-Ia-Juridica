@@ -60,6 +60,25 @@ class AnalysisTest < ActiveSupport::TestCase
     assert_equal "high", result.first["risk_level"]
   end
 
+  test "entities parses JSON correctly" do
+    analysis = create_analysis(user: @user)
+    analysis.update_column(:entities_json, { "contratante" => "Alpha Ltda.", "foro" => "São Paulo" }.to_json)
+    assert_equal "Alpha Ltda.", analysis.entities["contratante"]
+    assert_equal "São Paulo", analysis.entities["foro"]
+  end
+
+  test "entities returns empty hash on nil" do
+    analysis = create_analysis(user: @user)
+    analysis.update_column(:entities_json, nil)
+    assert_equal({}, analysis.entities)
+  end
+
+  test "entities returns empty hash on invalid JSON" do
+    analysis = create_analysis(user: @user)
+    analysis.update_column(:entities_json, "invalid {{")
+    assert_equal({}, analysis.entities)
+  end
+
   test "completed? returns true when status is completed" do
     analysis = create_analysis(user: @user, status: "completed")
     assert analysis.completed?

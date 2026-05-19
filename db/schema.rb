@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_19_005401) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_19_030157) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -42,6 +42,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_005401) do
   create_table "analyses", force: :cascade do |t|
     t.string "analysis_mode"
     t.datetime "created_at", null: false
+    t.text "entities_json"
     t.string "filename"
     t.text "legal_insights_json"
     t.text "original_text"
