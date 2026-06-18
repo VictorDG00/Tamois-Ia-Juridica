@@ -17,7 +17,7 @@ gem "stimulus-rails"
 
 # Authentication
 gem "bcrypt", "~> 3.1.7"
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0"
 
 # DOCX parsing
 gem "nokogiri", "~> 1.16"
