@@ -30,7 +30,7 @@ gem "faraday", "~> 2.12"
 gem "redcarpet", "~> 3.6"
 
 # File uploads
-gem "image_processing", "~> 1.14"
+gem "image_processing", "~> 2.0"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
