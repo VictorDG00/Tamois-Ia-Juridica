@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tamois · Fluxo 4: Insights Jurídicos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --crimson:#C1121F; --parchment:#FDF0D5; --abyss:#003049; --steel:#669BBC; --ink:#1a1a2e; --muted:#6b7280; }
+    body { font-family:'Instrument Sans',sans-serif; background:var(--parchment); color:var(--ink); min-height:100vh; }
+    .top-nav { background:var(--abyss); padding:12px 32px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+    .nav-brand { font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:700; color:var(--parchment); text-decoration:none; letter-spacing:0.05em; }
+    .nav-sep { color:#ffffff30; }
+    .nav-links { display:flex; gap:8px; flex-wrap:wrap; }
+    .nav-link { font-size:0.78rem; color:#ffffffaa; text-decoration:none; padding:4px 10px; border-radius:4px; border:1px solid transparent; transition:all .15s; }
+    .nav-link:hover { color:var(--parchment); border-color:#ffffff30; }
+    .nav-link.active { color:var(--parchment); background:#ffffff18; border-color:#ffffff30; }
+    .page-header { background:var(--abyss); padding:48px 32px 40px; border-bottom:3px solid var(--crimson); }
+    .page-header-inner { max-width:860px; margin:0 auto; }
+    .pipeline-badges { display:flex; align-items:center; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+    .pipe-step { font-size:0.72rem; font-family:'DM Mono',monospace; padding:3px 10px; border-radius:4px; background:#ffffff15; color:#ffffffaa; border:1px solid #ffffff20; }
+    .pipe-step.current { background:var(--crimson); color:white; border-color:var(--crimson); font-weight:500; }
+    .pipe-arrow { color:#ffffff40; font-size:0.8rem; }
+    h1 { font-family:'Cormorant Garamond',serif; font-size:2.4rem; font-weight:700; color:var(--parchment); line-height:1.2; margin-bottom:12px; }
+    .page-desc { color:#ffffffcc; font-size:0.95rem; line-height:1.6; max-width:600px; }
+    .main { max-width:860px; margin:0 auto; padding:40px 32px; }
+    .card { background:white; border-radius:10px; border:1px solid #e5d9c0; margin-bottom:24px; overflow:hidden; }
+    .card-header { padding:16px 24px; border-bottom:1px solid #e5d9c0; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .card-title { font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:700; color:var(--abyss); }
+    .card-tag { font-size:0.7rem; font-family:'DM Mono',monospace; padding:3px 8px; border-radius:4px; font-weight:500; letter-spacing:0.05em; }
+    .tag-system { background:#f0f4ff; color:#3730a3; border:1px solid #c7d2fe; }
+    .tag-user   { background:#f0fff4; color:#166534; border:1px solid #bbf7d0; }
+    .tag-output { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+    .tag-info   { background:#f0f9ff; color:#075985; border:1px solid #bae6fd; }
+    .card-body { padding:24px; }
+    .params-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+    .param-label { font-size:0.72rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .param-value { font-family:'DM Mono',monospace; font-size:0.88rem; color:var(--abyss); font-weight:500; }
+    .param-note { font-size:0.78rem; color:var(--muted); margin-top:2px; }
+    .prompt-block { position:relative; background:#0f172a; border-radius:8px; padding:20px 24px; overflow:auto; }
+    .prompt-block pre { font-family:'DM Mono',monospace; font-size:0.82rem; line-height:1.7; color:#e2e8f0; white-space:pre-wrap; word-break:break-word; }
+    .prompt-block .placeholder { background:#1e3a5f; color:#7dd3fc; padding:1px 4px; border-radius:3px; }
+    .copy-btn { position:absolute; top:12px; right:12px; background:#1e293b; border:1px solid #334155; color:#94a3b8; font-family:'DM Mono',monospace; font-size:0.72rem; padding:4px 10px; border-radius:4px; cursor:pointer; transition:all .15s; }
+    .copy-btn:hover { background:#334155; color:#e2e8f0; }
+    .copy-btn.copied { color:#4ade80; border-color:#4ade80; }
+    .json-schema { background:#0f172a; border-radius:8px; padding:20px 24px; overflow:auto; }
+    .json-schema pre { font-family:'DM Mono',monospace; font-size:0.82rem; line-height:1.7; color:#e2e8f0; white-space:pre-wrap; }
+    .json-key { color:#7dd3fc; }
+    .json-str { color:#a3e635; }
+    .json-comment { color:#64748b; font-style:italic; }
+    .rules-list { list-style:none; }
+    .rules-list li { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid #f3ede0; font-size:0.9rem; line-height:1.5; }
+    .rules-list li:last-child { border-bottom:none; }
+    .rule-icon { flex-shrink:0; width:22px; text-align:center; margin-top:1px; }
+    .rule-text { color:var(--ink); }
+    .rule-text strong { color:var(--abyss); }
+    .rule-text code { font-family:'DM Mono',monospace; font-size:0.8rem; background:#f3ede0; padding:1px 5px; border-radius:3px; }
+    .alert { border-radius:8px; padding:14px 18px; font-size:0.88rem; line-height:1.5; display:flex; gap:10px; align-items:flex-start; }
+    .alert-warn { background:#fffbeb; border:1px solid #fbbf24; color:#92400e; }
+    .alert-info { background:#eff6ff; border:1px solid #93c5fd; color:#1e3a5f; }
+    .alert-ok   { background:#f0fdf4; border:1px solid #86efac; color:#14532d; }
+    .alert-icon { flex-shrink:0; }
+    .section-label { font-size:0.72rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .risk-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .risk-card { border-radius:8px; padding:16px; border-width:1px; border-style:solid; }
+    .risk-high { background:#fff1f2; border-color:#fecdd3; }
+    .risk-medium { background:#fff7ed; border-color:#fed7aa; }
+    .risk-low { background:#fefce8; border-color:#fef08a; }
+    .risk-label { font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px; }
+    .risk-high .risk-label { color:#be123c; }
+    .risk-medium .risk-label { color:#c2410c; }
+    .risk-low .risk-label { color:#a16207; }
+    .risk-desc { font-size:0.82rem; line-height:1.5; color:var(--ink); }
+    .risk-example { font-size:0.78rem; font-style:italic; color:var(--muted); margin-top:6px; }
+    .disclaimer-box { background:#1e293b; border-radius:8px; padding:16px 20px; }
+    .disclaimer-box code { font-family:'DM Mono',monospace; font-size:0.8rem; color:#a3e635; line-height:1.6; display:block; }
+    .mt-16 { margin-top:16px; }
+    footer { text-align:center; padding:32px; color:var(--muted); font-size:0.78rem; border-top:1px solid #e5d9c0; margin-top:20px; }
+    @media (max-width:600px) { .risk-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="#" class="nav-brand">Tamois · Fluxos de IA</a>
+  <span class="nav-sep">|</span>
+  <div class="nav-links">
+    <a href="/fluxo-entidades.html" class="nav-link">1. Entidades</a>
+    <a href="/fluxo-ortografia.html" class="nav-link">2. Ortografia</a>
+    <a href="/fluxo-redacao.html" class="nav-link">3. Redação</a>
+    <a href="/fluxo-insights.html" class="nav-link active">4. Insights Jurídicos</a>
+    <a href="/fluxo-chat.html" class="nav-link">5. Chat</a>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="page-header-inner">
+    <div class="pipeline-badges">
+      <span class="pipe-step">1. Entidades</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">2. Ortografia</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">3. Redação</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step current">4. Insights Jurídicos</span>
+    </div>
+    <h1>Fluxo 4 — Insights Jurídicos</h1>
+    <p class="page-desc">
+      Identifica riscos jurídicos reais baseados em norma específica e identificável.
+      Quarta e última chamada à API — ao salvar, o status da análise muda para "concluída".
+    </p>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Parâmetros Técnicos</span>
+      <span class="card-tag tag-info">CONFIG</span>
+    </div>
+    <div class="card-body">
+      <div class="params-grid">
+        <div class="param-item">
+          <div class="param-label">Modelo (padrão)</div>
+          <div class="param-value">deepseek-chat</div>
+          <div class="param-note">Modo "Análise Profunda" usa deepseek-reasoner</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Temperatura</div>
+          <div class="param-value">0.1</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Texto máximo</div>
+          <div class="param-value">20.000 chars</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Campo máximo (output)</div>
+          <div class="param-value">~539 chars</div>
+          <div class="param-note">600 total − 61 chars do disclaimer automático</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Posição no pipeline</div>
+          <div class="param-value">4ª chamada (última)</div>
+          <div class="param-note">Conclusão muda status para "completed"</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Timeout</div>
+          <div class="param-value">90 segundos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NÍVEIS DE RISCO -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Classificação de Risco</span>
+      <span class="card-tag tag-info">3 NÍVEIS</span>
+    </div>
+    <div class="card-body">
+      <p class="section-label">O modelo deve classificar cada insight em exatamente um destes níveis</p>
+      <div class="risk-grid">
+        <div class="risk-card risk-high">
+          <div class="risk-label">high — Alto</div>
+          <div class="risk-desc">Nulidade, inconstitucionalidade, violação de direito fundamental.</div>
+          <div class="risk-example">Ex: cláusula que viola o CDC em contrato de consumo, renúncia a direito irrenunciável.</div>
+        </div>
+        <div class="risk-card risk-medium">
+          <div class="risk-label">medium — Médio</div>
+          <div class="risk-desc">Cláusula abusiva confirmada, ambiguidade que gera conflito real, falta de elemento essencial.</div>
+          <div class="risk-example">Ex: prazo de recurso ambíguo, multa sem definição de base de cálculo.</div>
+        </div>
+        <div class="risk-card risk-low">
+          <div class="risk-label">low — Baixo</div>
+          <div class="risk-desc">Imprecisão terminológica clara, redundância evidente.</div>
+          <div class="risk-example">Ex: uso de "rescisão" onde tecnicamente seria "resolução".</div>
+        </div>
+      </div>
+      <div class="alert alert-info mt-16">
+        <span class="alert-icon">ℹ️</span>
+        <span>Se o modelo retornar um <code>risk_level</code> diferente de <code>low</code>, <code>medium</code> ou <code>high</code>, o sistema substitui automaticamente por <code>medium</code>. O prompt deve forçar o uso exato dessas três strings.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Mensagem System</span>
+      <span class="card-tag tag-system">SYSTEM</span>
+    </div>
+    <div class="card-body">
+      <div class="prompt-block">
+        <button class="copy-btn" onclick="copyText(this, 'sys-ins')">Copiar</button>
+        <pre id="sys-ins">Responda somente em JSON válido.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Prompt do Usuário (completo)</span>
+      <span class="card-tag tag-user">USER</span>
+    </div>
+    <div class="card-body">
+      <p class="section-label">O bloco em azul é substituído pelo texto real do documento</p>
+      <div class="prompt-block">
+        <button class="copy-btn" onclick="copyText(this, 'prompt-ins')">Copiar</button>
+        <pre id="prompt-ins">Você é um revisor jurídico especializado em direito brasileiro.
+REGRA FUNDAMENTAL: Só reporte itens com CERTEZA ABSOLUTA. Em caso de dúvida, não reporte.
+Prefira lista pequena e precisa a lista grande com itens duvidosos.
+O texto contém parágrafos indexados (ex: [Paragrafo 0] ...).
+
+Analise APENAS riscos jurídicos baseados em norma específica e identificável.
+NÃO reporte: especulações, riscos hipotéticos, interpretações forçadas.
+Classifique risco_level como: high (nulidade, inconstitucionalidade, violação de direito fundamental),
+medium (cláusula abusiva confirmada, ambiguidade que gera conflito real, falta de elemento essencial),
+low (imprecisão terminológica clara, redundância evidente).
+Reporte TODOS os riscos reais, sem limite de quantidade.
+Use paragraph_id com o número inteiro do parágrafo de origem.
+
+Retorne SOMENTE JSON válido:
+{"legal_insights":[{"topic":"...","insight":"...","risk_level":"low|medium|high","paragraph_id":INT}]}
+Se não houver riscos, retorne: {"legal_insights":[]}
+
+Texto:
+<span class="placeholder">[TEXTO DO DOCUMENTO — parágrafos indexados, máx 20.000 chars]</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRATO DE SAÍDA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Contrato de Saída (JSON)</span>
+      <span class="card-tag tag-output">OUTPUT</span>
+    </div>
+    <div class="card-body">
+      <div class="json-schema">
+        <pre>{
+  <span class="json-key">"legal_insights"</span>: [
+    {
+      <span class="json-key">"topic"</span>:        <span class="json-str">"nome do risco (ex: Cláusula Abusiva)"</span>,  <span class="json-comment">// obrigatório</span>
+      <span class="json-key">"insight"</span>:      <span class="json-str">"descrição do risco identificado"</span>,       <span class="json-comment">// obrigatório</span>
+      <span class="json-key">"risk_level"</span>:   <span class="json-str">"low"</span> | <span class="json-str">"medium"</span> | <span class="json-str">"high"</span>,             <span class="json-comment">// exatamente uma das três strings</span>
+      <span class="json-key">"paragraph_id"</span>: <span class="json-type">3</span>                                       <span class="json-comment">// índice inteiro do parágrafo — ex: 3 para [Paragrafo 3]</span>
+    }
+  ]
+}</pre>
+      </div>
+
+      <div class="mt-16">
+        <p class="section-label">Normalização aplicada pelo sistema após a resposta</p>
+        <ul class="rules-list">
+          <li>
+            <span class="rule-icon">🔍</span>
+            <span class="rule-text"><strong>Filtragem:</strong> itens sem <code>topic</code> ou sem <code>insight</code> são descartados.</span>
+          </li>
+          <li>
+            <span class="rule-icon">🏷️</span>
+            <span class="rule-text"><strong>Validação de risk_level:</strong> se o valor não for <code>low</code>, <code>medium</code> ou <code>high</code>, substitui por <code>medium</code> automaticamente.</span>
+          </li>
+          <li>
+            <span class="rule-icon">📍</span>
+            <span class="rule-text"><strong>paragraph_id:</strong> convertido para inteiro. Valores negativos, nulos ou inválidos viram <code>-1</code> (indica parágrafo não localizado).</span>
+          </li>
+          <li>
+            <span class="rule-icon">⚖️</span>
+            <span class="rule-text"><strong>Disclaimer automático:</strong> o sistema adiciona ao final de cada <code>insight</code> o texto abaixo. O campo <code>insight</code> é truncado para caber dentro dos 600 chars totais.</span>
+          </li>
+        </ul>
+        <div class="disclaimer-box mt-16">
+          <code>Análise informativa que não substitui consultoria jurídica profissional.</code>
+        </div>
+        <div class="alert alert-warn mt-16">
+          <span class="alert-icon">⚠️</span>
+          <span>O disclaimer é adicionado <strong>sempre</strong>, automaticamente, pelo código — não deve ser incluído no prompt. Isso garante que a obrigação legal aparece em todos os insights independentemente do que o modelo retornar.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Como o paragraph_id funciona</span>
+      <span class="card-tag tag-info">ÂNCORA</span>
+    </div>
+    <div class="card-body">
+      <p style="font-size:0.9rem; line-height:1.6; margin-bottom:14px;">O <code style="font-family:'DM Mono',monospace; background:#f3ede0; padding:1px 5px; border-radius:3px;">paragraph_id</code> permite que a interface exiba o insight vinculado ao parágrafo correto do documento. Quando o usuário clica em um insight de risco alto, a UI destaca o parágrafo de origem.</p>
+      <div class="prompt-block">
+        <pre><span style="color:#64748b">// Texto enviado ao modelo:</span>
+[Paragrafo 0] CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+[Paragrafo 1] ...qualificação das partes...
+[Paragrafo 2] CLÁUSULA PRIMEIRA — OBJETO
+[Paragrafo 3] A CONTRATADA deverá entregar em prazo razoável...
+                                  ^^^^^^^^^^^^^^^^^^^
+<span style="color:#64748b">// Insight gerado:
+// paragraph_id: 3  →  o insight se refere ao [Paragrafo 3]</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Dicas para Testar</span>
+      <span class="card-tag tag-info">TESTE</span>
+    </div>
+    <div class="card-body">
+      <ul class="rules-list">
+        <li>
+          <span class="rule-icon">1️⃣</span>
+          <span class="rule-text">Insira uma cláusula claramente abusiva — o modelo deve identificar e classificar como <code>high</code> ou <code>medium</code>.</span>
+        </li>
+        <li>
+          <span class="rule-icon">2️⃣</span>
+          <span class="rule-text">Insira um contrato equilibrado e bem redigido — o modelo deve retornar <code>{"legal_insights":[]}</code> ou poucos insights de risco baixo.</span>
+        </li>
+        <li>
+          <span class="rule-icon">3️⃣</span>
+          <span class="rule-text">Verifique se os <code>paragraph_id</code> retornados correspondem ao parágrafo correto do texto enviado.</span>
+        </li>
+        <li>
+          <span class="rule-icon">4️⃣</span>
+          <span class="rule-text">O modelo não deve especular sobre riscos hipotéticos ("pode causar problemas futuramente"). Apenas riscos baseados em norma concreta.</span>
+        </li>
+        <li>
+          <span class="rule-icon">5️⃣</span>
+          <span class="rule-text">Verifique o <code>topic</code> — deve ser um título curto e objetivo, não uma frase longa. Ex: "Cláusula de Não Concorrência Abusiva", não "A cláusula 7 pode ser considerada abusiva por...".</span>
+        </li>
+      </ul>
+      <div class="alert alert-ok mt-16">
+        <span class="alert-icon">✅</span>
+        <span><strong>Critério de aprovação:</strong> zero riscos inventados + risco_level correto por critério definido + paragraph_id preciso + topic conciso.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>Tamois · Documento interno de referência técnica · Não publicar externamente</footer>
+
+<script>
+function copyText(btn, id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    btn.textContent = 'Copiado!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

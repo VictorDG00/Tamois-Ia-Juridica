@@ -19,18 +19,19 @@ class ChatsController < ApplicationController
     messages = build_chat_messages(@analysis, user_content)
     client = DeepseekClient.new
 
-    begin
-      reply = client.chat(messages)
-      @analysis.chat_messages.create!(role: "assistant", content: reply)
+    reply = begin
+      client.chat(messages)
     rescue DeepseekClient::ProviderError => e
-      @analysis.chat_messages.create!(
-        role: "assistant",
-        content: "Erro ao processar sua pergunta. Tente novamente."
-      )
       Rails.logger.error("Chat error: #{e.message}")
+      "Erro ao processar sua pergunta. Tente novamente."
     end
 
-    redirect_to analysis_chat_path(@analysis)
+    @analysis.chat_messages.create!(role: "assistant", content: reply)
+
+    respond_to do |format|
+      format.json { render json: { html: helpers.markdown(reply) } }
+      format.html { redirect_to analysis_chat_path(@analysis) }
+    end
   end
 
   private
@@ -55,7 +56,7 @@ class ChatsController < ApplicationController
         - #{analysis.legal_insights.length} insights jurídicos (#{analysis.legal_insights.count { |i| i["risk_level"] == "high" }} de alto risco)
 
         Trecho do documento:
-        #{analysis.original_text.to_s[0, 4000]}
+        #{analysis.original_text.to_s[0, 160_000]}
       SYS
     }
 

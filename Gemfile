@@ -26,6 +26,9 @@ gem "rubyzip", "~> 2.3"
 # HTTP client for DeepSeek API
 gem "faraday", "~> 2.12"
 
+# Markdown rendering
+gem "redcarpet", "~> 3.6"
+
 # File uploads
 gem "image_processing", "~> 1.14"
 

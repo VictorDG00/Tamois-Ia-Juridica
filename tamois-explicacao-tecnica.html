@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tamois — Esquema técnico e fluxo do produto</title>
+<style>
+  :root {
+    --crimson: #C1121F; --molten: #780000; --parchment: #FDF0D5;
+    --abyss: #003049; --steel: #669BBC;
+    --bg: #F5EDDA; --surface: #FAF6E9; --card: #FFFFFF;
+    --text: #1F1A14; --text2: rgba(31,26,20,0.66); --text3: rgba(31,26,20,0.42);
+    --border: rgba(120,75,30,0.14); --border2: rgba(120,75,30,0.22);
+    --ok: #156B3A; --ok-bg: rgba(21,107,58,0.07);
+    --warn: #6E4F08; --warn-bg: rgba(110,79,8,0.07);
+    --risk: #9C0F1A; --risk-bg: rgba(156,15,26,0.07);
+    --info: #2A5670; --info-bg: rgba(42,86,112,0.07);
+    --font-d: 'Cormorant Garamond', Georgia, serif;
+    --font-b: 'Instrument Sans', system-ui, sans-serif;
+    --font-m: 'DM Mono', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-b); background: var(--bg); color: var(--text); line-height: 1.7; font-size: 15px; }
+
+  /* Nav */
+  .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); border-bottom: 1px solid var(--border); backdrop-filter: blur(16px); padding: 0 40px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+  .brand-mark { width: 26px; height: 26px; border-radius: 4px; background: linear-gradient(135deg, var(--crimson), var(--molten)); display: grid; place-items: center; font-family: var(--font-d); font-size: 16px; color: var(--parchment); }
+  .brand-name { font-family: var(--font-d); font-size: 20px; font-weight: 400; letter-spacing: 0.06em; }
+  .nav-links { display: flex; gap: 4px; list-style: none; }
+  .nav-links a { font-size: 12px; color: var(--text2); text-decoration: none; padding: 6px 12px; border-radius: 4px; transition: all 0.15s; }
+  .nav-links a:hover { background: rgba(120,75,30,0.06); color: var(--text); }
+  .nav-links a.highlight { background: rgba(193,18,31,0.08); color: var(--crimson); font-weight: 600; }
+  .nav-links a.highlight:hover { background: rgba(193,18,31,0.14); }
+
+  /* Layout */
+  .container { max-width: 920px; margin: 0 auto; padding: 0 32px; }
+  .page { padding: 64px 0 120px; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 48px 0 64px; border-bottom: 1px solid var(--border); margin-bottom: 64px; }
+  .hero-label { font-family: var(--font-m); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--info); margin-bottom: 16px; }
+  .hero-title { font-family: var(--font-d); font-size: clamp(36px, 5vw, 56px); font-weight: 300; line-height: 1.1; margin-bottom: 16px; }
+  .hero-title em { font-style: italic; color: var(--crimson); }
+  .hero-sub { font-size: 16px; color: var(--text2); max-width: 600px; margin: 0 auto; }
+
+  /* Section */
+  .section { margin-bottom: 72px; }
+  .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--font-m); font-size: 11px; letter-spacing: 0.2em; color: var(--crimson); background: rgba(193,18,31,0.07); border: 1px solid rgba(193,18,31,0.18); border-radius: 4px; padding: 4px 10px; flex-shrink: 0; }
+  .section-title { font-family: var(--font-d); font-size: 28px; font-weight: 400; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(80,50,15,0.04), 0 4px 16px rgba(80,50,15,0.06); }
+  .card-title { font-family: var(--font-m); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+  .card-heading { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+
+  /* ── ESQUEMA (módulos do produto) ── */
+  .module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .module-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; }
+  .module-card.done { border-left: 3px solid var(--ok); }
+  .module-card.done .mod-status { color: var(--ok); background: var(--ok-bg); border-color: rgba(21,107,58,0.2); }
+  .module-card.partial { border-left: 3px solid #B45309; }
+  .module-card.partial .mod-status { color: #B45309; background: rgba(180,83,9,0.07); border-color: rgba(180,83,9,0.2); }
+  .mod-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .mod-title { font-size: 14px; font-weight: 600; }
+  .mod-status { font-family: var(--font-m); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid; flex-shrink: 0; white-space: nowrap; }
+  .mod-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+  /* Fluxo do usuário (esquema visual) */
+  .user-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 24px 0; }
+  .uf-step { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 13px; font-weight: 500; text-align: center; min-width: 110px; flex-shrink: 0; }
+  .uf-arrow { color: var(--text3); font-size: 18px; padding: 0 6px; flex-shrink: 0; }
+  .uf-step.highlight { background: rgba(193,18,31,0.06); border-color: rgba(193,18,31,0.22); color: var(--crimson); }
+
+  /* Stack */
+  .stack-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .stack-tag { font-family: var(--font-m); font-size: 11px; padding: 5px 12px; border-radius: 6px; background: rgba(42,86,112,0.07); border: 1px solid rgba(42,86,112,0.18); color: var(--info); }
+
+  /* Pipeline */
+  .pipeline { display: flex; flex-direction: column; gap: 0; }
+  .pipe-step { display: grid; grid-template-columns: 48px 1fr; gap: 0 20px; }
+  .pipe-line { display: flex; flex-direction: column; align-items: center; }
+  .pipe-dot { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-m); font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .pipe-connector { width: 2px; flex: 1; min-height: 24px; margin: 4px 0; }
+  .pipe-content { padding-bottom: 32px; }
+  .pipe-content h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; padding-top: 12px; }
+  .pipe-content p { font-size: 14px; color: var(--text2); margin-bottom: 8px; }
+
+  .step-upload .pipe-dot { background: rgba(42,86,112,0.1); color: var(--info); border: 1px solid rgba(42,86,112,0.2); }
+  .step-upload .pipe-connector { background: rgba(42,86,112,0.15); }
+  .step-entity .pipe-dot { background: rgba(0,48,73,0.1); color: var(--abyss); border: 1px solid rgba(0,48,73,0.2); }
+  .step-entity .pipe-connector { background: rgba(0,48,73,0.15); }
+  .step-extract .pipe-dot { background: rgba(110,79,8,0.1); color: var(--warn); border: 1px solid rgba(110,79,8,0.2); }
+  .step-extract .pipe-connector { background: rgba(110,79,8,0.15); }
+  .step-ai .pipe-dot { background: rgba(193,18,31,0.1); color: var(--crimson); border: 1px solid rgba(193,18,31,0.2); }
+  .step-ai .pipe-connector { background: rgba(193,18,31,0.15); }
+  .step-save .pipe-dot { background: rgba(21,107,58,0.1); color: var(--ok); border: 1px solid rgba(21,107,58,0.2); }
+  .step-save .pipe-connector { background: rgba(21,107,58,0.15); }
+  .step-show .pipe-dot { background: rgba(0,48,73,0.1); color: var(--abyss); border: 1px solid rgba(0,48,73,0.2); }
+
+  /* Code blocks */
+  .code { background: #1a1410; border-radius: 8px; padding: 20px 24px; font-family: var(--font-m); font-size: 13px; line-height: 1.7; overflow-x: auto; margin: 16px 0; }
+  .code .c { color: #6b7280; }
+  .code .k { color: #c084fc; }
+  .code .s { color: #86efac; }
+  .code .n { color: #93c5fd; }
+  .code .v { color: #fcd34d; }
+  .code .t { color: #fb7185; }
+  .code .p { color: #e2e8f0; }
+  .inline-code { font-family: var(--font-m); font-size: 12px; background: rgba(120,75,30,0.08); border: 1px solid var(--border); border-radius: 3px; padding: 2px 6px; color: var(--abyss); }
+
+  /* Badges */
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-m); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+  .badge-ok { background: var(--ok-bg); color: var(--ok); border: 1px solid rgba(21,107,58,0.2); }
+  .badge-warn { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(110,79,8,0.2); }
+  .badge-risk { background: var(--risk-bg); color: var(--risk); border: 1px solid rgba(156,15,26,0.2); }
+  .badge-info { background: var(--info-bg); color: var(--info); border: 1px solid rgba(42,86,112,0.2); }
+  .badge-abyss { background: rgba(0,48,73,0.08); color: var(--abyss); border: 1px solid rgba(0,48,73,0.2); }
+
+  /* JSON example */
+  .json-block { background: #0f1117; border-radius: 10px; padding: 24px; font-family: var(--font-m); font-size: 12.5px; line-height: 1.8; overflow-x: auto; }
+  .jk { color: #93c5fd; }
+  .jv { color: #86efac; }
+  .jn { color: #fbbf24; }
+  .jp { color: #94a3b8; }
+  .jc { color: #6b7280; font-style: italic; }
+
+  /* DOCX features */
+  .docx-feature { display: grid; grid-template-columns: 56px 1fr; gap: 20px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+  .docx-icon { width: 48px; height: 48px; border-radius: 8px; display: grid; place-items: center; font-size: 22px; flex-shrink: 0; }
+  .docx-feature h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .docx-feature p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .docx-feature .tech { font-family: var(--font-m); font-size: 11px; color: var(--text3); margin-top: 8px; }
+
+  /* Callout */
+  .callout { display: flex; gap: 14px; padding: 18px 20px; border-radius: 8px; margin: 20px 0; }
+  .callout-ok { background: var(--ok-bg); border: 1px solid rgba(21,107,58,0.2); }
+  .callout-warn { background: var(--warn-bg); border: 1px solid rgba(110,79,8,0.2); }
+  .callout-info { background: var(--info-bg); border: 1px solid rgba(42,86,112,0.2); }
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .callout p { font-size: 13px; line-height: 1.6; }
+  .callout-ok p { color: var(--ok); }
+  .callout-warn p { color: var(--warn); }
+  .callout-info p { color: var(--info); }
+
+  /* Comparison table */
+  .compare { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare th { font-family: var(--font-m); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+  .compare td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .compare tr:last-child td { border-bottom: none; }
+  .compare tr:hover td { background: rgba(120,75,30,0.03); }
+
+  /* OOXML mockup */
+  .xml-example { background: #0d1117; border-radius: 8px; padding: 20px; font-family: var(--font-m); font-size: 12px; line-height: 1.7; overflow-x: auto; }
+  .xt { color: #7dd3fc; }
+  .xa { color: #fcd34d; }
+  .xv { color: #86efac; }
+  .xs { color: #f1f5f9; }
+  .xc { color: #6b7280; font-style: italic; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* Entities grid */
+  .entity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .entity-item { background: rgba(0,48,73,0.04); border: 1px solid rgba(0,48,73,0.12); border-radius: 8px; padding: 12px 14px; }
+  .entity-key { font-family: var(--font-m); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--info); margin-bottom: 4px; }
+  .entity-val { font-size: 13px; color: var(--text2); }
+
+  /* Feedback section */
+  .feedback-flow { display: flex; align-items: stretch; gap: 16px; margin: 20px 0; flex-wrap: wrap; }
+  .fb-box { flex: 1; min-width: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .fb-box-title { font-family: var(--font-m); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .fb-box p { font-size: 13px; color: var(--text2); line-height: 1.55; }
+  .fb-arrow { display: flex; align-items: center; color: var(--text3); font-size: 20px; padding-top: 18px; }
+
+  @media (max-width: 680px) {
+    .container { padding: 0 20px; }
+    .nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .module-grid { grid-template-columns: 1fr; }
+    .entity-grid { grid-template-columns: 1fr; }
+    .docx-feature { grid-template-columns: 1fr; }
+    .user-flow { gap: 4px; }
+    .uf-arrow { display: none; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="brand">
+    <div class="brand-mark">T</div>
+    <span class="brand-name">Tamois</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#esquema" class="highlight">Esquema</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#extracao">Extração</a></li>
+    <li><a href="#deepseek">DeepSeek</a></li>
+    <li><a href="#retorno">Retorno</a></li>
+    <li><a href="#docx">DOCX Anotado</a></li>
+    <li><a href="#extras">Chat & Feedback</a></li>
+  </ul>
+</nav>
+
+<div class="container page">
+
+  <div class="hero">
+    <div class="hero-label">Documentação técnica — atualizada em 19/05/2026</div>
+    <h1 class="hero-title">Tamois — como o produto<br>funciona <em>hoje</em></h1>
+    <p class="hero-sub">Esquema completo para os sócios + documentação técnica do pipeline de análise jurídica com IA.</p>
+  </div>
+
+  <!-- ═══════════════ 0. ESQUEMA PARA SÓCIOS ═══════════════ -->
+  <section class="section" id="esquema">
+    <div class="section-header">
+      <span class="section-num">00</span>
+      <h2 class="section-title">Esquema geral do produto</h2>
+    </div>
+
+    <p style="color:var(--text2);margin-bottom:28px">Esta seção é um resumo executivo — o que o Tamois faz, quais módulos existem e qual o estado atual de cada um.</p>
+
+    <div class="card" style="margin-bottom:28px">
+      <div class="card-title">O que é o Tamois</div>
+      <p style="margin-bottom:12px">Tamois é um revisor jurídico com IA. O advogado ou empresário sobe um contrato em DOCX, o sistema analisa automaticamente e devolve:</p>
+      <ul style="margin-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--text2)">
+        <li><strong style="color:var(--text)">Ficha do contrato</strong> — quem contrata quem, valor, prazo, foro, multa (extraídos com IA)</li>
+        <li><strong style="color:var(--text)">Correções ortográficas</strong> — erros inequívocos encontrados no texto (ex: "rescição" → "rescisão")</li>
+        <li><strong style="color:var(--text)">Sugestões de redação</strong> — trechos ambíguos ou tecnicamente imprecisos com reescrita sugerida</li>
+        <li><strong style="color:var(--text)">Insights jurídicos</strong> — riscos classificados por nível (alto / médio / baixo), ancorados no parágrafo de origem</li>
+        <li><strong style="color:var(--text)">DOCX anotado para download</strong> — o contrato original com Track Changes e comentários nativos do Word</li>
+        <li><strong style="color:var(--text)">Chat jurídico</strong> — o usuário conversa com a IA sobre o documento após a análise</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:600;margin-bottom:16px">Jornada do usuário</h3>
+    <div class="user-flow">
+      <div class="uf-step">Cadastro / login</div>
+      <div class="uf-arrow">→</div>
+      <div class="uf-step highlight">Upload do DOCX</div>
+      <div class="uf-arrow">→</div>
+      <div class="uf-step highlight">Análise pela IA</div>
+      <div class="uf-arrow">→</div>
+      <div class="uf-step highlight">Vê o resultado</div>
+      <div class="uf-arrow">→</div>
+      <div class="uf-step">Baixa DOCX anotado</div>
+      <div class="uf-arrow">→</div>
+      <div class="uf-step">Chat sobre o doc</div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:600;margin:28px 0 16px">Módulos implementados</h3>
+    <div class="module-grid">
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Autenticação de usuários</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">Cadastro, login e sessão via Devise. Cada usuário só acessa suas próprias análises.</p>
+      </div>
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Upload e análise de DOCX</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">Recebe o arquivo, extrai o texto, chama o DeepSeek 4 vezes em sequência (entidades, ortografia, redação, insights). Processamento assíncrono via SolidQueue.</p>
+      </div>
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Ficha do contrato (entidades)</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">Extrai automaticamente: contratante, contratada, objeto, valor, vigência, prazo de pagamento, multa e foro. Campos nulos quando não encontrados no texto.</p>
+      </div>
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Checkpoints em tempo real</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">A tela acende cada seção conforme termina — o usuário vê o progresso sem precisar recarregar. Meta-refresh automático a cada 3s enquanto processa.</p>
+      </div>
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Download do DOCX anotado</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">Gera o contrato original com correções ortográficas como Track Changes (rastreamento nativo do Word) e sugestões/insights como comentários de margem.</p>
+      </div>
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Chat jurídico por análise</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">Após a análise, o usuário pode conversar com a IA sobre o contrato. O histórico das últimas 10 mensagens é enviado junto com o contexto do documento.</p>
+      </div>
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Sistema de feedback</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">O usuário pode marcar qualquer item da análise como incorreto (ortografia, redação, insights ou entidades). O snapshot do item é salvo para avaliação posterior.</p>
+      </div>
+
+      <div class="module-card done">
+        <div class="mod-header">
+          <div class="mod-title">Dashboard e histórico</div>
+          <span class="mod-status">Implementado</span>
+        </div>
+        <p class="mod-desc">Painel com KPIs do usuário e listagem de todas as análises anteriores com status e links para acesso rápido.</p>
+      </div>
+
+    </div>
+
+    <h3 style="font-size:17px;font-weight:600;margin:8px 0 16px">Stack técnica</h3>
+    <div class="stack-row">
+      <span class="stack-tag">Ruby on Rails 8.1</span>
+      <span class="stack-tag">SQLite</span>
+      <span class="stack-tag">SolidQueue (jobs)</span>
+      <span class="stack-tag">Active Storage</span>
+      <span class="stack-tag">Devise (auth)</span>
+      <span class="stack-tag">DeepSeek API</span>
+      <span class="stack-tag">Nokogiri (XML)</span>
+      <span class="stack-tag">rubyzip</span>
+      <span class="stack-tag">Faraday (HTTP)</span>
+      <span class="stack-tag">Docker</span>
+    </div>
+
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════ 1. PIPELINE GERAL ═══════════════ -->
+  <section class="section" id="pipeline">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Pipeline completo da análise</h2>
+    </div>
+
+    <p style="color:var(--text2);margin-bottom:32px">Quando o usuário faz upload de um DOCX, o sistema percorre 6 etapas encadeadas. A requisição HTTP retorna imediatamente — o processamento pesado roda em background via <span class="inline-code">SolidQueue</span>. São feitas <strong>4 chamadas ao DeepSeek</strong> em sequência.</p>
+
+    <div class="pipeline">
+
+      <div class="pipe-step step-upload">
+        <div class="pipe-line">
+          <div class="pipe-dot">①</div>
+          <div class="pipe-connector"></div>
+        </div>
+        <div class="pipe-content">
+          <h3>Upload e enfileiramento</h3>
+          <p><span class="inline-code">AnalysesController#create</span> recebe o arquivo, valida o content-type (<span class="inline-code">.docx</span>), cria o registro <span class="inline-code">Analysis</span> com <span class="inline-code">status: "pending"</span>, seleciona o modo de análise (<strong>fast</strong> ou <strong>deep</strong>) e salva o arquivo via <strong>Active Storage</strong> (disco local, volume Docker persistente). Enfileira <span class="inline-code">AnalysisJob</span> no <strong>SolidQueue</strong> e redireciona o usuário imediatamente.</p>
+          <span class="badge badge-info">app/controllers/analyses_controller.rb</span>
+        </div>
+      </div>
+
+      <div class="pipe-step step-extract">
+        <div class="pipe-line">
+          <div class="pipe-dot">②</div>
+          <div class="pipe-connector"></div>
+        </div>
+        <div class="pipe-content">
+          <h3>Extração de texto do DOCX</h3>
+          <p><span class="inline-code">DocxExtractor</span> abre o arquivo DOCX como um ZIP (formato OOXML), lê o XML interno em <span class="inline-code">word/document.xml</span>, extrai todos os parágrafos com <strong>Nokogiri</strong> e os numera sequencialmente. O texto fica no formato <span class="inline-code">[Paragrafo 0] texto... [Paragrafo 1] texto...</span> para que a IA referencie de onde veio cada problema. O texto extraído é salvo em <span class="inline-code">original_text</span>.</p>
+          <span class="badge badge-warn">app/services/docx_extractor.rb</span>
+        </div>
+      </div>
+
+      <div class="pipe-step step-ai">
+        <div class="pipe-line">
+          <div class="pipe-dot">③</div>
+          <div class="pipe-connector"></div>
+        </div>
+        <div class="pipe-content">
+          <h3>4 chamadas ao DeepSeek — checkpoints incrementais</h3>
+          <p><span class="inline-code">AnalysisService</span> chama o <span class="inline-code">DeepseekClient</span> quatro vezes em sequência — uma por seção. Cada chamada tem prompt focado e independente. Entre cada chamada, o resultado parcial é salvo no banco imediatamente, acendendo os checkpoints na tela.</p>
+          <p style="margin-top:10px">Ordem das chamadas:</p>
+          <ol style="margin-left:20px;font-size:14px;color:var(--text2);display:flex;flex-direction:column;gap:6px;margin-top:6px">
+            <li><span class="badge badge-abyss" style="margin-right:6px">1ª</span> <strong>Entidades</strong> → extrai ficha do contrato → salva <span class="inline-code">entities_json</span></li>
+            <li><span class="badge badge-ok" style="margin-right:6px">2ª</span> <strong>Ortografia</strong> → identifica erros inequívocos → salva <span class="inline-code">orthography_json</span></li>
+            <li><span class="badge badge-warn" style="margin-right:6px">3ª</span> <strong>Redação</strong> → encontra ambiguidades → salva <span class="inline-code">writing_suggestions_json</span></li>
+            <li><span class="badge badge-risk" style="margin-right:6px">4ª</span> <strong>Insights jurídicos</strong> → classifica riscos → salva <span class="inline-code">legal_insights_json</span>, <span class="inline-code">status → completed</span></li>
+          </ol>
+          <br>
+          <span class="badge badge-risk">app/services/deepseek_client.rb</span>
+        </div>
+      </div>
+
+      <div class="pipe-step step-save">
+        <div class="pipe-line">
+          <div class="pipe-dot">④</div>
+          <div class="pipe-connector"></div>
+        </div>
+        <div class="pipe-content">
+          <h3>Persistência e normalização</h3>
+          <p>Cada seção é normalizada antes de salvar: filtra itens inválidos (campos em branco, JSON malformado), valida <span class="inline-code">risk_level</span> nos insights, adiciona disclaimer jurídico automático, trunca campos acima de 600 chars. Os dados ficam como JSON no SQLite. O <span class="inline-code">status</span> muda para <span class="inline-code">"completed"</span> só depois das 4 seções. Em caso de erro, status vai para <span class="inline-code">"failed"</span>.</p>
+          <span class="badge badge-ok">app/models/analysis.rb</span>
+        </div>
+      </div>
+
+      <div class="pipe-step step-show">
+        <div class="pipe-line">
+          <div class="pipe-dot">⑤</div>
+          <div class="pipe-connector"></div>
+        </div>
+        <div class="pipe-content">
+          <h3>Exibição do resultado</h3>
+          <p>A página <span class="inline-code">analyses/show</span> faz meta-refresh a cada 3 segundos enquanto <span class="inline-code">status != "completed"</span>. Ao completar, exibe as 4 seções: ficha do contrato (entidades), ortografia (original/sugestão com diff), redação (trecho + reescrita) e insights jurídicos (ordenados por risco alto→baixo). Cada item tem um botão de feedback para marcá-lo como incorreto.</p>
+          <span class="badge badge-info">app/views/analyses/show.html.erb</span>
+        </div>
+      </div>
+
+      <div class="pipe-step step-entity">
+        <div class="pipe-line">
+          <div class="pipe-dot">⑥</div>
+        </div>
+        <div class="pipe-content">
+          <h3>Download do DOCX anotado (opcional)</h3>
+          <p>O usuário clica em "Baixar DOCX anotado". A rota <span class="inline-code">GET /analyses/:id/download</span> instancia <span class="inline-code">DocxAnnotator</span>, que abre o DOCX original, aplica Track Changes (ortografia) e comentários de margem (redação + insights) diretamente no XML, e devolve o arquivo para download sem modificar o original armazenado.</p>
+          <span class="badge badge-abyss">app/services/docx_annotator.rb</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════ 2. EXTRAÇÃO DO DOCX ═══════════════ -->
+  <section class="section" id="extracao">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Como extraímos o texto do DOCX</h2>
+    </div>
+
+    <p style="color:var(--text2);margin-bottom:24px">Um arquivo <strong>.docx é um ZIP</strong> disfarçado. Dentro dele existe uma estrutura de arquivos XML que segue o padrão <strong>OOXML</strong> (Office Open XML). O documento de texto fica em <span class="inline-code">word/document.xml</span>.</p>
+
+    <div class="card">
+      <div class="card-title">Estrutura interna de um DOCX</div>
+      <div class="code">
+        <span class="p">contrato.docx (ZIP)</span><br>
+        <span class="p">├── word/</span><br>
+        <span class="p">│   ├── </span><span class="v">document.xml</span> &nbsp;<span class="c">← texto principal está aqui</span><br>
+        <span class="p">│   ├── styles.xml</span><br>
+        <span class="p">│   ├── comments.xml</span> &nbsp;<span class="c">← comentários (gerado pelo DocxAnnotator)</span><br>
+        <span class="p">│   └── _rels/document.xml.rels</span> &nbsp;<span class="c">← relacionamentos (patched)</span><br>
+        <span class="p">├── [Content_Types].xml</span> &nbsp;<span class="c">← patched para incluir comments</span><br>
+        <span class="p">└── _rels/</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">O que o DocxExtractor faz</div>
+      <div class="code">
+<span class="c"># 1. Abre o DOCX como ZIP</span><br>
+<span class="k">Zip::File</span>.<span class="n">open</span>(<span class="v">file_path</span>) <span class="k">do</span> |zip|<br>
+&nbsp;&nbsp;xml = zip.find_entry(<span class="s">"word/document.xml"</span>).get_input_stream.read<br>
+<span class="k">end</span><br><br>
+
+<span class="c"># 2. Lê o XML com Nokogiri</span><br>
+doc = <span class="k">Nokogiri</span>::<span class="k">XML</span>(xml)<br>
+<span class="n">NS</span> = { <span class="s">"w"</span> => <span class="s">"http://schemas.openxmlformats.org/wordprocessingml/2006/main"</span> }<br><br>
+
+<span class="c"># 3. Extrai todos os parágrafos &lt;w:p&gt; e os numera</span><br>
+paragraphs = doc.xpath(<span class="s">"//w:p"</span>, NS).map.<span class="n">with_index</span> <span class="k">do</span> |para, idx|<br>
+&nbsp;&nbsp;text = para.xpath(<span class="s">".//w:t"</span>, NS).map(&amp;:text).join(<span class="s">" "</span>).strip<br>
+&nbsp;&nbsp;text.empty? ? <span class="k">nil</span> : <span class="s">"[Paragrafo #{idx}] #{text}"</span><br>
+<span class="k">end</span>.compact<br><br>
+
+<span class="c"># Resultado — texto indexado enviado ao DeepSeek (máx. 20.000 chars)</span><br>
+<span class="c"># "[Paragrafo 0] CONTRATO DE PRESTAÇÃO DE SERVIÇOS"</span><br>
+<span class="c"># "[Paragrafo 1] As partes abaixo qualificadas celebram..."</span>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">💡</span>
+      <p>A indexação <span class="inline-code">[Paragrafo N]</span> é fundamental: o DeepSeek retorna o <span class="inline-code">paragraph_id</span> nos insights jurídicos, indicando de qual parágrafo veio cada risco. Isso permite ao <span class="inline-code">DocxAnnotator</span> ancorar o comentário exatamente no parágrafo correto ao gerar o DOCX anotado.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════ 3. AS 4 CHAMADAS AO DEEPSEEK ═══════════════ -->
+  <section class="section" id="deepseek">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">As 4 chamadas ao DeepSeek</h2>
+    </div>
+
+    <p style="color:var(--text2);margin-bottom:24px">Fazemos <strong>4 chamadas HTTP separadas</strong> à API do DeepSeek — uma por seção. Cada chamada tem um prompt focado em uma única tarefa, com temperatura <span class="inline-code">0.1</span> (conservador). O modelo varia conforme o modo escolhido.</p>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Modelos disponíveis</div>
+      <table class="compare">
+        <thead><tr><th>Modo</th><th>Modelo</th><th>Velocidade</th><th>Profundidade</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-ok">Rápido (fast)</span></td>
+            <td><span class="inline-code">deepseek-chat</span></td>
+            <td>15–40s por seção</td>
+            <td>Boa para a maioria dos casos</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-warn">Profundo (deep)</span></td>
+            <td><span class="inline-code">deepseek-reasoner</span></td>
+            <td>30–90s por seção</td>
+            <td>Raciocínio em cadeia — melhor para contratos complexos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">As 4 seções — o que cada prompt pede</div>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
+
+        <div style="padding:16px;background:rgba(0,48,73,0.05);border:1px solid rgba(0,48,73,0.15);border-radius:8px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span class="badge badge-abyss">Chamada 1</span>
+            <strong style="font-size:14px">Entidades (ficha do contrato)</strong>
+          </div>
+          <p style="font-size:13px;color:var(--text2)">"Extraia as informações-chave deste contrato. Copie EXATAMENTE o que está no texto. Se não encontrar, retorne null. NUNCA invente, NUNCA infira." Campos: <span class="inline-code">contratante · contratada · objeto · valor · vigencia · prazo_pagamento · multa · foro</span>.</p>
+        </div>
+
+        <div style="padding:16px;background:var(--ok-bg);border:1px solid rgba(21,107,58,0.2);border-radius:8px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span class="badge badge-ok">Chamada 2</span>
+            <strong style="font-size:14px">Ortografia</strong>
+          </div>
+          <p style="font-size:13px;color:var(--text2)">"Analise APENAS erros ortográficos e gramaticais inequívocos. NÃO reporte: jargão jurídico, latinismos, termos técnicos, variações aceitas, palavras corretas em contexto jurídico." Retorna <span class="inline-code">orthography</span>.</p>
+        </div>
+
+        <div style="padding:16px;background:var(--warn-bg);border:1px solid rgba(110,79,8,0.2);border-radius:8px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span class="badge badge-warn">Chamada 3</span>
+            <strong style="font-size:14px">Redação</strong>
+          </div>
+          <p style="font-size:13px;color:var(--text2)">"Analise APENAS problemas de redação jurídica: ambiguidade semântica, contradições lógicas, imprecisão que gera insegurança jurídica. NÃO reporte erros ortográficos (tratados na chamada anterior). Use 'excerpt' com o trecho EXATO do texto." Retorna <span class="inline-code">writing_suggestions</span>.</p>
+        </div>
+
+        <div style="padding:16px;background:var(--risk-bg);border:1px solid rgba(156,15,26,0.2);border-radius:8px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span class="badge badge-risk">Chamada 4</span>
+            <strong style="font-size:14px">Insights jurídicos</strong>
+          </div>
+          <p style="font-size:13px;color:var(--text2)">"Analise APENAS riscos baseados em norma jurídica específica e identificável. NÃO reporte especulações ou riscos hipotéticos. Classifique: high (nulidade, inconstitucionalidade), medium (cláusula abusiva confirmada), low (imprecisão terminológica). Inclua paragraph_id." Retorna <span class="inline-code">legal_insights</span>.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <p><strong>Regra fundamental anti-alucinação</strong> — presente em todos os prompts: "Só reporte itens com CERTEZA ABSOLUTA. Em caso de dúvida, não reporte. Prefira lista pequena e precisa a lista grande com itens duvidosos."</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════ 4. RETORNO E VALIDAÇÃO ═══════════════ -->
+  <section class="section" id="retorno">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Como pegamos e validamos o retorno</h2>
+    </div>
+
+    <p style="color:var(--text2);margin-bottom:24px">O DeepSeek retorna um JSON dentro de uma resposta de API padrão. Extraímos, limpamos e validamos antes de salvar — modelos de linguagem às vezes retornam JSON malformado, com markdown ao redor, ou campos em branco.</p>
+
+    <div class="card">
+      <div class="card-title">Pipeline de validação do retorno</div>
+      <div class="code">
+<span class="c"># 1. Extrai o content da resposta</span><br>
+content = body.dig(<span class="s">"choices"</span>, 0, <span class="s">"message"</span>, <span class="s">"content"</span>)<br><br>
+
+<span class="c"># 2. Remove markdown se o modelo colocou ```json ... ```</span><br>
+clean = strip_markdown(content)<br><br>
+
+<span class="c"># 3. Tenta parsear o JSON — fallback extrai o { } mais externo</span><br>
+parsed = JSON.parse(clean)<br><br>
+
+<span class="c"># 4. Normalização por seção:</span><br>
+<span class="c"># entities:    valida 8 campos, null para ausentes, máx 200 chars</span><br>
+<span class="c"># orthography: exige 'original' e 'suggestion' não vazios</span><br>
+<span class="c"># writing:     exige 'excerpt' e 'suggestion' não vazios</span><br>
+<span class="c"># insights:    exige 'topic' e 'insight', valida risk_level,</span><br>
+<span class="c">#              fallback 'medium' para level inválido, paragraph_id >= 0</span><br><br>
+
+<span class="c"># 5. Insights ganham disclaimer automático (máx total 600 chars)</span><br>
+insight_text = <span class="s">"#{insight_content} #{DISCLAIMER}"</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Exemplo: ficha de entidades extraída</div>
+      <div class="entity-grid">
+        <div class="entity-item">
+          <div class="entity-key">Contratante</div>
+          <div class="entity-val">João da Silva Ltda.</div>
+        </div>
+        <div class="entity-item">
+          <div class="entity-key">Contratada</div>
+          <div class="entity-val">Prestadora de Serviços S.A.</div>
+        </div>
+        <div class="entity-item">
+          <div class="entity-key">Objeto</div>
+          <div class="entity-val">Prestação de serviços de consultoria em TI</div>
+        </div>
+        <div class="entity-item">
+          <div class="entity-key">Valor</div>
+          <div class="entity-val">R$ 8.000,00/mês</div>
+        </div>
+        <div class="entity-item">
+          <div class="entity-key">Vigência</div>
+          <div class="entity-val">12 meses a partir de 01/06/2026</div>
+        </div>
+        <div class="entity-item">
+          <div class="entity-key">Prazo de pagamento</div>
+          <div class="entity-val">Todo dia 5 do mês subsequente</div>
+        </div>
+        <div class="entity-item">
+          <div class="entity-key">Multa</div>
+          <div class="entity-val">20% sobre o valor do contrato</div>
+        </div>
+        <div class="entity-item">
+          <div class="entity-key">Foro</div>
+          <div class="entity-val">Comarca de São Paulo/SP</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">JSON final que vai para o banco (exemplo real)</div>
+      <div class="json-block">
+<span class="jc">-- orthography_json --</span><br>
+<span class="jp">[</span><br>
+&nbsp;&nbsp;<span class="jp">{</span> <span class="jk">"original"</span><span class="jp">:</span> <span class="jv">"rescição"</span><span class="jp">,</span> <span class="jk">"suggestion"</span><span class="jp">:</span> <span class="jv">"rescisão"</span><span class="jp">,</span> <span class="jk">"reason"</span><span class="jp">:</span> <span class="jv">"Grafia correta do termo jurídico"</span> <span class="jp">},</span><br>
+&nbsp;&nbsp;<span class="jp">{</span> <span class="jk">"original"</span><span class="jp">:</span> <span class="jv">"inadimplência"</span><span class="jp">,</span> <span class="jk">"suggestion"</span><span class="jp">:</span> <span class="jv">"inadimplemento"</span><span class="jp">,</span> <span class="jk">"reason"</span><span class="jp">:</span> <span class="jv">"Termo técnico correto em direito contratual"</span> <span class="jp">}</span><br>
+<span class="jp">]</span><br><br>
+<span class="jc">-- legal_insights_json --</span><br>
+<span class="jp">[{</span><br>
+&nbsp;&nbsp;<span class="jk">"topic"</span><span class="jp">:</span> <span class="jv">"Cláusula de responsabilidade civil"</span><span class="jp">,</span><br>
+&nbsp;&nbsp;<span class="jk">"insight"</span><span class="jp">:</span> <span class="jv">"A limitação de responsabilidade sem teto definido pode ser abusiva (CDC art. 51, I). Análise informativa que não substitui consultoria jurídica profissional."</span><span class="jp">,</span><br>
+&nbsp;&nbsp;<span class="jk">"risk_level"</span><span class="jp">:</span> <span class="jv">"high"</span><span class="jp">,</span><br>
+&nbsp;&nbsp;<span class="jk">"paragraph_id"</span><span class="jp">:</span> <span class="jn">7</span><br>
+<span class="jp">}]</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════ 5. DOCX ANOTADO ═══════════════ -->
+  <section class="section" id="docx">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">DOCX anotado para download</h2>
+    </div>
+
+    <div class="callout callout-ok">
+      <span class="callout-icon">✅</span>
+      <p><strong>Implementado e em produção.</strong> O <span class="inline-code">DocxAnnotator</span> gera o DOCX anotado em memória — o arquivo original nunca é modificado. Rota: <span class="inline-code">GET /analyses/:id/download</span>.</p>
+    </div>
+
+    <p style="color:var(--text2);margin-bottom:24px;margin-top:20px">O documento final abre no Word (ou Google Docs) com as correções e comentários nativos — como se um revisor humano tivesse trabalhado no documento.</p>
+
+    <div class="docx-feature">
+      <div class="docx-icon" style="background:var(--ok-bg)">✏️</div>
+      <div>
+        <h3>Correções ortográficas → Track Changes (rastreamento nativo)</h3>
+        <p>Cada erro ortográfico vira uma revisão nativa do Word: o texto errado aparece tachado em vermelho e o correto sublinhado em verde, com o revisor "Tamois" registrado. O usuário aceita ou rejeita cada correção individualmente.</p>
+        <p>O algoritmo localiza a palavra dentro dos nós <span class="inline-code">&lt;w:r&gt;</span> do XML, divide o run se necessário, e insere os nós <span class="inline-code">&lt;w:del&gt;</span> e <span class="inline-code">&lt;w:ins&gt;</span> com IDs únicos.</p>
+        <p class="tech">Implementação: <span class="inline-code">&lt;w:del w:author="Tamois"&gt;</span> + <span class="inline-code">&lt;w:ins w:author="Tamois"&gt;</span></p>
+      </div>
+    </div>
+
+    <div class="docx-feature">
+      <div class="docx-icon" style="background:var(--warn-bg)">💬</div>
+      <div>
+        <h3>Sugestões de redação → Comentários de margem</h3>
+        <p>O parágrafo onde o <span class="inline-code">excerpt</span> foi encontrado é ancorado com <span class="inline-code">commentRangeStart/End</span>. Na margem direita aparece um balão com: ícone 💬, trecho original, sugestão e motivo. O usuário decide se aceita e reescreve manualmente.</p>
+        <p class="tech">Implementação: <span class="inline-code">&lt;w:commentRangeStart&gt;</span>/<span class="inline-code">&lt;w:commentRangeEnd&gt;</span> + entrada em <span class="inline-code">word/comments.xml</span></p>
+      </div>
+    </div>
+
+    <div class="docx-feature">
+      <div class="docx-icon" style="background:var(--risk-bg)">⚖️</div>
+      <div>
+        <h3>Insights jurídicos → Comentários com nível de risco</h3>
+        <p>Cada insight é ancorado diretamente pelo <span class="inline-code">paragraph_id</span> que a IA retornou. O comentário começa com o emoji do risco (<strong>🔴 ALTO</strong>, <strong>🟡 MÉDIO</strong>, <strong>🟢 BAIXO</strong>) e o tópico em destaque, seguido da análise completa com o disclaimer jurídico.</p>
+        <p class="tech">Fallback: se paragraph_id inválido, busca o parágrafo pelo início do topic (primeiros 20 chars)</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:17px;margin:32px 0 16px">Como o OOXML de Track Changes funciona</h3>
+    <div class="xml-example">
+<span class="xc">&lt;!-- Track Change: "rescição" → "rescisão" --&gt;</span><br>
+<span class="xt">&lt;w:p&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:r&gt;&lt;w:t xml:space="preserve"&gt;</span><span class="xs">O contrato prevê a </span><span class="xt">&lt;/w:t&gt;&lt;/w:r&gt;</span><br><br>
+&nbsp;&nbsp;<span class="xc">&lt;!-- Texto REMOVIDO (tachado vermelho no Word) --&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:del</span> <span class="xa">w:id</span>=<span class="xv">"1"</span> <span class="xa">w:author</span>=<span class="xv">"Tamois"</span> <span class="xa">w:date</span>=<span class="xv">"2026-05-19"</span><span class="xt">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="xt">&lt;w:r&gt;&lt;w:delText&gt;</span><span class="xs">rescição</span><span class="xt">&lt;/w:delText&gt;&lt;/w:r&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;/w:del&gt;</span><br><br>
+&nbsp;&nbsp;<span class="xc">&lt;!-- Texto INSERIDO (sublinhado verde no Word) --&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:ins</span> <span class="xa">w:id</span>=<span class="xv">"2"</span> <span class="xa">w:author</span>=<span class="xv">"Tamois"</span> <span class="xa">w:date</span>=<span class="xv">"2026-05-19"</span><span class="xt">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="xt">&lt;w:r&gt;&lt;w:t&gt;</span><span class="xs">rescisão</span><span class="xt">&lt;/w:t&gt;&lt;/w:r&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;/w:ins&gt;</span><br><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:r&gt;&lt;w:t xml:space="preserve"&gt;</span><span class="xs"> do contrato.</span><span class="xt">&lt;/w:t&gt;&lt;/w:r&gt;</span><br>
+<span class="xt">&lt;/w:p&gt;</span>
+    </div>
+
+    <h3 style="font-size:17px;margin:32px 0 16px">Como os comentários de margem funcionam</h3>
+    <div class="xml-example">
+<span class="xc">&lt;!-- Em word/document.xml — ancora o comentário no parágrafo --&gt;</span><br>
+<span class="xt">&lt;w:p&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:commentRangeStart</span> <span class="xa">w:id</span>=<span class="xv">"10"</span><span class="xt">/&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:r&gt;&lt;w:t&gt;</span><span class="xs">A parte contratante poderá rescindir...</span><span class="xt">&lt;/w:t&gt;&lt;/w:r&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:commentRangeEnd</span> <span class="xa">w:id</span>=<span class="xv">"10"</span><span class="xt">/&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:r&gt;&lt;w:commentReference</span> <span class="xa">w:id</span>=<span class="xv">"10"</span><span class="xt">/&gt;&lt;/w:r&gt;</span><br>
+<span class="xt">&lt;/w:p&gt;</span><br><br>
+
+<span class="xc">&lt;!-- Em word/comments.xml — conteúdo do balão --&gt;</span><br>
+<span class="xt">&lt;w:comment</span> <span class="xa">w:id</span>=<span class="xv">"10"</span> <span class="xa">w:author</span>=<span class="xv">"Tamois"</span> <span class="xa">w:date</span>=<span class="xv">"2026-05-19"</span> <span class="xa">w:initials</span>=<span class="xv">"T"</span><span class="xt">&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:p&gt;&lt;w:pPr&gt;&lt;w:pStyle w:val=</span><span class="xv">"CommentText"</span><span class="xt">/&gt;&lt;/w:pPr&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="xt">&lt;w:r&gt;&lt;w:t&gt;</span><span class="xs">🔴 RISCO HIGH — Cláusula de Responsabilidade</span><span class="xt">&lt;/w:t&gt;&lt;/w:r&gt;&lt;/w:p&gt;</span><br>
+&nbsp;&nbsp;<span class="xt">&lt;w:p&gt;&lt;w:r&gt;&lt;w:t&gt;</span><span class="xs">Isenção ilimitada pode ser abusiva (CDC art. 51)...</span><span class="xt">&lt;/w:t&gt;&lt;/w:r&gt;&lt;/w:p&gt;</span><br>
+<span class="xt">&lt;/w:comment&gt;</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════ 6. CHAT & FEEDBACK ═══════════════ -->
+  <section class="section" id="extras">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Chat jurídico e sistema de feedback</h2>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:600;margin-bottom:16px">Chat jurídico por análise</h3>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Como funciona o chat</div>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Após a análise, o usuário acessa o chat via <span class="inline-code">GET /analyses/:id/chat</span>. O DeepSeek recebe um system prompt com o resumo da análise + até 160.000 chars do documento original, e os últimos 10 turnos do histórico de mensagens.</p>
+      <div class="code">
+<span class="c"># System prompt do chat:</span><br>
+<span class="s">"Você é Tamois, um assistente jurídico especializado em direito brasileiro.</span><br>
+<span class="s"> Resumo: X correções, Y sugestões, Z insights (N de alto risco).</span><br>
+<span class="s"> Trecho do documento: [primeiros 160.000 chars do original_text]"</span><br><br>
+<span class="c"># + histórico dos últimos 10 turnos + pergunta atual do usuário</span><br>
+<span class="c"># temperatura: 0.5 (mais conversacional que a análise)</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:600;margin:28px 0 16px">Sistema de feedback</h3>
+
+    <p style="color:var(--text2);margin-bottom:20px">Cada item exibido na tela de resultado tem um botão para o usuário sinalizar que a análise está incorreta. O feedback é salvo com um snapshot do item no momento do clique — útil para identificar padrões de erros do modelo e calibrar os prompts.</p>
+
+    <div class="feedback-flow">
+      <div class="fb-box">
+        <div class="fb-box-title">Usuário vê o item</div>
+        <p>Ex: ortografia "rescição → rescisão"</p>
+      </div>
+      <div class="fb-arrow">→</div>
+      <div class="fb-box">
+        <div class="fb-box-title">Clica em "Incorreto"</div>
+        <p>Pode adicionar um comentário opcional explicando o erro</p>
+      </div>
+      <div class="fb-arrow">→</div>
+      <div class="fb-box">
+        <div class="fb-box-title">AnalysisFeedback salvo</div>
+        <p>Guarda: section, item_index, verdict ("incorrect"), item_snapshot (JSON do item), comment</p>
+      </div>
+      <div class="fb-arrow">→</div>
+      <div class="fb-box">
+        <div class="fb-box-title">Consulta em /feedbacks</div>
+        <p>Listagem agrupada por seção, ordenada por data — para análise dos erros do modelo</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Seções cobertas pelo feedback</div>
+      <table class="compare">
+        <thead><tr><th>Seção</th><th>O que o snapshot salva</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-abyss">entities</span></td><td>Objeto inteiro das entidades extraídas (hash completo)</td></tr>
+          <tr><td><span class="badge badge-ok">orthography</span></td><td>O item específico: original, suggestion, reason</td></tr>
+          <tr><td><span class="badge badge-warn">writing</span></td><td>O item específico: excerpt, suggestion, reason</td></tr>
+          <tr><td><span class="badge badge-risk">insights</span></td><td>O item específico: topic, insight, risk_level, paragraph_id</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+</div>
+
+<div style="background:var(--abyss);color:rgba(253,240,213,0.5);text-align:center;padding:32px;font-family:var(--font-m);font-size:11px;letter-spacing:0.15em">
+  TAMOIS — DOCUMENTAÇÃO TÉCNICA INTERNA · ATUALIZADO EM 19/05/2026
+</div>
+
+</body>
+</html>

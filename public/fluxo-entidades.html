@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tamois · Fluxo 1: Entidades</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --crimson:#C1121F; --parchment:#FDF0D5; --abyss:#003049; --steel:#669BBC; --steel-light:#e8f1f8; --ink:#1a1a2e; --muted:#6b7280; }
+    body { font-family:'Instrument Sans',sans-serif; background:var(--parchment); color:var(--ink); min-height:100vh; }
+    .top-nav { background:var(--abyss); padding:12px 32px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+    .nav-brand { font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:700; color:var(--parchment); text-decoration:none; letter-spacing:0.05em; }
+    .nav-sep { color:#ffffff30; }
+    .nav-links { display:flex; gap:8px; flex-wrap:wrap; }
+    .nav-link { font-size:0.78rem; color:#ffffffaa; text-decoration:none; padding:4px 10px; border-radius:4px; border:1px solid transparent; transition:all .15s; }
+    .nav-link:hover { color:var(--parchment); border-color:#ffffff30; }
+    .nav-link.active { color:var(--parchment); background:#ffffff18; border-color:#ffffff30; }
+    .page-header { background:var(--abyss); padding:48px 32px 40px; border-bottom:3px solid var(--crimson); }
+    .page-header-inner { max-width:860px; margin:0 auto; }
+    .pipeline-badges { display:flex; align-items:center; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+    .pipe-step { font-size:0.72rem; font-family:'DM Mono',monospace; padding:3px 10px; border-radius:4px; background:#ffffff15; color:#ffffffaa; border:1px solid #ffffff20; }
+    .pipe-step.current { background:var(--crimson); color:white; border-color:var(--crimson); font-weight:500; }
+    .pipe-arrow { color:#ffffff40; font-size:0.8rem; }
+    h1 { font-family:'Cormorant Garamond',serif; font-size:2.4rem; font-weight:700; color:var(--parchment); line-height:1.2; margin-bottom:12px; }
+    .page-desc { color:#ffffffcc; font-size:0.95rem; line-height:1.6; max-width:600px; }
+    .main { max-width:860px; margin:0 auto; padding:40px 32px; }
+    .card { background:white; border-radius:10px; border:1px solid #e5d9c0; margin-bottom:24px; overflow:hidden; }
+    .card-header { padding:16px 24px; border-bottom:1px solid #e5d9c0; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .card-title { font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:700; color:var(--abyss); }
+    .card-tag { font-size:0.7rem; font-family:'DM Mono',monospace; padding:3px 8px; border-radius:4px; font-weight:500; letter-spacing:0.05em; }
+    .tag-system { background:#f0f4ff; color:#3730a3; border:1px solid #c7d2fe; }
+    .tag-user   { background:#f0fff4; color:#166534; border:1px solid #bbf7d0; }
+    .tag-output { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+    .tag-code   { background:#faf5ff; color:#6b21a8; border:1px solid #e9d5ff; }
+    .tag-info   { background:#f0f9ff; color:#075985; border:1px solid #bae6fd; }
+    .card-body { padding:24px; }
+    .params-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+    .param-label { font-size:0.72rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .param-value { font-family:'DM Mono',monospace; font-size:0.88rem; color:var(--abyss); font-weight:500; }
+    .param-note { font-size:0.78rem; color:var(--muted); margin-top:2px; }
+    .prompt-block { position:relative; background:#0f172a; border-radius:8px; padding:20px 24px; overflow:auto; }
+    .prompt-block pre { font-family:'DM Mono',monospace; font-size:0.82rem; line-height:1.7; color:#e2e8f0; white-space:pre-wrap; word-break:break-word; }
+    .prompt-block .placeholder { background:#1e3a5f; color:#7dd3fc; padding:1px 4px; border-radius:3px; }
+    .copy-btn { position:absolute; top:12px; right:12px; background:#1e293b; border:1px solid #334155; color:#94a3b8; font-family:'DM Mono',monospace; font-size:0.72rem; padding:4px 10px; border-radius:4px; cursor:pointer; transition:all .15s; }
+    .copy-btn:hover { background:#334155; color:#e2e8f0; }
+    .copy-btn.copied { color:#4ade80; border-color:#4ade80; }
+    .json-schema { background:#0f172a; border-radius:8px; padding:20px 24px; overflow:auto; }
+    .json-schema pre { font-family:'DM Mono',monospace; font-size:0.82rem; line-height:1.7; color:#e2e8f0; white-space:pre-wrap; }
+    .json-key { color:#7dd3fc; }
+    .json-str { color:#a3e635; }
+    .json-type { color:#f59e0b; }
+    .json-comment { color:#64748b; font-style:italic; }
+    .rules-list { list-style:none; }
+    .rules-list li { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid #f3ede0; font-size:0.9rem; line-height:1.5; }
+    .rules-list li:last-child { border-bottom:none; }
+    .rule-icon { flex-shrink:0; width:22px; text-align:center; margin-top:1px; }
+    .rule-text { color:var(--ink); }
+    .rule-text strong { color:var(--abyss); }
+    .rule-text code { font-family:'DM Mono',monospace; font-size:0.8rem; background:#f3ede0; padding:1px 5px; border-radius:3px; }
+    .alert { border-radius:8px; padding:14px 18px; font-size:0.88rem; line-height:1.5; display:flex; gap:10px; align-items:flex-start; }
+    .alert-warn { background:#fffbeb; border:1px solid #fbbf24; color:#92400e; }
+    .alert-info { background:#eff6ff; border:1px solid #93c5fd; color:#1e3a5f; }
+    .alert-ok   { background:#f0fdf4; border:1px solid #86efac; color:#14532d; }
+    .alert-icon { flex-shrink:0; font-size:1rem; }
+    .section-label { font-size:0.72rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .entities-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+    .entity-card { background:#f8f4ec; border:1px solid #e5d9c0; border-radius:8px; padding:14px; }
+    .entity-name { font-family:'DM Mono',monospace; font-size:0.78rem; font-weight:500; color:var(--crimson); margin-bottom:4px; }
+    .entity-desc { font-size:0.82rem; color:var(--ink); line-height:1.4; }
+    .mt-16 { margin-top:16px; }
+    .mt-12 { margin-top:12px; }
+    footer { text-align:center; padding:32px; color:var(--muted); font-size:0.78rem; border-top:1px solid #e5d9c0; margin-top:20px; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="#" class="nav-brand">Tamois · Fluxos de IA</a>
+  <span class="nav-sep">|</span>
+  <div class="nav-links">
+    <a href="/fluxo-entidades.html" class="nav-link active">1. Entidades</a>
+    <a href="/fluxo-ortografia.html" class="nav-link">2. Ortografia</a>
+    <a href="/fluxo-redacao.html" class="nav-link">3. Redação</a>
+    <a href="/fluxo-insights.html" class="nav-link">4. Insights Jurídicos</a>
+    <a href="/fluxo-chat.html" class="nav-link">5. Chat</a>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="page-header-inner">
+    <div class="pipeline-badges">
+      <span class="pipe-step current">1. Entidades</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">2. Ortografia</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">3. Redação</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">4. Insights</span>
+    </div>
+    <h1>Fluxo 1 — Extração de Entidades</h1>
+    <p class="page-desc">
+      Extrai as informações-chave do contrato: partes, objeto, valor, vigência e cláusulas críticas.
+      Primeira chamada à API — alimenta a "Ficha do Contrato" exibida na interface.
+    </p>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Parâmetros Técnicos</span>
+      <span class="card-tag tag-info">CONFIG</span>
+    </div>
+    <div class="card-body">
+      <div class="params-grid">
+        <div class="param-item">
+          <div class="param-label">Modelo (padrão)</div>
+          <div class="param-value">deepseek-chat</div>
+          <div class="param-note">Modo "Análise Profunda" usa deepseek-reasoner</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Temperatura</div>
+          <div class="param-value">0.1</div>
+          <div class="param-note">Extração factual — deterministmo máximo</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Texto máximo</div>
+          <div class="param-value">20.000 chars</div>
+          <div class="param-note">Truncado antes do envio se necessário</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Posição no pipeline</div>
+          <div class="param-value">1ª chamada</div>
+          <div class="param-note">Primeira — resultado salvo como checkpoint</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Campo máximo (output)</div>
+          <div class="param-value">200 chars</div>
+          <div class="param-note">Menor que os outros fluxos — dados curtos</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Timeout</div>
+          <div class="param-value">90 segundos</div>
+          <div class="param-note">Por chamada à API</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTIDADES EXTRAÍDAS -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Campos Extraídos</span>
+      <span class="card-tag tag-output">8 CAMPOS</span>
+    </div>
+    <div class="card-body">
+      <p class="section-label">O modelo extrai exatamente estes 8 campos — sem mais, sem menos</p>
+      <div class="entities-grid">
+        <div class="entity-card">
+          <div class="entity-name">contratante</div>
+          <div class="entity-desc">Nome completo de quem contrata (cliente/comprador)</div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-name">contratada</div>
+          <div class="entity-desc">Nome completo de quem presta o serviço ou fornece o bem</div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-name">objeto</div>
+          <div class="entity-desc">Descrição objetiva do serviço ou produto (máx 150 chars)</div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-name">valor</div>
+          <div class="entity-desc">Remuneração com periodicidade (ex: R$ 5.000,00/mês)</div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-name">vigencia</div>
+          <div class="entity-desc">Duração do contrato (ex: 12 meses a partir de 01/01/2026)</div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-name">prazo_pagamento</div>
+          <div class="entity-desc">Quando o pagamento deve ser efetuado</div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-name">multa</div>
+          <div class="entity-desc">Percentual ou valor da multa por descumprimento</div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-name">foro</div>
+          <div class="entity-desc">Comarca ou cidade eleita para resolução de disputas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENSAGEM SYSTEM -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Mensagem System</span>
+      <span class="card-tag tag-system">SYSTEM</span>
+    </div>
+    <div class="card-body">
+      <div class="prompt-block">
+        <button class="copy-btn" onclick="copyText(this, 'sys-ent')">Copiar</button>
+        <pre id="sys-ent">Responda somente em JSON válido.</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMPT COMPLETO -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Prompt do Usuário (completo)</span>
+      <span class="card-tag tag-user">USER</span>
+    </div>
+    <div class="card-body">
+      <p class="section-label">O bloco em azul é substituído pelo texto real do documento</p>
+      <div class="prompt-block">
+        <button class="copy-btn" onclick="copyText(this, 'prompt-ent')">Copiar</button>
+        <pre id="prompt-ent">Você é um revisor jurídico especializado em direito brasileiro.
+REGRA FUNDAMENTAL: Só reporte itens com CERTEZA ABSOLUTA. Em caso de dúvida, não reporte.
+Prefira lista pequena e precisa a lista grande com itens duvidosos.
+O texto contém parágrafos indexados (ex: [Paragrafo 0] ...).
+
+Extraia as informações-chave deste contrato jurídico.
+REGRA ABSOLUTA: Copie EXATAMENTE o que está escrito no texto.
+Se uma informação não estiver explicitamente no texto, retorne null para esse campo.
+NUNCA invente, NUNCA infira, NUNCA complete com suposições.
+
+Retorne SOMENTE JSON válido com exatamente estas chaves:
+{
+  "entities": {
+    "contratante": "nome completo de quem contrata (cliente/comprador)",
+    "contratada": "nome completo de quem presta o serviço",
+    "objeto": "descrição objetiva do serviço ou produto (máx 150 chars)",
+    "valor": "valor da remuneração com periodicidade (ex: R$ 5.000,00/mês)",
+    "vigencia": "duração do contrato (ex: 12 meses a partir de 01/01/2026)",
+    "prazo_pagamento": "quando o pagamento deve ser efetuado",
+    "multa": "percentual ou valor da multa por descumprimento",
+    "foro": "comarca ou cidade eleita para resolução de disputas"
+  }
+}
+Use null (sem aspas) para campos não encontrados.
+
+Texto:
+<span class="placeholder">[TEXTO DO DOCUMENTO — parágrafos indexados, máx 20.000 chars]</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRATO DE SAÍDA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Contrato de Saída (JSON)</span>
+      <span class="card-tag tag-output">OUTPUT</span>
+    </div>
+    <div class="card-body">
+      <div class="json-schema">
+        <pre>{
+  <span class="json-key">"entities"</span>: {
+    <span class="json-key">"contratante"</span>:     <span class="json-str">"EMPRESA XYZ LTDA"</span>          <span class="json-comment">// ou null se não encontrado</span>
+    <span class="json-key">"contratada"</span>:      <span class="json-str">"João Silva MEI"</span>            <span class="json-comment">// ou null</span>
+    <span class="json-key">"objeto"</span>:          <span class="json-str">"Prestação de serviços de..."</span> <span class="json-comment">// ou null</span>
+    <span class="json-key">"valor"</span>:          <span class="json-str">"R$ 5.000,00/mês"</span>          <span class="json-comment">// ou null</span>
+    <span class="json-key">"vigencia"</span>:       <span class="json-str">"12 meses"</span>                  <span class="json-comment">// ou null</span>
+    <span class="json-key">"prazo_pagamento"</span>: <span class="json-str">"dia 10 de cada mês"</span>       <span class="json-comment">// ou null</span>
+    <span class="json-key">"multa"</span>:          <span class="json-str">"10% sobre o valor total"</span>  <span class="json-comment">// ou null</span>
+    <span class="json-key">"foro"</span>:           <span class="json-str">"Comarca de São Paulo/SP"</span>  <span class="json-comment">// ou null</span>
+  }
+}</pre>
+      </div>
+
+      <div class="mt-16">
+        <p class="section-label">Normalização aplicada pelo sistema após a resposta</p>
+        <ul class="rules-list">
+          <li>
+            <span class="rule-icon">🔍</span>
+            <span class="rule-text"><strong>Validação de campos:</strong> apenas os 8 campos definidos são aceitos — campos extras são ignorados.</span>
+          </li>
+          <li>
+            <span class="rule-icon">✂️</span>
+            <span class="rule-text"><strong>Truncamento:</strong> cada campo é cortado em 200 caracteres (menor que os outros fluxos — dados devem ser curtos e objetivos).</span>
+          </li>
+          <li>
+            <span class="rule-icon">🔄</span>
+            <span class="rule-text"><strong>Normalização de nulos:</strong> campos ausentes, vazios ou com strings vazias são convertidos para <code>null</code>.</span>
+          </li>
+          <li>
+            <span class="rule-icon">🔧</span>
+            <span class="rule-text"><strong>Recuperação de JSON quebrado:</strong> igual aos outros fluxos — tenta extrair JSON de markdown ou do texto livre.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Regra Principal — Não inferir</span>
+      <span class="card-tag tag-info">ESCOPO</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <span><strong>A regra mais importante deste fluxo:</strong> o modelo não pode inferir ou completar informações que não estejam explicitamente no texto. Se o valor não está no contrato, o campo deve ser <code>null</code> — não uma estimativa, não "a combinar", não "não informado".</span>
+      </div>
+      <ul class="rules-list mt-16">
+        <li>
+          <span class="rule-icon">✅</span>
+          <span class="rule-text">Campo presente no texto → copiar literalmente, sem parafrasear</span>
+        </li>
+        <li>
+          <span class="rule-icon">✅</span>
+          <span class="rule-text">Campo ausente no texto → retornar <code>null</code> (sem aspas)</span>
+        </li>
+        <li>
+          <span class="rule-icon">🚫</span>
+          <span class="rule-text">Campo parcialmente presente → <strong>não</strong> completar com inferência. Ex: se menciona "R$ 5.000" sem periodicidade, copiar apenas "R$ 5.000" sem adicionar "/mês"</span>
+        </li>
+        <li>
+          <span class="rule-icon">🚫</span>
+          <span class="rule-text">Tipo de documento diferente (notificação, petição) → alguns campos serão naturalmente <code>null</code>. Normal e esperado.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Dicas para Testar</span>
+      <span class="card-tag tag-info">TESTE</span>
+    </div>
+    <div class="card-body">
+      <ul class="rules-list">
+        <li>
+          <span class="rule-icon">1️⃣</span>
+          <span class="rule-text">Teste com contrato completo — todos os 8 campos presentes. Verifique se o modelo extrai sem parafrasear.</span>
+        </li>
+        <li>
+          <span class="rule-icon">2️⃣</span>
+          <span class="rule-text">Teste com contrato incompleto — faltando 3-4 campos. O modelo deve retornar <code>null</code> sem inventar.</span>
+        </li>
+        <li>
+          <span class="rule-icon">3️⃣</span>
+          <span class="rule-text">Teste com petição (sem contratante/contratada/valor) — quase todos os campos devem ser <code>null</code>.</span>
+        </li>
+        <li>
+          <span class="rule-icon">4️⃣</span>
+          <span class="rule-text">Atenção ao campo <strong>objeto</strong>: contratos longos têm parágrafos extensos — verifique se o modelo resume ou copia literal (deve copiar literal até 150 chars).</span>
+        </li>
+      </ul>
+      <div class="alert alert-ok mt-16">
+        <span class="alert-icon">✅</span>
+        <span><strong>Critério de aprovação:</strong> zero campos inventados + todos os campos presentes extraídos literalmente. <code>null</code> para ausentes é resultado correto, não um erro.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>Tamois · Documento interno de referência técnica · Não publicar externamente</footer>
+
+<script>
+function copyText(btn, id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    btn.textContent = 'Copiado!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

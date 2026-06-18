@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tamois · Fluxo 5: Chat Jurídico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --crimson:#C1121F; --parchment:#FDF0D5; --abyss:#003049; --steel:#669BBC; --ink:#1a1a2e; --muted:#6b7280; }
+    body { font-family:'Instrument Sans',sans-serif; background:var(--parchment); color:var(--ink); min-height:100vh; }
+    .top-nav { background:var(--abyss); padding:12px 32px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+    .nav-brand { font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:700; color:var(--parchment); text-decoration:none; letter-spacing:0.05em; }
+    .nav-sep { color:#ffffff30; }
+    .nav-links { display:flex; gap:8px; flex-wrap:wrap; }
+    .nav-link { font-size:0.78rem; color:#ffffffaa; text-decoration:none; padding:4px 10px; border-radius:4px; border:1px solid transparent; transition:all .15s; }
+    .nav-link:hover { color:var(--parchment); border-color:#ffffff30; }
+    .nav-link.active { color:var(--parchment); background:#ffffff18; border-color:#ffffff30; }
+    .page-header { background:var(--abyss); padding:48px 32px 40px; border-bottom:3px solid var(--crimson); }
+    .page-header-inner { max-width:860px; margin:0 auto; }
+    .pipeline-badges { display:flex; align-items:center; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+    .pipe-step { font-size:0.72rem; font-family:'DM Mono',monospace; padding:3px 10px; border-radius:4px; background:#ffffff15; color:#ffffffaa; border:1px solid #ffffff20; }
+    .pipe-step.current { background:var(--crimson); color:white; border-color:var(--crimson); font-weight:500; }
+    .pipe-arrow { color:#ffffff40; font-size:0.8rem; }
+    h1 { font-family:'Cormorant Garamond',serif; font-size:2.4rem; font-weight:700; color:var(--parchment); line-height:1.2; margin-bottom:12px; }
+    .page-desc { color:#ffffffcc; font-size:0.95rem; line-height:1.6; max-width:600px; }
+    .main { max-width:860px; margin:0 auto; padding:40px 32px; }
+    .card { background:white; border-radius:10px; border:1px solid #e5d9c0; margin-bottom:24px; overflow:hidden; }
+    .card-header { padding:16px 24px; border-bottom:1px solid #e5d9c0; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .card-title { font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:700; color:var(--abyss); }
+    .card-tag { font-size:0.7rem; font-family:'DM Mono',monospace; padding:3px 8px; border-radius:4px; font-weight:500; letter-spacing:0.05em; }
+    .tag-system { background:#f0f4ff; color:#3730a3; border:1px solid #c7d2fe; }
+    .tag-user   { background:#f0fff4; color:#166534; border:1px solid #bbf7d0; }
+    .tag-output { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+    .tag-info   { background:#f0f9ff; color:#075985; border:1px solid #bae6fd; }
+    .card-body { padding:24px; }
+    .params-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+    .param-label { font-size:0.72rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .param-value { font-family:'DM Mono',monospace; font-size:0.88rem; color:var(--abyss); font-weight:500; }
+    .param-note { font-size:0.78rem; color:var(--muted); margin-top:2px; }
+    .prompt-block { position:relative; background:#0f172a; border-radius:8px; padding:20px 24px; overflow:auto; }
+    .prompt-block pre { font-family:'DM Mono',monospace; font-size:0.82rem; line-height:1.7; color:#e2e8f0; white-space:pre-wrap; word-break:break-word; }
+    .prompt-block .placeholder { background:#1e3a5f; color:#7dd3fc; padding:1px 4px; border-radius:3px; }
+    .prompt-block .dynamic { background:#1a3a1a; color:#86efac; padding:1px 4px; border-radius:3px; }
+    .copy-btn { position:absolute; top:12px; right:12px; background:#1e293b; border:1px solid #334155; color:#94a3b8; font-family:'DM Mono',monospace; font-size:0.72rem; padding:4px 10px; border-radius:4px; cursor:pointer; transition:all .15s; }
+    .copy-btn:hover { background:#334155; color:#e2e8f0; }
+    .copy-btn.copied { color:#4ade80; border-color:#4ade80; }
+    .rules-list { list-style:none; }
+    .rules-list li { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid #f3ede0; font-size:0.9rem; line-height:1.5; }
+    .rules-list li:last-child { border-bottom:none; }
+    .rule-icon { flex-shrink:0; width:22px; text-align:center; margin-top:1px; }
+    .rule-text { color:var(--ink); }
+    .rule-text strong { color:var(--abyss); }
+    .rule-text code { font-family:'DM Mono',monospace; font-size:0.8rem; background:#f3ede0; padding:1px 5px; border-radius:3px; }
+    .alert { border-radius:8px; padding:14px 18px; font-size:0.88rem; line-height:1.5; display:flex; gap:10px; align-items:flex-start; }
+    .alert-warn { background:#fffbeb; border:1px solid #fbbf24; color:#92400e; }
+    .alert-info { background:#eff6ff; border:1px solid #93c5fd; color:#1e3a5f; }
+    .alert-ok   { background:#f0fdf4; border:1px solid #86efac; color:#14532d; }
+    .alert-icon { flex-shrink:0; }
+    .section-label { font-size:0.72rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .messages-flow { display:flex; flex-direction:column; gap:12px; }
+    .msg-row { display:flex; gap:10px; align-items:flex-start; }
+    .msg-role { font-family:'DM Mono',monospace; font-size:0.72rem; font-weight:500; padding:3px 8px; border-radius:4px; flex-shrink:0; margin-top:3px; }
+    .role-system { background:#f0f4ff; color:#3730a3; border:1px solid #c7d2fe; }
+    .role-user   { background:#f0fff4; color:#166534; border:1px solid #bbf7d0; }
+    .role-asst   { background:#faf5ff; color:#6b21a8; border:1px solid #e9d5ff; }
+    .msg-content { background:#f8f4ec; border:1px solid #e5d9c0; border-radius:6px; padding:10px 14px; font-size:0.85rem; line-height:1.6; flex:1; }
+    .msg-content em { color:var(--muted); }
+    .diff-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .diff-col h4 { font-size:0.8rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:10px; }
+    .diff-col.analysis h4 { color:#075985; }
+    .diff-col.chat h4 { color:#6b21a8; }
+    .diff-item { font-size:0.84rem; padding:6px 0; border-bottom:1px solid #f3ede0; }
+    .diff-item:last-child { border-bottom:none; }
+    .mt-16 { margin-top:16px; }
+    footer { text-align:center; padding:32px; color:var(--muted); font-size:0.78rem; border-top:1px solid #e5d9c0; margin-top:20px; }
+    @media (max-width:600px) { .diff-row { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="#" class="nav-brand">Tamois · Fluxos de IA</a>
+  <span class="nav-sep">|</span>
+  <div class="nav-links">
+    <a href="/fluxo-entidades.html" class="nav-link">1. Entidades</a>
+    <a href="/fluxo-ortografia.html" class="nav-link">2. Ortografia</a>
+    <a href="/fluxo-redacao.html" class="nav-link">3. Redação</a>
+    <a href="/fluxo-insights.html" class="nav-link">4. Insights Jurídicos</a>
+    <a href="/fluxo-chat.html" class="nav-link active">5. Chat</a>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="page-header-inner">
+    <div class="pipeline-badges">
+      <span class="pipe-step">Pipeline de Análise (fluxos 1–4)</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step current">5. Chat (independente)</span>
+    </div>
+    <h1>Fluxo 5 — Chat Jurídico</h1>
+    <p class="page-desc">
+      Assistente conversacional ativado após a análise ser concluída. O usuário faz perguntas
+      sobre o documento e recebe respostas contextualizadas. Fluxo independente — não faz parte
+      do pipeline de análise dos fluxos 1–4.
+    </p>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Parâmetros Técnicos</span>
+      <span class="card-tag tag-info">CONFIG</span>
+    </div>
+    <div class="card-body">
+      <div class="params-grid">
+        <div class="param-item">
+          <div class="param-label">Modelo</div>
+          <div class="param-value">deepseek-chat</div>
+          <div class="param-note">Fixo — não muda com o modo de análise</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Temperatura</div>
+          <div class="param-value">0.5</div>
+          <div class="param-note">Mais alta que os outros fluxos — respostas conversacionais</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Histório incluído</div>
+          <div class="param-value">últimas 10 msgs</div>
+          <div class="param-note">Contexto de conversa mantido por 10 trocas</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Texto do documento</div>
+          <div class="param-value">até 160.000 chars</div>
+          <div class="param-note">Muito maior que o pipeline — chat tem contexto completo</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Acionamento</div>
+          <div class="param-value">por mensagem</div>
+          <div class="param-note">Uma chamada à API por mensagem do usuário</div>
+        </div>
+        <div class="param-item">
+          <div class="param-label">Formato de saída</div>
+          <div class="param-value">texto livre</div>
+          <div class="param-note">Markdown — renderizado na interface</div>
+        </div>
+      </div>
+      <div class="alert alert-info mt-16">
+        <span class="alert-icon">ℹ️</span>
+        <span><strong>Diferença crítica:</strong> no chat, a temperatura é <code>0.5</code> (não <code>0.1</code>) e o output é texto livre em Markdown — sem JSON. O modelo aqui pode ser mais conversacional e menos rígido na forma.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTRUTURA DA CHAMADA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Estrutura Completa da Chamada</span>
+      <span class="card-tag tag-system">MESSAGES ARRAY</span>
+    </div>
+    <div class="card-body">
+      <p class="section-label">O array de mensagens enviado ao DeepSeek a cada pergunta do usuário</p>
+      <div class="messages-flow">
+        <div class="msg-row">
+          <span class="msg-role role-system">system</span>
+          <div class="msg-content">
+            <em>Prompt de contexto — gerado dinamicamente a partir da análise concluída</em><br>
+            Você é Tamois, assistente jurídico + resumo da análise + trecho do documento
+          </div>
+        </div>
+        <div class="msg-row">
+          <span class="msg-role role-user">user</span>
+          <div class="msg-content"><em>Mensagem 1 do histórico (até 10 mensagens anteriores)</em></div>
+        </div>
+        <div class="msg-row">
+          <span class="msg-role role-asst">assistant</span>
+          <div class="msg-content"><em>Resposta 1 do histórico</em></div>
+        </div>
+        <div class="msg-row">
+          <span class="msg-role role-user">user</span>
+          <div class="msg-content"><em>... até 10 mensagens de histórico ...</em></div>
+        </div>
+        <div class="msg-row">
+          <span class="msg-role role-user">user</span>
+          <div class="msg-content"><strong>Pergunta atual do usuário</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SYSTEM MESSAGE COMPLETO -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">System Message (completo)</span>
+      <span class="card-tag tag-system">SYSTEM</span>
+    </div>
+    <div class="card-body">
+      <p class="section-label">Os campos em verde são preenchidos dinamicamente com dados da análise real</p>
+      <div class="prompt-block">
+        <button class="copy-btn" onclick="copyText(this, 'sys-chat')">Copiar</button>
+        <pre id="sys-chat">Você é Tamois, um assistente jurídico especializado em direito brasileiro.
+O usuário está revisando o seguinte documento jurídico. Responda perguntas sobre o conteúdo,
+riscos identificados e sugestões de melhoria. Seja objetivo, preciso e cite trechos quando relevante.
+
+Resumo da análise:
+- <span class="dynamic">[N]</span> correções ortográficas identificadas
+- <span class="dynamic">[N]</span> sugestões de redação
+- <span class="dynamic">[N]</span> insights jurídicos (<span class="dynamic">[N]</span> de alto risco)
+
+Trecho do documento:
+<span class="placeholder">[TEXTO COMPLETO DO DOCUMENTO — até 160.000 chars]</span></pre>
+      </div>
+      <div class="alert alert-info mt-16">
+        <span class="alert-icon">ℹ️</span>
+        <span>O limite de 160.000 chars aqui (vs 20.000 no pipeline) é intencional: o chat precisa do documento completo para responder perguntas específicas do usuário. O pipeline usa menos para economizar tokens em 4 chamadas paralelas.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIFERENÇAS vs PIPELINE -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Chat vs. Pipeline de Análise</span>
+      <span class="card-tag tag-info">DIFERENÇAS</span>
+    </div>
+    <div class="card-body">
+      <div class="diff-row">
+        <div class="diff-col analysis">
+          <h4>Pipeline (fluxos 1–4)</h4>
+          <div class="diff-item">Temperatura <strong>0.1</strong> — determinístico</div>
+          <div class="diff-item">Output obrigatório em <strong>JSON</strong></div>
+          <div class="diff-item">Texto limitado a <strong>20.000 chars</strong></div>
+          <div class="diff-item">Sem histórico — chamada isolada</div>
+          <div class="diff-item">Roda uma vez, durante o processamento</div>
+          <div class="diff-item">Output salvo no banco de dados</div>
+        </div>
+        <div class="diff-col chat">
+          <h4>Chat (fluxo 5)</h4>
+          <div class="diff-item">Temperatura <strong>0.5</strong> — conversacional</div>
+          <div class="diff-item">Output em <strong>texto livre / Markdown</strong></div>
+          <div class="diff-item">Texto até <strong>160.000 chars</strong></div>
+          <div class="diff-item">Histórico das últimas <strong>10 mensagens</strong></div>
+          <div class="diff-item">Roda a cada mensagem do usuário</div>
+          <div class="diff-item">Output exibido em tempo real na UI</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">O que o Chat sabe sobre a análise</span>
+      <span class="card-tag tag-info">CONTEXTO</span>
+    </div>
+    <div class="card-body">
+      <ul class="rules-list">
+        <li>
+          <span class="rule-icon">✅</span>
+          <span class="rule-text"><strong>Quantidade de itens:</strong> quantas correções, sugestões e insights foram encontrados, e quantos são de alto risco.</span>
+        </li>
+        <li>
+          <span class="rule-icon">✅</span>
+          <span class="rule-text"><strong>Texto do documento:</strong> o documento completo (até 160.000 chars) está no system message — o modelo pode citar trechos exatos.</span>
+        </li>
+        <li>
+          <span class="rule-icon">🚫</span>
+          <span class="rule-text"><strong>Detalhes dos itens:</strong> o chat não recebe o JSON das análises — não sabe quais erros específicos foram encontrados, só a quantidade total. O usuário pode perguntar sobre o documento, não sobre "o que o sistema encontrou".</span>
+        </li>
+      </ul>
+      <div class="alert alert-warn mt-16">
+        <span class="alert-icon">⚠️</span>
+        <span><strong>Oportunidade de melhoria:</strong> incluir o JSON resumido das análises no system message permitiria ao chat responder perguntas como "me explique o risco de alto nível que você encontrou". Hoje isso não está implementado.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Dicas para Testar e Iterar</span>
+      <span class="card-tag tag-info">TESTE</span>
+    </div>
+    <div class="card-body">
+      <ul class="rules-list">
+        <li>
+          <span class="rule-icon">1️⃣</span>
+          <span class="rule-text">Teste perguntas sobre o documento ("O que diz a cláusula de multa?") — o modelo deve responder citando o texto.</span>
+        </li>
+        <li>
+          <span class="rule-icon">2️⃣</span>
+          <span class="rule-text">Teste perguntas fora do escopo jurídico — o modelo deve se manter no papel de assistente jurídico e recusar ou redirecionar.</span>
+        </li>
+        <li>
+          <span class="rule-icon">3️⃣</span>
+          <span class="rule-text">Teste a coerência de histórico: faça uma pergunta, receba resposta, faça uma pergunta de acompanhamento — o modelo deve lembrar o contexto.</span>
+        </li>
+        <li>
+          <span class="rule-icon">4️⃣</span>
+          <span class="rule-text">Verifique o tom: deve ser objetivo e profissional, não excessivamente formal ao ponto de ser ilegível.</span>
+        </li>
+      </ul>
+      <div class="alert alert-ok mt-16">
+        <span class="alert-icon">✅</span>
+        <span><strong>Critério de aprovação:</strong> respostas ancoradas no texto do documento + tom profissional-acessível + coerência de histórico + limites claros de escopo.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>Tamois · Documento interno de referência técnica · Não publicar externamente</footer>
+
+<script>
+function copyText(btn, id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    btn.textContent = 'Copiado!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
