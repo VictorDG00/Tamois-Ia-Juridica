@@ -128,17 +128,22 @@ Sem limite de itens por seção · 600 chars por campo · disclaimer automático
 
 ## Regras de Commit e Push
 
-**A cada 2 alterações significativas:**
+Fluxo da esteira CI/CD: **`feature/*` → `dev` → `main`** (a `main` é protegida; não há push direto).
 
 ```bash
 bundle exec rails test                    # obrigatório — nenhum commit com testes falhando
+git checkout -b feature/minha-mudanca dev # trabalhe sempre a partir de dev
 git add <arquivos alterados>
 git commit -m "tipo: descrição curta"
-git push origin main
+git push -u origin feature/minha-mudanca
+gh pr create --base dev                    # PR para dev → auto-merge com testes verdes
+# release: PR dev → main exige 1 aprovação humana e dispara o deploy automático na VPS
 ```
 
 - Rodar a suite completa antes de todo commit — sem exceção
-- Push vai direto para `main` (branch único de produção)
+- **Nunca** dar push direto na `main` (bloqueado pelo ruleset); todo merge na `main` vem de `dev` via PR
+- `dev` recebe merge automático quando o check `test` passa; `main` exige guard (origem = `dev`) + 1 aprovação
+- Merge na `main` → deploy automático via self-hosted runner (`docker compose up -d --build`)
 - Tipos de commit: `feat`, `fix`, `chore`, `test`, `docs`, `refactor`
 - Se os testes falharem após uma mudança: corrigir antes de continuar
 
@@ -146,6 +151,21 @@ git push origin main
 - Arquivos `.env` (chaves de API)
 - `storage/` (uploads dos usuários)
 - `tmp/` e `log/`
+
+## Deploy (Docker)
+
+O projeto roda em container Docker — **alterações nos arquivos locais não aparecem no site até o rebuild**.
+
+**Após qualquer feature que altere código, CSS, views ou gems:**
+
+```bash
+docker compose build && docker compose up -d
+```
+
+- `build` recompila a imagem com o código mais recente (gems + assets)
+- `up -d` recria o container sem downtime perceptível
+- O volume `tamois_storage` persiste os uploads entre rebuilds
+- Não é necessário limpar cache do navegador — o Propshaft gera fingerprints nos assets
 
 ## Design
 

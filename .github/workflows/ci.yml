@@ -1,0 +1,28 @@
+# CI — testes (GitHub-hosted). Vira o status check obrigatório "test".
+# Stack: Rails (Minitest) + sqlite. test/evals se auto-pula sem DEEPSEEK_API_KEY.
+name: ci
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+      # Evita depender da master.key de produção (gitignored); nada lê credentials no boot.
+      SECRET_KEY_BASE: ci-dummy-secret-key-base
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.3"
+          bundler-cache: true
+      - name: Preparar banco de teste (sqlite)
+        run: bin/rails db:test:prepare
+      - name: Rodar testes
+        run: bin/rails test
