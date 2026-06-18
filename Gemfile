@@ -20,7 +20,7 @@ gem "bcrypt", "~> 3.1.7"
 gem "devise", "~> 4.9"
 
 # DOCX parsing
-gem "nokogiri", "~> 1.16"
+gem "nokogiri", "~> 1.19"
 gem "rubyzip", "~> 2.3"
 
 # HTTP client for DeepSeek API
