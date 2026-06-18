@@ -21,7 +21,7 @@ gem "devise", "~> 4.9"
 
 # DOCX parsing
 gem "nokogiri", "~> 1.16"
-gem "rubyzip", "~> 2.3"
+gem "rubyzip", "~> 3.4"
 
 # HTTP client for DeepSeek API
 gem "faraday", "~> 2.12"
