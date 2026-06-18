@@ -17,7 +17,7 @@ jobs:
       # Evita depender da master.key de produção (gitignored); nada lê credentials no boot.
       SECRET_KEY_BASE: ci-dummy-secret-key-base
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.3"
