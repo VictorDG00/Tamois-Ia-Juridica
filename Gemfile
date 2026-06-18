@@ -24,7 +24,7 @@ gem "nokogiri", "~> 1.16"
 gem "rubyzip", "~> 2.3"
 
 # HTTP client for DeepSeek API
-gem "faraday", "~> 2.12"
+gem "faraday", "~> 2.14"
 
 # Markdown rendering
 gem "redcarpet", "~> 3.6"
