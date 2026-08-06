@@ -126,24 +126,41 @@ Sem limite de itens por seção · 600 chars por campo · disclaimer automático
 | `AnalysisService` | Orquestra extração → 3 chamadas → saves incrementais |
 | `DocxAnnotator` | Gera DOCX com Track Changes (ortografia) e comentários (redação/insights) |
 
-## Regras de Commit e Push
+## Fluxo de trabalho e Git
 
-Fluxo da esteira CI/CD: **`feature/*` → `dev` → `main`** (a `main` é protegida; não há push direto).
+> Regra da frota — idêntica nos 5 projetos da VPS. Atualizada em 2026-08-06.
 
+**Todo trabalho começa por um plano.** Levantar o que já existe, decidir a abordagem e só então
+implementar.
+
+**Rodar a suite completa antes de qualquer push — sem exceção:**
 ```bash
-bundle exec rails test                    # obrigatório — nenhum commit com testes falhando
-git checkout -b feature/minha-mudanca dev # trabalhe sempre a partir de dev
-git add <arquivos alterados>
-git commit -m "tipo: descrição curta"
-git push -u origin feature/minha-mudanca
-gh pr create --base dev                    # PR para dev → auto-merge com testes verdes
-# release: PR dev → main exige 1 aprovação humana e dispara o deploy automático na VPS
+bundle exec rails test
 ```
 
-- Rodar a suite completa antes de todo commit — sem exceção
-- **Nunca** dar push direto na `main` (bloqueado pelo ruleset); todo merge na `main` vem de `dev` via PR
-- `dev` recebe merge automático quando o check `test` passa; `main` exige guard (origem = `dev`) + 1 aprovação
-- Merge na `main` → deploy automático via self-hosted runner (`docker compose up -d --build`)
+**Ao final de todo plano, sincronizar tudo:**
+```bash
+git add <arquivos alterados>
+git commit -m "tipo: descrição curta"
+git push origin main        # push direto — é o fluxo atual
+git push origin main:dev    # mantém a dev alinhada
+```
+
+⚠️ **Commitar ANTES de qualquer push.** Este diretório é o alvo do deploy: todo push na `main`
+dispara o workflow, que faz `git reset --hard FETCH_HEAD` aqui. Qualquer alteração não commitada
+é **destruída** — aconteceu em 06/08/2026 com uma edição de CLAUDE.md.
+
+**Por que push direto na `main`:** nenhuma aplicação da VPS tem cliente hoje, e o gate de aprovação
+humana do fluxo `feature → dev → main` só atrasa o desenvolvimento. Os `bypass_actors` de admin nos
+rulesets são **intencionais**, não descuido.
+
+**A `dev` é mantida em dia de propósito.** Ela não está em uso, mas fica idêntica à `main` para que
+o fluxo com PR volte sem migração no dia em que houver cliente.
+
+**Quando houver cliente:** remover os bypasses dos rulesets e voltar para `feature → dev → main` com
+PR, check `test` verde e 1 aprovação humana. A esteira já está montada — só o bypass precisa sair.
+
+- Push na `main` → deploy automático via self-hosted runner (`docker compose up -d --build`)
 - Tipos de commit: `feat`, `fix`, `chore`, `test`, `docs`, `refactor`
 - Se os testes falharem após uma mudança: corrigir antes de continuar
 
